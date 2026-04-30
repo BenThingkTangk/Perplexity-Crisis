@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Perplexity Multi-Cloud Architecture — Complexity & Failure Analysis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --font-body: 'Inter', 'Helvetica Neue', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --color-bg: #0a0a0c;
+  --color-surface: #111114;
+  --color-surface-2: #161619;
+  --color-surface-3: #1c1c21;
+  --color-border: rgba(255,255,255,0.07);
+  --color-text: #e8e8ec;
+  --color-text-muted: #888890;
+  --color-text-faint: #4a4a55;
+
+  /* Provider brand colors */
+  --aws: #ff9900;
+  --aws-dim: rgba(255,153,0,0.15);
+  --aws-glow: rgba(255,153,0,0.25);
+  --azure: #0078d4;
+  --azure-dim: rgba(0,120,212,0.15);
+  --azure-glow: rgba(0,120,212,0.3);
+  --coreweave: #7c3aed;
+  --coreweave-dim: rgba(124,58,237,0.15);
+  --coreweave-glow: rgba(124,58,237,0.3);
+  --nvidia: #76b900;
+  --nvidia-dim: rgba(118,185,0,0.12);
+  --nvidia-glow: rgba(118,185,0,0.25);
+  --perplexity: #20b2aa;
+  --perplexity-dim: rgba(32,178,170,0.15);
+
+  /* Status colors */
+  --danger: #ef4444;
+  --danger-dim: rgba(239,68,68,0.15);
+  --warning: #f59e0b;
+  --warning-dim: rgba(245,158,11,0.12);
+  --ok: #10b981;
+
+  --radius: 10px;
+  --radius-sm: 6px;
+  --space: 16px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ═══ HEADER ═══ */
+.page-header {
+  padding: 48px 40px 32px;
+  border-bottom: 1px solid var(--color-border);
+  background: linear-gradient(180deg, rgba(239,68,68,0.04) 0%, transparent 100%);
+  position: relative;
+  overflow: hidden;
+}
+.page-header::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -80px;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(239,68,68,0.05) 0%, transparent 70%);
+  pointer-events: none;
+}
+.header-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--danger);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.header-eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 6px; height: 6px;
+  background: var(--danger);
+  border-radius: 50%;
+  animation: pulse-danger 1.5s ease-in-out infinite;
+}
+@keyframes pulse-danger {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.4); }
+}
+.page-title {
+  font-size: clamp(22px, 3vw, 36px);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-bottom: 16px;
+  color: #f0f0f4;
+}
+.page-title span { color: var(--danger); }
+.page-subtitle {
+  font-size: 15px;
+  color: var(--color-text-muted);
+  max-width: 680px;
+  line-height: 1.7;
+}
+
+/* ═══ TIMELINE STRIP ═══ */
+.timeline-strip {
+  display: flex;
+  align-items: stretch;
+  padding: 0 40px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  overflow-x: auto;
+  gap: 0;
+}
+.timeline-event {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 24px;
+  border-right: 1px solid var(--color-border);
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+.timeline-event:hover { background: var(--color-surface-2); }
+.t-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.t-label { font-family: var(--font-mono); font-size: 11px; color: var(--color-text-muted); }
+.t-desc { font-size: 12px; font-weight: 600; }
+.timeline-event.aws .t-dot { background: var(--aws); }
+.timeline-event.aws .t-desc { color: var(--aws); }
+.timeline-event.azure .t-dot { background: var(--azure); }
+.timeline-event.azure .t-desc { color: var(--azure); }
+.timeline-event.coreweave .t-dot { background: var(--coreweave); }
+.timeline-event.coreweave .t-desc { color: var(--coreweave); }
+.timeline-event.chaos .t-dot { background: var(--danger); animation: pulse-danger 1.5s ease-in-out infinite; }
+.timeline-event.chaos .t-desc { color: var(--danger); }
+
+/* ═══ MAIN LAYOUT ═══ */
+.main-content {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 0;
+  min-height: calc(100vh - 200px);
+}
+.diagram-area {
+  padding: 40px;
+  border-right: 1px solid var(--color-border);
+  overflow: hidden;
+}
+.sidebar {
+  padding: 32px 28px;
+  background: var(--color-surface);
+  overflow-y: auto;
+}
+
+/* ═══ SECTION LABELS ═══ */
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
+/* ═══ ARCHITECTURE CANVAS ═══ */
+.arch-canvas {
+  position: relative;
+  width: 100%;
+  min-height: 700px;
+}
+
+/* ═══ PERPLEXITY CORE ═══ */
+.perplexity-core {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  text-align: center;
+}
+.core-node {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, rgba(32,178,170,0.25), rgba(32,178,170,0.05));
+  border: 2px solid rgba(32,178,170,0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  box-shadow: 0 0 40px rgba(32,178,170,0.15), 0 0 80px rgba(32,178,170,0.05);
+  animation: core-pulse 3s ease-in-out infinite;
+  cursor: pointer;
+  position: relative;
+}
+@keyframes core-pulse {
+  0%, 100% { box-shadow: 0 0 40px rgba(32,178,170,0.15), 0 0 80px rgba(32,178,170,0.05); }
+  50% { box-shadow: 0 0 60px rgba(32,178,170,0.25), 0 0 100px rgba(32,178,170,0.1); }
+}
+.core-icon {
+  width: 36px;
+  height: 36px;
+}
+.core-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--perplexity);
+  letter-spacing: -0.01em;
+}
+.core-sub {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: rgba(32,178,170,0.6);
+}
+
+/* ═══ PROVIDER CLUSTERS ═══ */
+.provider-cluster {
+  position: absolute;
+  border-radius: var(--radius);
+  padding: 18px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  min-width: 200px;
+}
+.provider-cluster:hover { transform: translateY(-2px); }
+.provider-cluster.aws {
+  top: 20px; left: 20px;
+  background: var(--aws-dim);
+  border: 1.5px solid rgba(255,153,0,0.3);
+}
+.provider-cluster.aws:hover { border-color: rgba(255,153,0,0.6); box-shadow: 0 8px 32px var(--aws-glow); }
+.provider-cluster.azure {
+  top: 20px; right: 20px;
+  background: var(--azure-dim);
+  border: 1.5px solid rgba(0,120,212,0.3);
+  text-align: right;
+}
+.provider-cluster.azure:hover { border-color: rgba(0,120,212,0.6); box-shadow: 0 8px 32px var(--azure-glow); }
+.provider-cluster.coreweave {
+  bottom: 20px; left: 20px;
+  background: var(--coreweave-dim);
+  border: 1.5px solid rgba(124,58,237,0.3);
+}
+.provider-cluster.coreweave:hover { border-color: rgba(124,58,237,0.6); box-shadow: 0 8px 32px var(--coreweave-glow); }
+.provider-cluster.nvidia {
+  bottom: 20px; right: 20px;
+  background: var(--nvidia-dim);
+  border: 1.5px solid rgba(118,185,0,0.3);
+  text-align: right;
+}
+.provider-cluster.nvidia:hover { border-color: rgba(118,185,0,0.6); box-shadow: 0 8px 32px var(--nvidia-glow); }
+
+.cluster-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.provider-cluster.azure .cluster-header,
+.provider-cluster.nvidia .cluster-header {
+  flex-direction: row-reverse;
+}
+.cluster-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.aws .cluster-dot { background: var(--aws); box-shadow: 0 0 8px var(--aws); }
+.azure .cluster-dot { background: var(--azure); box-shadow: 0 0 8px var(--azure); }
+.coreweave .cluster-dot { background: var(--coreweave); box-shadow: 0 0 8px var(--coreweave); }
+.nvidia .cluster-dot { background: var(--nvidia); box-shadow: 0 0 8px var(--nvidia); }
+
+.cluster-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+.cluster-badge {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+.aws .cluster-badge { background: rgba(255,153,0,0.2); color: var(--aws); border: 1px solid rgba(255,153,0,0.3); }
+.azure .cluster-badge { background: rgba(0,120,212,0.2); color: #60a5fa; border: 1px solid rgba(0,120,212,0.3); }
+.coreweave .cluster-badge { background: rgba(124,58,237,0.2); color: #a78bfa; border: 1px solid rgba(124,58,237,0.3); }
+.nvidia .cluster-badge { background: rgba(118,185,0,0.2); color: var(--nvidia); border: 1px solid rgba(118,185,0,0.3); }
+
+.service-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.service-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+.provider-cluster.azure .service-item,
+.provider-cluster.nvidia .service-item {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+.service-dot {
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.aws .service-dot { background: rgba(255,153,0,0.5); }
+.azure .service-dot { background: rgba(0,120,212,0.5); }
+.coreweave .service-dot { background: rgba(124,58,237,0.5); }
+.nvidia .service-dot { background: rgba(118,185,0,0.5); }
+
+.cluster-cost {
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-text-faint);
+  padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+/* ═══ SVG CONNECTOR LINES ═══ */
+.connector-svg {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* ═══ CHAOS INDICATORS ═══ */
+.chaos-badge {
+  position: absolute;
+  z-index: 20;
+  background: var(--danger-dim);
+  border: 1px solid rgba(239,68,68,0.4);
+  border-radius: 20px;
+  padding: 4px 10px 4px 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--danger);
+  font-family: var(--font-mono);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.chaos-badge:hover { background: rgba(239,68,68,0.2); transform: scale(1.05); }
+.chaos-badge-dot {
+  width: 6px; height: 6px;
+  background: var(--danger);
+  border-radius: 50%;
+  animation: pulse-danger 1.2s ease-in-out infinite;
+}
+
+/* ═══ FRICTION OVERLAY ═══ */
+.friction-zone {
+  position: absolute;
+  z-index: 3;
+  border-radius: 8px;
+  border: 1px dashed rgba(239,68,68,0.3);
+  background: rgba(239,68,68,0.03);
+  pointer-events: none;
+}
+
+/* ═══ SIDEBAR PANELS ═══ */
+.sidebar-section {
+  margin-bottom: 28px;
+}
+.sidebar-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-faint);
+  margin-bottom: 12px;
+  font-family: var(--font-mono);
+}
+
+/* Status cards */
+.status-card {
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  margin-bottom: 8px;
+}
+.status-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.status-card-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.status-pill {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+.pill-critical { background: var(--danger-dim); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); }
+.pill-warn { background: var(--warning-dim); color: var(--warning); border: 1px solid rgba(245,158,11,0.3); }
+.pill-ok { background: rgba(16,185,129,0.1); color: var(--ok); border: 1px solid rgba(16,185,129,0.2); }
+.status-card-body {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+/* Issue list */
+.issue-item {
+  display: flex;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.issue-item:last-child { border-bottom: none; }
+.issue-num {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--danger);
+  font-weight: 700;
+  padding-top: 1px;
+  flex-shrink: 0;
+}
+.issue-text {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+.issue-text strong {
+  display: block;
+  color: var(--color-text);
+  font-size: 12px;
+  margin-bottom: 2px;
+}
+
+/* Metrics */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.metric-box {
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+}
+.metric-value {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.metric-label {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+}
+.metric-red .metric-value { color: var(--danger); }
+.metric-orange .metric-value { color: var(--aws); }
+.metric-blue .metric-value { color: #60a5fa; }
+.metric-purple .metric-value { color: #a78bfa; }
+
+/* Ticket card */
+.ticket-card {
+  background: var(--color-surface-2);
+  border: 1px solid rgba(245,158,11,0.3);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  margin-top: 8px;
+}
+.ticket-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.ticket-icon {
+  width: 28px; height: 28px;
+  background: rgba(245,158,11,0.15);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--warning);
+  font-size: 14px;
+}
+.ticket-from {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+.ticket-time {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-text-faint);
+  margin-left: auto;
+}
+.ticket-body {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  font-style: italic;
+  border-left: 2px solid rgba(245,158,11,0.3);
+  padding-left: 10px;
+}
+.ticket-tag {
+  display: inline-block;
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  padding: 2px 7px;
+  background: rgba(245,158,11,0.1);
+  color: var(--warning);
+  border-radius: 4px;
+  border: 1px solid rgba(245,158,11,0.2);
+}
+
+/* ═══ BOTTOM ANALYSIS STRIP ═══ */
+.analysis-strip {
+  padding: 32px 40px;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+}
+.analysis-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+.analysis-card {
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 18px;
+}
+.analysis-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.analysis-icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.icon-red { background: var(--danger-dim); }
+.icon-orange { background: rgba(255,153,0,0.12); }
+.icon-yellow { background: rgba(245,158,11,0.12); }
+.icon-purple { background: rgba(124,58,237,0.12); }
+.analysis-card-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+.analysis-card-body {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  line-height: 1.65;
+}
+
+/* ═══ SCROLL HINT ═══ */
+.scroll-hint {
+  display: none;
+  text-align: center;
+  padding: 8px;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--color-text-faint);
+}
+
+/* ═══ TOOLTIP ═══ */
+.tooltip {
+  display: none;
+  position: fixed;
+  z-index: 100;
+  background: var(--color-surface-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  max-width: 260px;
+  font-size: 11.5px;
+  color: var(--color-text-muted);
+  line-height: 1.55;
+  pointer-events: none;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+.tooltip.active { display: block; }
+.tooltip-title {
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 4px;
+  font-size: 12px;
+}
+
+/* ═══ RESPONSIVE ═══ */
+@media (max-width: 900px) {
+  .main-content { grid-template-columns: 1fr; }
+  .diagram-area { border-right: none; border-bottom: 1px solid var(--color-border); }
+  .sidebar { border-top: 1px solid var(--color-border); }
+  .page-header { padding: 32px 20px 24px; }
+  .timeline-strip { padding: 0 20px; }
+  .diagram-area { padding: 24px 16px; }
+  .analysis-strip { padding: 24px 20px; }
+  .scroll-hint { display: block; }
+  .arch-canvas { min-height: 600px; overflow-x: auto; }
+  .provider-cluster { min-width: 160px; }
+}
+
+/* ═══ CALLOUT BANNER ═══ */
+.callout-banner {
+  margin: 24px 40px 0;
+  background: rgba(239,68,68,0.06);
+  border: 1px solid rgba(239,68,68,0.2);
+  border-radius: var(--radius);
+  padding: 14px 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+@media (max-width: 900px) { .callout-banner { margin: 16px 20px 0; } }
+.callout-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.callout-text {
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+  line-height: 1.65;
+}
+.callout-text strong { color: var(--danger); }
+
+/* ═══ DATA FLOW ANIMATIONS ═══ */
+@keyframes dash-flow {
+  to { stroke-dashoffset: -20; }
+}
+.data-flow {
+  stroke-dasharray: 6 4;
+  animation: dash-flow 1s linear infinite;
+}
+.data-flow-slow {
+  stroke-dasharray: 6 4;
+  animation: dash-flow 2s linear infinite;
+}
+.data-flow-chaos {
+  stroke-dasharray: 4 6;
+  animation: dash-flow 0.6s linear infinite;
+}
+</style>
+</head>
+<body>
+
+<!-- PAGE HEADER -->
+<header class="page-header">
+  <div class="header-eyebrow">Infrastructure Intelligence Report — April 2026</div>
+  <h1 class="page-title">Perplexity's Multi-Cloud<br><span>Convergence Crisis</span></h1>
+  <p class="page-subtitle">
+    Three hyperscaler deals signed in under 90 days — AWS (primary), Azure ($750M, Jan 2026), and CoreWeave (multi-year, March 2026) —
+    have created a fragmented infrastructure ecosystem where no single provider is incentivized to coordinate with the others,
+    resulting in cascading platform reliability, billing visibility, and performance issues.
+  </p>
+</header>
+
+<!-- TIMELINE STRIP -->
+<div class="timeline-strip">
+  <div class="timeline-event aws">
+    <div class="t-dot"></div>
+    <div>
+      <div class="t-label">ONGOING — PRIMARY</div>
+      <div class="t-desc">AWS — EC2 P4de → P5 (H100)</div>
+    </div>
+  </div>
+  <div class="timeline-event azure">
+    <div class="t-dot"></div>
+    <div>
+      <div class="t-label">JAN 29, 2026</div>
+      <div class="t-desc">Azure — $750M / 3-Year + Foundry</div>
+    </div>
+  </div>
+  <div class="timeline-event coreweave">
+    <div class="t-dot"></div>
+    <div>
+      <div class="t-label">MARCH 3, 2026</div>
+      <div class="t-desc">CoreWeave — GB200 NVL72 Multi-Year</div>
+    </div>
+  </div>
+  <div class="timeline-event chaos">
+    <div class="t-dot"></div>
+    <div>
+      <div class="t-label">MARCH–APRIL 2026</div>
+      <div class="t-desc">⚠ Platform Issues Begin Surfacing</div>
+    </div>
+  </div>
+</div>
+
+<!-- CALLOUT BANNER -->
+<div class="callout-banner">
+  <div class="callout-icon">⚠️</div>
+  <div class="callout-text">
+    <strong>Active incident:</strong> Credit visibility failures and invoice waiver requests are now entering Perplexity's billing support queue — a direct downstream symptom of multi-cloud cost fragmentation across AWS, Azure, and CoreWeave.
+    Engineering teams are conducting multi-party calls with all three providers simultaneously to diagnose cross-stack failures, as each provider operates its own siloed SLA, billing ledger, and support channel.
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main-content">
+
+  <!-- ARCHITECTURE DIAGRAM -->
+  <div class="diagram-area">
+    <div class="section-label">Architecture Map — Live Infrastructure</div>
+
+    <div class="arch-canvas" id="archCanvas">
+
+      <!-- SVG CONNECTOR LINES -->
+      <svg class="connector-svg" viewBox="0 0 760 680" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- AWS to Core -->
+        <path d="M 215,165 Q 320,240 380,340" stroke="rgba(255,153,0,0.35)" stroke-width="1.5" fill="none" class="data-flow"/>
+        <!-- Azure to Core -->
+        <path d="M 545,165 Q 440,240 380,340" stroke="rgba(0,120,212,0.35)" stroke-width="1.5" fill="none" class="data-flow-slow"/>
+        <!-- CoreWeave to Core -->
+        <path d="M 215,520 Q 320,460 380,400" stroke="rgba(124,58,237,0.35)" stroke-width="1.5" fill="none" class="data-flow"/>
+        <!-- Nvidia to Core -->
+        <path d="M 545,520 Q 440,460 380,400" stroke="rgba(118,185,0,0.35)" stroke-width="1.5" fill="none" class="data-flow-slow"/>
+
+        <!-- CHAOS LINES — cross-provider non-cooperation -->
+        <path d="M 215,200 Q 380,20 545,200" stroke="rgba(239,68,68,0.2)" stroke-width="1" fill="none" class="data-flow-chaos" stroke-dasharray="3 7"/>
+        <path d="M 215,490 Q 380,660 545,490" stroke="rgba(239,68,68,0.2)" stroke-width="1" fill="none" class="data-flow-chaos" stroke-dasharray="3 7"/>
+
+        <!-- Friction zone border (AWS ↔ Azure gap) -->
+        <rect x="250" y="80" width="260" height="130" rx="8" fill="rgba(239,68,68,0.02)" stroke="rgba(239,68,68,0.15)" stroke-dasharray="4 4"/>
+
+        <!-- Weights & Biases satellite node -->
+        <circle cx="380" cy="560" r="24" fill="rgba(32,178,170,0.06)" stroke="rgba(32,178,170,0.25)" stroke-width="1"/>
+        <text x="380" y="556" text-anchor="middle" fill="rgba(32,178,170,0.7)" font-size="8" font-family="JetBrains Mono, monospace">W&B</text>
+        <text x="380" y="567" text-anchor="middle" fill="rgba(255,255,255,0.3)" font-size="7" font-family="JetBrains Mono, monospace">Models</text>
+        <path d="M 380,536 L 380,415" stroke="rgba(32,178,170,0.2)" stroke-width="1" stroke-dasharray="3 4"/>
+
+        <!-- Billing siloes indicator -->
+        <rect x="120" y="300" width="70" height="28" rx="4" fill="rgba(239,68,68,0.1)" stroke="rgba(239,68,68,0.25)"/>
+        <text x="155" y="315" text-anchor="middle" fill="rgba(239,68,68,0.8)" font-size="8" font-family="JetBrains Mono, monospace">$ AWS</text>
+        <text x="155" y="324" text-anchor="middle" fill="rgba(239,68,68,0.5)" font-size="7" font-family="JetBrains Mono, monospace">BILLING</text>
+
+        <rect x="575" y="300" width="70" height="28" rx="4" fill="rgba(239,68,68,0.1)" stroke="rgba(239,68,68,0.25)"/>
+        <text x="610" y="315" text-anchor="middle" fill="rgba(239,68,68,0.8)" font-size="8" font-family="JetBrains Mono, monospace">$ AZ</text>
+        <text x="610" y="324" text-anchor="middle" fill="rgba(239,68,68,0.5)" font-size="7" font-family="JetBrains Mono, monospace">BILLING</text>
+
+        <rect x="345" y="620" width="70" height="28" rx="4" fill="rgba(239,68,68,0.1)" stroke="rgba(239,68,68,0.25)"/>
+        <text x="380" y="635" text-anchor="middle" fill="rgba(239,68,68,0.8)" font-size="8" font-family="JetBrains Mono, monospace">$ CW</text>
+        <text x="380" y="644" text-anchor="middle" fill="rgba(239,68,68,0.5)" font-size="7" font-family="JetBrains Mono, monospace">BILLING</text>
+
+        <!-- No-comms barrier between billing boxes -->
+        <line x1="210" y1="314" x2="330" y2="314" stroke="rgba(239,68,68,0.4)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <text x="270" y="310" text-anchor="middle" fill="rgba(239,68,68,0.6)" font-size="9">✕</text>
+        <line x1="430" y1="314" x2="550" y2="314" stroke="rgba(239,68,68,0.4)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <text x="490" y="310" text-anchor="middle" fill="rgba(239,68,68,0.6)" font-size="9">✕</text>
+      </svg>
+
+      <!-- AWS CLUSTER -->
+      <div class="provider-cluster aws" id="aws-cluster"
+           onmouseenter="showTooltip(event, 'AWS — Primary Cloud', 'EC2 P4de instances (A100) used for AI training workloads; now transitioning to P5 instances powered by H100 GPUs for production inference. AWS remains Perplexity\'s primary cloud provider despite the Azure deal. AWS also has an active lawsuit over Perplexity\'s agentic shopping feature.')"
+           onmouseleave="hideTooltip()">
+        <div class="cluster-header">
+          <div class="cluster-dot"></div>
+          <span class="cluster-name">Amazon Web Services</span>
+          <span class="cluster-badge">PRIMARY</span>
+        </div>
+        <ul class="service-list">
+          <li class="service-item"><div class="service-dot"></div>EC2 P4de — NVIDIA A100 (Training)</li>
+          <li class="service-item"><div class="service-dot"></div>EC2 P5 — NVIDIA H100 (Inference)</li>
+          <li class="service-item"><div class="service-dot"></div>SageMaker (GPU Memory Transfer)</li>
+          <li class="service-item"><div class="service-dot"></div>EFA — 3,200 Gbps Network Fabric</li>
+          <li class="service-item"><div class="service-dot"></div>UltraClusters (up to 20K H100s)</li>
+        </ul>
+        <div class="cluster-cost">Primary spend • Ongoing • Active legal dispute ⚠</div>
+      </div>
+
+      <!-- AZURE CLUSTER -->
+      <div class="provider-cluster azure" id="azure-cluster"
+           onmouseenter="showTooltip(event, 'Microsoft Azure — $750M Deal (Jan 2026)', 'Three-year, $750M commitment signed January 29, 2026. Powers search and shopping features via Microsoft Foundry — giving Perplexity access to frontier models from OpenAI, Anthropic, and xAI, plus a library of 11,000+ models. Perplexity stated AWS spending was not reduced.')"
+           onmouseleave="hideTooltip()">
+        <div class="cluster-header">
+          <div class="cluster-dot"></div>
+          <span class="cluster-name">Microsoft Azure</span>
+          <span class="cluster-badge">$750M / 3YR</span>
+        </div>
+        <ul class="service-list">
+          <li class="service-item"><div class="service-dot"></div>Microsoft Foundry Platform</li>
+          <li class="service-item"><div class="service-dot"></div>OpenAI + Anthropic + xAI Models</li>
+          <li class="service-item"><div class="service-dot"></div>11,000+ Model Library</li>
+          <li class="service-item"><div class="service-dot"></div>Search Feature Inference</li>
+          <li class="service-item"><div class="service-dot"></div>Shopping Feature Inference</li>
+        </ul>
+        <div class="cluster-cost">$250M/yr committed • Signed Jan 29 2026</div>
+      </div>
+
+      <!-- COREWEAVE CLUSTER -->
+      <div class="provider-cluster coreweave" id="cw-cluster"
+           onmouseenter="showTooltip(event, 'CoreWeave — Multi-Year Partnership (Mar 2026)', 'Signed March 3, 2026. Dedicated NVIDIA GB200 NVL72 clusters (Blackwell architecture) power Perplexity\'s Sonar API and Search API inference workloads. Uses CoreWeave Kubernetes Services (CKS) for orchestration. CoreWeave is also deploying Perplexity Enterprise Max internally.')"
+           onmouseleave="hideTooltip()">
+        <div class="cluster-header">
+          <div class="cluster-dot"></div>
+          <span class="cluster-name">CoreWeave Cloud</span>
+          <span class="cluster-badge">BLACKWELL</span>
+        </div>
+        <ul class="service-list">
+          <li class="service-item"><div class="service-dot"></div>NVIDIA GB200 NVL72 Clusters</li>
+          <li class="service-item"><div class="service-dot"></div>CoreWeave Kubernetes (CKS)</li>
+          <li class="service-item"><div class="service-dot"></div>Sonar API + Search API Inference</li>
+          <li class="service-item"><div class="service-dot"></div>Weights & Biases Integration</li>
+          <li class="service-item"><div class="service-dot"></div>Next-Gen Production Inference</li>
+        </ul>
+        <div class="cluster-cost">Multi-year term • Signed Mar 3 2026 • Low-latency SLA</div>
+      </div>
+
+      <!-- NVIDIA DGX CLOUD CLUSTER -->
+      <div class="provider-cluster nvidia" id="nvidia-cluster"
+           onmouseenter="showTooltip(event, 'Nvidia DGX Cloud Lepton — International', 'Used for Perplexity\'s international expansion strategy via the DGX Cloud Lepton marketplace, connecting to cloud partners globally. Provides geographic compliance and compute access in regions where AWS/Azure/CoreWeave coverage is insufficient.')"
+           onmouseleave="hideTooltip()">
+        <div class="cluster-header">
+          <div class="cluster-dot"></div>
+          <span class="cluster-name">Nvidia DGX Cloud</span>
+          <span class="cluster-badge">INTL EXPANSION</span>
+        </div>
+        <ul class="service-list">
+          <li class="service-item"><div class="service-dot"></div>DGX Cloud Lepton Marketplace</li>
+          <li class="service-item"><div class="service-dot"></div>Global Cloud Partner Network</li>
+          <li class="service-item"><div class="service-dot"></div>Regional Geo Compliance</li>
+          <li class="service-item"><div class="service-dot"></div>International Inference Routing</li>
+        </ul>
+        <div class="cluster-cost">International workloads • Geo compliance layer</div>
+      </div>
+
+      <!-- PERPLEXITY CORE NODE -->
+      <div class="perplexity-core">
+        <div class="core-node">
+          <svg class="core-icon" viewBox="0 0 36 36" fill="none">
+            <circle cx="18" cy="18" r="16" stroke="rgba(32,178,170,0.6)" stroke-width="1.5"/>
+            <circle cx="18" cy="18" r="8" fill="rgba(32,178,170,0.15)" stroke="rgba(32,178,170,0.8)" stroke-width="1.5"/>
+            <circle cx="18" cy="18" r="3" fill="rgba(32,178,170,0.9)"/>
+            <line x1="18" y1="2" x2="18" y2="10" stroke="rgba(32,178,170,0.4)" stroke-width="1.5"/>
+            <line x1="18" y1="26" x2="18" y2="34" stroke="rgba(32,178,170,0.4)" stroke-width="1.5"/>
+            <line x1="2" y1="18" x2="10" y2="18" stroke="rgba(32,178,170,0.4)" stroke-width="1.5"/>
+            <line x1="26" y1="18" x2="34" y2="18" stroke="rgba(32,178,170,0.4)" stroke-width="1.5"/>
+          </svg>
+          <div class="core-label">Perplexity AI</div>
+          <div class="core-sub">inference orchestrator</div>
+        </div>
+      </div>
+
+      <!-- CHAOS BADGES -->
+      <div class="chaos-badge" style="top: 47%; left: 4%; font-size:9px;"
+           onmouseenter="showTooltip(event, 'No Cross-Provider Coordination', 'AWS, Azure, and CoreWeave have no incentive to cooperate on diagnosing Perplexity\'s issues. Each provider owns a separate support channel, SLA clock, and billing ledger — forcing engineers to coordinate all three simultaneously.')"
+           onmouseleave="hideTooltip()">
+        <div class="chaos-badge-dot"></div>NO CROSS-PROVIDER SLA
+      </div>
+      <div class="chaos-badge" style="top: 47%; right: 4%; font-size:9px;"
+           onmouseenter="showTooltip(event, 'Billing Fragmentation', 'Three separate billing systems (AWS, Azure, CoreWeave) with no unified credit visibility. Users are seeing credit disappear without traceable audit trails. The Perplexity support ticket in this report directly reflects this billing fragmentation.')"
+           onmouseleave="hideTooltip()">
+        <div class="chaos-badge-dot"></div>BILLING FRAGMENTATION
+      </div>
+      <div class="chaos-badge" style="top: 14%; left: 50%; transform: translateX(-50%); font-size:9px;"
+           onmouseenter="showTooltip(event, 'Egress Cost Trap', 'Multi-cloud strategies incur significant data egress fees when moving data between AWS and Azure. This is a well-documented cost multiplier that compounds total spend beyond the committed contract values.')"
+           onmouseleave="hideTooltip()">
+        <div class="chaos-badge-dot"></div>EGRESS COST TRAP
+      </div>
+
+    </div><!-- /arch-canvas -->
+  </div><!-- /diagram-area -->
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+
+    <!-- Active Ticket -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">Active Support Ticket</div>
+      <div class="ticket-card">
+        <div class="ticket-header">
+          <div class="ticket-icon">✉</div>
+          <div>
+            <div class="ticket-from">Sam — Perplexity Enterprise</div>
+          </div>
+          <div class="ticket-time">Yesterday 1:34PM</div>
+        </div>
+        <div class="ticket-body">
+          "Your ticket regarding the credit visibility issues and invoice waiver request is with our Computer Credits &amp; Billing team. They'll review your situation and get back to you as soon as possible."
+        </div>
+        <span class="ticket-tag">Re: Billing &amp; Subscription</span>
+      </div>
+    </div>
+
+    <!-- Platform Status -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">Provider Status</div>
+      <div class="status-card">
+        <div class="status-card-header">
+          <div class="status-card-title">AWS (Primary)</div>
+          <span class="status-pill pill-warn">TRANSITIONING</span>
+        </div>
+        <div class="status-card-body">P4de → P5 migration in progress. Legal dispute with Amazon ongoing over agentic shopping.</div>
+      </div>
+      <div class="status-card">
+        <div class="status-card-header">
+          <div class="status-card-title">Azure / Foundry</div>
+          <span class="status-pill pill-warn">RAMPING</span>
+        </div>
+        <div class="status-card-body">89 days post-signing. Search + shopping features now routing through Foundry. Integration overhead accumulating.</div>
+      </div>
+      <div class="status-card">
+        <div class="status-card-header">
+          <div class="status-card-title">CoreWeave (CKS)</div>
+          <span class="status-pill pill-warn">ONBOARDING</span>
+        </div>
+        <div class="status-card-body">58 days post-signing. GB200 NVL72 clusters being provisioned. W&B pipeline integration active.</div>
+      </div>
+      <div class="status-card">
+        <div class="status-card-header">
+          <div class="status-card-title">Billing Unification</div>
+          <span class="status-pill pill-critical">BROKEN</span>
+        </div>
+        <div class="status-card-body">No unified credit ledger across 3 providers. Tickets escalating. Invoice waivers requested.</div>
+      </div>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">Infrastructure Metrics</div>
+      <div class="metrics-grid">
+        <div class="metric-box metric-red">
+          <div class="metric-value">3</div>
+          <div class="metric-label">Active Hyperscalers</div>
+        </div>
+        <div class="metric-box metric-orange">
+          <div class="metric-value">$750M</div>
+          <div class="metric-label">Azure Commitment</div>
+        </div>
+        <div class="metric-box metric-purple">
+          <div class="metric-value">&lt;90</div>
+          <div class="metric-label">Days AWS→Azure→CW</div>
+        </div>
+        <div class="metric-box metric-blue">
+          <div class="metric-value">11K+</div>
+          <div class="metric-label">Foundry Models</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Root Cause Issues -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">Root Cause Analysis</div>
+      <div class="issue-item">
+        <div class="issue-num">01</div>
+        <div class="issue-text">
+          <strong>Competitive Hyperscaler Isolation</strong>
+          AWS, Azure, and CoreWeave are direct competitors. None will proactively share logs, debug contexts, or coordinate SLAs with each other on Perplexity's behalf.
+        </div>
+      </div>
+      <div class="issue-item">
+        <div class="issue-num">02</div>
+        <div class="issue-text">
+          <strong>Speed-of-Signing vs. Integration Reality</strong>
+          Azure (Jan 29) + CoreWeave (Mar 3) = two major infrastructure pivots in 33 days. Integration debt is accumulating faster than engineering can absorb.
+        </div>
+      </div>
+      <div class="issue-item">
+        <div class="issue-num">03</div>
+        <div class="issue-text">
+          <strong>Billing Ledger Fragmentation</strong>
+          Three independent billing systems with no shared credit visibility. The active support ticket is a direct symptom.
+        </div>
+      </div>
+      <div class="issue-item">
+        <div class="issue-num">04</div>
+        <div class="issue-text">
+          <strong>Multi-Cloud Egress Tax</strong>
+          Data moving between AWS, Azure, and CoreWeave incurs egress fees that compound total infrastructure cost beyond contracted values.
+        </div>
+      </div>
+      <div class="issue-item">
+        <div class="issue-num">05</div>
+        <div class="issue-text">
+          <strong>Orchestration Complexity</strong>
+          AWS EFA/EKS + Azure Foundry API + CoreWeave CKS + DGX Cloud Lepton = four separate orchestration layers with no common abstraction.
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /sidebar -->
+</div><!-- /main-content -->
+
+<!-- BOTTOM ANALYSIS STRIP -->
+<div class="analysis-strip">
+  <div class="section-label">Strategic Diagnosis — Why the "Multi-Cloud" Thesis Is Now Backfiring</div>
+  <div class="analysis-grid">
+    <div class="analysis-card">
+      <div class="analysis-card-header">
+        <div class="analysis-icon icon-red">🔥</div>
+        <div class="analysis-card-title">The Philosophical Trap</div>
+      </div>
+      <div class="analysis-card-body">
+        Perplexity's multi-cloud strategy was predicated on the classical thesis: better performance, lower cost, and geographic compliance through provider redundancy. In theory, sound. In practice,
+        the coordination overhead of three competing hyperscalers — each with proprietary tooling, separate SLA structures, and zero incentive to help competitors' customers — has created
+        more operational debt than any single-provider lock-in would have.
+      </div>
+    </div>
+    <div class="analysis-card">
+      <div class="analysis-card-header">
+        <div class="analysis-icon icon-orange">⚡</div>
+        <div class="analysis-card-title">The Timing Problem</div>
+      </div>
+      <div class="analysis-card-body">
+        The Azure deal (Jan 29) and CoreWeave deal (March 3) were signed 33 days apart. Each requires months of deep integration work — custom Kubernetes configurations,
+        routing logic, observability pipelines, billing reconciliation, and network tuning. Layering a third hyperscaler onto an already-complex AWS foundation before either new
+        deal was fully integrated is a textbook case of compounding integration debt.
+      </div>
+    </div>
+    <div class="analysis-card">
+      <div class="analysis-card-header">
+        <div class="analysis-icon icon-yellow">💸</div>
+        <div class="analysis-card-title">The Billing Black Hole</div>
+      </div>
+      <div class="analysis-card-body">
+        AWS, Azure, and CoreWeave each maintain isolated billing ledgers with incompatible credit structures. There is no native cross-cloud unified cost visibility — it must be
+        built by Perplexity's engineering team using third-party tools (e.g. Spot.io, Apptio, or custom dashboards). Until that abstraction layer exists,
+        users experience credit disappearance, invoice surprises, and unresolved waiver requests like the ticket shown here.
+      </div>
+    </div>
+    <div class="analysis-card">
+      <div class="analysis-card-header">
+        <div class="analysis-icon icon-purple">🧩</div>
+        <div class="analysis-card-title">The Path Forward</div>
+      </div>
+      <div class="analysis-card-body">
+        Resolution requires a dedicated multi-cloud abstraction layer: a unified control plane (likely Kubernetes-based), a single-pane billing aggregator,
+        and formalized escalation bridges to each hyperscaler's enterprise support org. Without it, Perplexity's engineering capacity is being consumed
+        by infrastructure firefighting rather than product velocity — the most expensive kind of technical debt.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOOLTIP -->
+<div class="tooltip" id="tooltip">
+  <div class="tooltip-title" id="tooltip-title"></div>
+  <div id="tooltip-body"></div>
+</div>
+
+<script>
+function showTooltip(event, title, body) {
+  var tip = document.getElementById('tooltip');
+  document.getElementById('tooltip-title').textContent = title;
+  document.getElementById('tooltip-body').textContent = body;
+  tip.classList.add('active');
+  moveTip(event);
+  event.currentTarget._moveHandler = function(e) { moveTip(e); };
+  event.currentTarget.addEventListener('mousemove', event.currentTarget._moveHandler);
+}
+function moveTip(e) {
+  var tip = document.getElementById('tooltip');
+  var x = e.clientX + 14, y = e.clientY + 14;
+  if (x + 270 > window.innerWidth) x = e.clientX - 270;
+  if (y + 160 > window.innerHeight) y = e.clientY - 160;
+  tip.style.left = x + 'px';
+  tip.style.top = y + 'px';
+}
+function hideTooltip() {
+  document.getElementById('tooltip').classList.remove('active');
+}
+</script>
+</body>
+</html>
