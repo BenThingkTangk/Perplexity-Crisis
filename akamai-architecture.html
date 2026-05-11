@@ -1,0 +1,781 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Akamai Convergence Architecture // Perplexity Crisis Brief</title>
+  <meta name="description" content="One-page Akamai product architecture showing how Perplexity can use AI Grid, edge GPUs, DNS, traffic management, API security, bot control, DDoS defense, and observability as an AI convergence fabric." />
+  <link rel="preconnect" href="https://api.fontshare.com" />
+  <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@500,700,800,900&f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #08090a;
+      --bg2: #0b0d10;
+      --surface: rgba(16,18,21,.78);
+      --surface2: rgba(21,25,29,.72);
+      --border: rgba(255,255,255,.10);
+      --border2: rgba(0,230,211,.35);
+      --text: #edf8f8;
+      --muted: #9ca8ad;
+      --faint: #5e6970;
+      --plasma: #00e6d3;
+      --plasma2: #00a7ff;
+      --gold: #ffd166;
+      --violet: #b987ff;
+      --coral: #ff7569;
+      --green: #72f2a1;
+      --shadow: 0 30px 120px rgba(0,0,0,.64);
+      --glow: 0 0 64px rgba(0,230,211,.20);
+      --font-display: "Cabinet Grotesk", "Satoshi", system-ui, sans-serif;
+      --font-body: "Satoshi", system-ui, sans-serif;
+      --font-mono: "JetBrains Mono", "SFMono-Regular", ui-monospace, monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html { min-height: 100%; background: var(--bg); color: var(--text); }
+    body {
+      min-height: 100%;
+      margin: 0;
+      font-family: var(--font-body);
+      background:
+        radial-gradient(circle at 18% 12%, rgba(0,230,211,.14), transparent 26%),
+        radial-gradient(circle at 78% 18%, rgba(0,167,255,.10), transparent 24%),
+        radial-gradient(circle at 50% 90%, rgba(0,230,211,.08), transparent 32%),
+        linear-gradient(135deg, #07100f 0%, #08090a 42%, #020303 100%);
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+      background-size: 54px 54px;
+      mask-image: radial-gradient(circle at 50% 35%, black, transparent 80%);
+      opacity: .45;
+    }
+
+    .page {
+      width: min(1480px, calc(100vw - 32px));
+      min-height: calc(100vh - 32px);
+      margin: 16px auto;
+      position: relative;
+      border: 1px solid var(--border);
+      border-radius: 32px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.018)),
+        rgba(8,9,10,.64);
+      box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,.08);
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .page::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(90deg, rgba(0,230,211,.09), transparent 24%, transparent 76%, rgba(0,167,255,.08));
+      mix-blend-mode: screen;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 24px;
+      padding: 24px 30px 18px;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      position: relative;
+      z-index: 2;
+    }
+
+    .atom-logo {
+      --logo-size: 42px;
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      color: var(--text);
+      text-decoration: none;
+      isolation: isolate;
+      min-width: 260px;
+    }
+
+    .atom-mark {
+      width: var(--logo-size);
+      height: var(--logo-size);
+      color: var(--plasma);
+      filter: drop-shadow(0 0 18px rgba(0,230,211,.28));
+    }
+
+    .atom-atmosphere { stroke: currentColor; stroke-width: 1.25; opacity: .18; }
+    .atom-orbits { transform-origin: 32px 32px; animation: atom-spin-left 8.5s linear infinite; }
+    .atom-orbit { stroke: currentColor; stroke-width: 1.5; fill: none; stroke-linecap: round; }
+    .atom-orbit-a { opacity: .95; }
+    .atom-orbit-b { opacity: .48; }
+    .atom-orbit-c { opacity: .32; }
+    .atom-nucleus {
+      fill: currentColor;
+      filter: drop-shadow(0 0 10px var(--plasma));
+      animation: atom-core-pulse 2.8s cubic-bezier(.4,0,.2,1) infinite;
+    }
+    .atom-electron {
+      fill: currentColor;
+      opacity: .82;
+      transform-origin: 32px 32px;
+      animation: atom-electron-flicker 2.4s cubic-bezier(.4,0,.2,1) infinite;
+    }
+    .atom-wordmark {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-family: var(--font-display);
+      font-weight: 900;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .atom-wordmark .word-main {
+      display: inline-block;
+      font-size: 22px;
+      letter-spacing: .12em;
+      line-height: .9;
+    }
+    .atom-wordmark small {
+      display: block;
+      font-family: var(--font-mono);
+      color: var(--faint);
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: .30em;
+    }
+    .atom-wordmark b { color: var(--plasma); text-shadow: 0 0 20px rgba(0,230,211,.34); }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: .24em;
+      text-transform: uppercase;
+      color: var(--plasma);
+      border: 1px solid var(--border2);
+      border-radius: 999px;
+      padding: 10px 14px;
+      background: rgba(0,230,211,.06);
+      box-shadow: var(--glow);
+      white-space: nowrap;
+    }
+    .pip {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--plasma);
+      box-shadow: 0 0 18px rgba(0,230,211,.85);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(320px, .86fr) minmax(720px, 1.44fr);
+      gap: 28px;
+      padding: 26px 30px 30px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .brief {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 22px;
+      min-height: 710px;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: clamp(52px, 5.6vw, 96px);
+      line-height: .9;
+      letter-spacing: -.065em;
+      max-width: 760px;
+    }
+
+    .accent {
+      color: var(--plasma);
+      text-shadow: 0 0 40px rgba(0,230,211,.26);
+    }
+
+    .lede {
+      margin: 22px 0 0;
+      color: #c2cccf;
+      font-size: clamp(17px, 1.28vw, 21px);
+      line-height: 1.55;
+      max-width: 670px;
+    }
+
+    .stack {
+      display: grid;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .product-card {
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 18px;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,.07), rgba(255,255,255,.025)),
+        rgba(11,13,16,.68);
+      padding: 15px 16px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.07);
+    }
+
+    .product-card h3 {
+      margin: 0 0 6px;
+      font-size: 15px;
+      letter-spacing: -.01em;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .product-card h3 span {
+      color: var(--plasma);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    .product-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 12px;
+    }
+
+    .metric {
+      padding: 15px 14px;
+      border-radius: 18px;
+      border: 1px solid rgba(0,230,211,.22);
+      background: rgba(0,230,211,.055);
+    }
+
+    .metric strong {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 31px;
+      letter-spacing: -.045em;
+      color: var(--text);
+    }
+
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.25;
+      margin-top: 4px;
+    }
+
+    .diagram-panel {
+      position: relative;
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 30px;
+      background:
+        radial-gradient(circle at 50% 48%, rgba(0,230,211,.17), transparent 32%),
+        linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.018)),
+        rgba(5,7,8,.72);
+      min-height: 710px;
+      box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,.08);
+      overflow: hidden;
+    }
+
+    .mobile-flow {
+      display: none;
+    }
+
+    .diagram-panel::before {
+      content: "";
+      position: absolute;
+      inset: 20px;
+      border: 1px solid rgba(0,230,211,.14);
+      border-radius: 24px;
+      pointer-events: none;
+    }
+
+    .architecture {
+      width: 100%;
+      height: 710px;
+      display: block;
+    }
+
+    .svg-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      fill: #9ca8ad;
+    }
+    .svg-title {
+      font-family: var(--font-display);
+      font-size: 21px;
+      font-weight: 900;
+      letter-spacing: -.035em;
+      fill: #edf8f8;
+    }
+    .svg-body {
+      font-family: var(--font-body);
+      font-size: 14px;
+      fill: #c2cccf;
+    }
+    .svg-mono {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: .08em;
+      fill: #08090a;
+      font-weight: 900;
+    }
+    .flow {
+      stroke-dasharray: 8 10;
+      animation: flow 3.8s linear infinite;
+      filter: drop-shadow(0 0 10px rgba(0,230,211,.25));
+    }
+    .pulse-node {
+      animation: node-pulse 2.2s ease-in-out infinite;
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+
+    .legend {
+      position: absolute;
+      right: 28px;
+      bottom: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      max-width: 560px;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(8,9,10,.66);
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+      backdrop-filter: blur(16px);
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--plasma);
+    }
+
+    .sources {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 18px;
+      padding: 0 30px 28px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .source-box {
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 22px;
+      padding: 17px 18px;
+      background: rgba(10,12,14,.68);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .source-box b {
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .18em;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .source-box a {
+      color: var(--plasma);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(0,230,211,.28);
+    }
+
+    @keyframes atom-spin-left { to { transform: rotate(-360deg); } }
+    @keyframes atom-core-pulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.18); opacity: .78; } }
+    @keyframes atom-electron-flicker { 0%,100% { opacity: .88; } 45% { opacity: .42; } 65% { opacity: 1; } }
+    @keyframes flow { to { stroke-dashoffset: -180; } }
+    @keyframes node-pulse { 0%,100% { transform: scale(1); opacity: .9; } 50% { transform: scale(1.12); opacity: 1; } }
+
+    @media (max-width: 1120px) {
+      .page { border-radius: 0; width: 100%; min-height: 100vh; margin: 0; }
+      .hero { grid-template-columns: 1fr; }
+      .brief { min-height: auto; }
+      .diagram-panel, .architecture { min-height: 680px; height: 680px; }
+      .sources { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 720px) {
+      .topbar { align-items: flex-start; flex-direction: column; padding: 18px 16px; }
+      .eyebrow { white-space: normal; line-height: 1.5; }
+      .hero { padding: 22px 16px; gap: 20px; }
+      h1 { font-size: clamp(43px, 15vw, 62px); }
+      .metrics { grid-template-columns: 1fr; }
+      .diagram-panel {
+        min-height: auto;
+        height: auto;
+        padding: 18px;
+        overflow: visible;
+      }
+      .diagram-panel::before { inset: 10px; }
+      .architecture { display: none; }
+      .mobile-flow {
+        display: grid;
+        gap: 12px;
+        position: relative;
+        z-index: 2;
+      }
+      .mobile-flow-card {
+        border: 1px solid rgba(255,255,255,.10);
+        border-radius: 18px;
+        padding: 14px;
+        background:
+          linear-gradient(135deg, rgba(255,255,255,.055), rgba(255,255,255,.018)),
+          rgba(8,9,10,.72);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.07);
+      }
+      .mobile-flow-card.primary {
+        border-color: rgba(0,230,211,.35);
+        background:
+          radial-gradient(circle at 78% 18%, rgba(0,230,211,.14), transparent 52%),
+          rgba(0,230,211,.055);
+      }
+      .mobile-flow-card.trust { border-color: rgba(255,117,105,.34); }
+      .mobile-flow-card.proof { border-color: rgba(185,135,255,.34); }
+      .mobile-flow-card b {
+        display: block;
+        color: var(--plasma);
+        font-family: var(--font-mono);
+        font-size: 9px;
+        letter-spacing: .20em;
+        text-transform: uppercase;
+        margin-bottom: 7px;
+      }
+      .mobile-flow-card h3 {
+        margin: 0 0 6px;
+        font-family: var(--font-display);
+        font-size: 22px;
+        line-height: .96;
+        letter-spacing: -.035em;
+      }
+      .mobile-flow-card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.42;
+      }
+      .mobile-flow-arrow {
+        justify-self: center;
+        width: 2px;
+        height: 24px;
+        background: linear-gradient(var(--plasma), transparent);
+        position: relative;
+        box-shadow: 0 0 16px rgba(0,230,211,.35);
+      }
+      .mobile-flow-arrow::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        bottom: -3px;
+        width: 8px;
+        height: 8px;
+        border-right: 2px solid var(--plasma);
+        border-bottom: 2px solid var(--plasma);
+        transform: translateX(-50%) rotate(45deg);
+      }
+      .mobile-subgrid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+      .legend {
+        position: static;
+        margin-top: 14px;
+        max-width: none;
+      }
+      .sources { padding: 0 16px 20px; }
+    }
+
+    @media print {
+      body { background: #08090a; }
+      .page { width: 100%; min-height: 100vh; margin: 0; border-radius: 0; box-shadow: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; scroll-behavior: auto !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page" aria-label="Akamai convergence architecture diagram">
+    <header class="topbar">
+      <a href="/" class="atom-logo" aria-label="Back to ΔTOM crisis brief">
+        <svg class="atom-mark" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <circle class="atom-atmosphere" cx="32" cy="32" r="30" />
+          <g class="atom-orbits">
+            <ellipse class="atom-orbit atom-orbit-a" cx="32" cy="32" rx="12" ry="29" />
+            <ellipse class="atom-orbit atom-orbit-b" cx="32" cy="32" rx="29" ry="12" />
+            <ellipse class="atom-orbit atom-orbit-c" cx="32" cy="32" rx="23" ry="10" transform="rotate(45 32 32)" />
+          </g>
+          <circle class="atom-nucleus" cx="32" cy="32" r="4.25" />
+          <circle class="atom-electron atom-electron-a" cx="32" cy="3" r="2.6" />
+          <circle class="atom-electron atom-electron-b" cx="61" cy="32" r="2.4" />
+          <circle class="atom-electron atom-electron-c" cx="15.5" cy="48.5" r="2.2" />
+        </svg>
+        <span class="atom-wordmark"><span class="word-main">AT<b>O</b>M</span><small>ARCHITECTURE DOSSIER</small></span>
+      </a>
+      <div class="eyebrow"><span class="pip"></span> Akamai convergence stack // Perplexity deployment map</div>
+    </header>
+
+    <section class="hero">
+      <aside class="brief">
+        <div>
+          <h1>Make the stack <span class="accent">behave like one system.</span></h1>
+          <p class="lede">
+            Perplexity keeps AWS, Microsoft Foundry/Azure, and CoreWeave as AI factories.
+            Akamai becomes the edge AI convergence fabric: inference distribution, routing intelligence,
+            security perimeter, and proof layer wrapped around the user path.
+          </p>
+
+          <div class="stack" aria-label="Akamai product stack">
+            <article class="product-card">
+              <h3>AI Grid + Akamai Inference Cloud <span>control plane</span></h3>
+              <p>Route each query by latency, token cost, model availability, regional policy, cacheability, and congestion.</p>
+            </article>
+            <article class="product-card">
+              <h3>Cloud GPUs + EdgeWorkers + EdgeKV <span>execution layer</span></h3>
+              <p>Serve low-latency inference and lightweight policy logic close to users while preserving centralized AI factories.</p>
+            </article>
+            <article class="product-card">
+              <h3>GTM + Edge DNS + Cloudlets <span>traffic layer</span></h3>
+              <p>Global load balancing, failover, API prioritization, phased release, waiting-room control, and region-aware steering.</p>
+            </article>
+            <article class="product-card">
+              <h3>App & API Protector + API Security + Bot Manager + Prolexic <span>trust layer</span></h3>
+              <p>Protect AI APIs, MCP/LLM integrations, agentic browsing, bot abuse, scraping, Layer 7 attacks, DNS, and volumetric DDoS.</p>
+            </article>
+            <article class="product-card">
+              <h3>DataStream + mPulse <span>proof layer</span></h3>
+              <p>Measure TTFT, p95 latency, offload, cache hits, user geography, incidents, and business impact in near real time.</p>
+            </article>
+          </div>
+        </div>
+
+        <div class="metrics" aria-label="Key Akamai architecture metrics">
+          <div class="metric"><strong>4,400+</strong><span>edge locations for distributed AI routing</span></div>
+          <div class="metric"><strong>2.5×</strong><span>headline latency reduction claim vs traditional hyperscaler infra</span></div>
+          <div class="metric"><strong>86%</strong><span>headline inference cost-savings claim for supported workloads</span></div>
+        </div>
+      </aside>
+
+      <section class="diagram-panel" aria-label="Architecture diagram">
+        <svg class="architecture" viewBox="0 0 960 710" role="img" aria-label="Akamai convergence architecture from user traffic to edge control plane, AI factories, security, and observability">
+          <defs>
+            <linearGradient id="plasmaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#00e6d3"/>
+              <stop offset="100%" stop-color="#00a7ff"/>
+            </linearGradient>
+            <linearGradient id="factoryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#15191d"/>
+              <stop offset="100%" stop-color="#0b0d10"/>
+            </linearGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="5" result="coloredBlur"/>
+              <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+            <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+              <path d="M0,0 L0,6 L9,3 z" fill="#00e6d3" />
+            </marker>
+            <marker id="arrowDim" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+              <path d="M0,0 L0,6 L9,3 z" fill="#5e6970" />
+            </marker>
+          </defs>
+
+          <rect x="34" y="36" width="190" height="70" rx="18" fill="rgba(0,230,211,.08)" stroke="rgba(0,230,211,.35)" />
+          <text x="57" y="65" class="svg-label">Demand</text>
+          <text x="57" y="91" class="svg-title" font-size="18">Users + agents</text>
+
+          <path class="flow" d="M224 72 C280 72 262 170 326 170" stroke="#00e6d3" stroke-width="3" fill="none" marker-end="url(#arrow)" />
+
+          <rect x="314" y="54" width="332" height="232" rx="30" fill="rgba(0,230,211,.055)" stroke="rgba(0,230,211,.42)" filter="url(#glow)" />
+          <text x="354" y="96" class="svg-label">Akamai convergence fabric</text>
+          <text x="354" y="130" class="svg-title" font-size="22">AI Grid Control Plane</text>
+          <text x="354" y="159" class="svg-body">Workload-aware broker for every AI request</text>
+
+          <g>
+            <rect x="348" y="190" width="118" height="44" rx="13" fill="#00e6d3"/>
+            <text x="372" y="217" class="svg-mono">TTFT</text>
+            <rect x="482" y="190" width="118" height="44" rx="13" fill="#00a7ff"/>
+            <text x="505" y="217" class="svg-mono">TOKEN COST</text>
+            <rect x="348" y="246" width="118" height="44" rx="13" fill="#72f2a1"/>
+            <text x="371" y="273" class="svg-mono">REGION</text>
+            <rect x="482" y="246" width="118" height="44" rx="13" fill="#ffd166"/>
+            <text x="499" y="273" class="svg-mono">MODEL FIT</text>
+          </g>
+
+          <circle cx="480" cy="420" r="130" fill="none" stroke="rgba(0,230,211,.34)" stroke-width="2" stroke-dasharray="6 9" />
+          <circle cx="480" cy="420" r="91" fill="rgba(0,230,211,.06)" stroke="rgba(0,230,211,.28)" />
+          <circle cx="480" cy="420" r="49" fill="rgba(0,230,211,.12)" stroke="rgba(0,230,211,.48)" filter="url(#glow)" />
+          <text x="480" y="411" text-anchor="middle" class="svg-label">Akamai</text>
+          <text x="480" y="439" text-anchor="middle" class="svg-title" font-size="22">Edge POPs</text>
+
+          <g class="pulse-node">
+            <circle cx="480" cy="292" r="9" fill="#00e6d3" />
+            <circle cx="609" cy="420" r="9" fill="#00e6d3" />
+            <circle cx="480" cy="548" r="9" fill="#00e6d3" />
+            <circle cx="351" cy="420" r="9" fill="#00e6d3" />
+            <circle cx="568" cy="326" r="7" fill="#00a7ff" />
+            <circle cx="392" cy="514" r="7" fill="#00a7ff" />
+          </g>
+
+          <path class="flow" d="M480 286 C480 326 480 343 480 370" stroke="#00e6d3" stroke-width="3" fill="none" marker-end="url(#arrow)" />
+
+          <rect x="48" y="185" width="218" height="102" rx="20" fill="url(#factoryGrad)" stroke="rgba(255,209,102,.42)" />
+          <text x="75" y="221" class="svg-label" fill="#ffd166">AI factory</text>
+          <text x="75" y="252" class="svg-title" font-size="22">AWS</text>
+          <text x="75" y="278" class="svg-body">EC2 · P5 · HyperPod</text>
+
+          <rect x="48" y="330" width="218" height="102" rx="20" fill="url(#factoryGrad)" stroke="rgba(0,167,255,.42)" />
+          <text x="75" y="366" class="svg-label" fill="#00a7ff">Model foundry</text>
+          <text x="75" y="397" class="svg-title" font-size="22">Microsoft</text>
+          <text x="75" y="423" class="svg-body">Foundry · OpenAI · xAI</text>
+
+          <rect x="48" y="475" width="218" height="102" rx="20" fill="url(#factoryGrad)" stroke="rgba(255,117,105,.42)" />
+          <text x="75" y="511" class="svg-label" fill="#ff7569">Inference partner</text>
+          <text x="75" y="542" class="svg-title" font-size="22">CoreWeave</text>
+          <text x="75" y="568" class="svg-body">GB200 NVL72 clusters</text>
+
+          <path class="flow" d="M314 178 C286 178 292 236 266 236" stroke="#ffd166" stroke-width="2.5" fill="none" marker-end="url(#arrowDim)" />
+          <path class="flow" d="M314 212 C276 240 302 380 266 380" stroke="#00a7ff" stroke-width="2.5" fill="none" marker-end="url(#arrowDim)" />
+          <path class="flow" d="M314 252 C278 320 310 526 266 526" stroke="#ff7569" stroke-width="2.5" fill="none" marker-end="url(#arrowDim)" />
+
+          <rect x="690" y="76" width="230" height="86" rx="20" fill="rgba(0,230,211,.055)" stroke="rgba(0,230,211,.26)" />
+          <text x="735" y="111" class="svg-label">Traffic</text>
+          <text x="735" y="140" class="svg-title" font-size="18">GTM · Edge DNS</text>
+          <path class="flow" d="M646 144 C668 120 668 119 690 119" stroke="#00e6d3" stroke-width="2.5" fill="none" marker-end="url(#arrow)" />
+
+          <rect x="690" y="202" width="230" height="100" rx="20" fill="rgba(0,230,211,.055)" stroke="rgba(0,230,211,.26)" />
+          <text x="735" y="237" class="svg-label">Edge logic</text>
+          <text x="735" y="266" class="svg-title" font-size="18">EdgeWorkers</text>
+          <text x="735" y="288" class="svg-body">Cloudlets · EdgeKV</text>
+          <path class="flow" d="M646 222 C668 250 668 252 690 252" stroke="#00e6d3" stroke-width="2.5" fill="none" marker-end="url(#arrow)" />
+
+          <rect x="690" y="344" width="230" height="118" rx="20" fill="rgba(255,117,105,.07)" stroke="rgba(255,117,105,.38)" />
+          <text x="735" y="379" class="svg-label" fill="#ff7569">Trust perimeter</text>
+          <text x="735" y="408" class="svg-title" font-size="18">WAAP + API Sec</text>
+          <text x="735" y="432" class="svg-body">Bot Manager · Prolexic</text>
+          <path class="flow" d="M610 420 C654 420 660 403 690 403" stroke="#ff7569" stroke-width="2.5" fill="none" marker-end="url(#arrowDim)" />
+
+          <rect x="690" y="504" width="230" height="96" rx="20" fill="rgba(185,135,255,.07)" stroke="rgba(185,135,255,.38)" />
+          <text x="735" y="539" class="svg-label" fill="#b987ff">Telemetry</text>
+          <text x="735" y="568" class="svg-title" font-size="18">DataStream</text>
+          <text x="735" y="590" class="svg-body">mPulse · SIEM · data lake</text>
+          <path class="flow" d="M580 520 C640 552 656 552 690 552" stroke="#b987ff" stroke-width="2.5" fill="none" marker-end="url(#arrowDim)" />
+
+          <rect x="323" y="615" width="314" height="54" rx="18" fill="rgba(0,230,211,.08)" stroke="rgba(0,230,211,.32)" />
+          <text x="480" y="638" text-anchor="middle" class="svg-label">Pilot motion</text>
+          <text x="480" y="661" text-anchor="middle" class="svg-body">90 days · peak-hour US/EU · measure TTFT, p95, cache hit, offload, incidents</text>
+        </svg>
+
+        <div class="mobile-flow" aria-label="Mobile Akamai convergence architecture">
+          <article class="mobile-flow-card">
+            <b>Demand</b>
+            <h3>Users + agents</h3>
+            <p>Search, assistant sessions, Comet-style agentic browsing, and high-concurrency API demand hit the edge first.</p>
+          </article>
+          <div class="mobile-flow-arrow" aria-hidden="true"></div>
+          <article class="mobile-flow-card primary">
+            <b>Akamai convergence fabric</b>
+            <h3>AI Grid Control Plane</h3>
+            <p>Each request routes by TTFT, token cost, region, model fit, live congestion, and cacheability.</p>
+          </article>
+          <div class="mobile-flow-arrow" aria-hidden="true"></div>
+          <article class="mobile-flow-card primary">
+            <b>Execution layer</b>
+            <h3>Akamai Edge POPs</h3>
+            <p>Inference Cloud, Cloud GPUs, EdgeWorkers, Cloudlets, and EdgeKV move latency-sensitive work closer to users.</p>
+          </article>
+          <div class="mobile-flow-arrow" aria-hidden="true"></div>
+          <div class="mobile-subgrid">
+            <article class="mobile-flow-card">
+              <b>Existing AI factories</b>
+              <h3>AWS · Microsoft · CoreWeave</h3>
+              <p>Keep training, heavyweight inference, and model access where they already run. Akamai orchestrates the user path above them.</p>
+            </article>
+            <article class="mobile-flow-card trust">
+              <b>Trust perimeter</b>
+              <h3>WAAP · API Security · Bot Manager · Prolexic</h3>
+              <p>Protect AI APIs, MCP/LLM integrations, bot abuse, scraping, L7 attacks, DNS, and volumetric DDoS.</p>
+            </article>
+            <article class="mobile-flow-card proof">
+              <b>Proof layer</b>
+              <h3>DataStream + mPulse</h3>
+              <p>Measure TTFT, p95 latency, edge offload, cache hit rate, incidents, geography, and user experience impact.</p>
+            </article>
+          </div>
+        </div>
+
+        <div class="legend" aria-label="Diagram legend">
+          <span><i class="dot"></i> Akamai control</span>
+          <span><i class="dot" style="background:var(--gold)"></i> Existing AI factory</span>
+          <span><i class="dot" style="background:var(--coral)"></i> Trust perimeter</span>
+          <span><i class="dot" style="background:var(--violet)"></i> Proof layer</span>
+        </div>
+      </section>
+    </section>
+
+    <section class="sources">
+      <div class="source-box">
+        <b>Strategic pitch</b>
+        Akamai is not the new religion. It is the distribution brain above an already-necessary multicloud AI estate.
+        Keep centralized training and heavyweight workloads in AI factories; move latency-sensitive inference, routing,
+        protection, and proof closer to the user.
+      </div>
+      <div class="source-box">
+        <b>Source anchors</b>
+        <a href="https://www.akamai.com/newsroom/press-release/akamai-launches-ai-grid-intelligent-orchestration-for-distributed-inference-across-4400-edge-locations">Akamai AI Grid</a> ·
+        <a href="https://www.akamai.com/newsroom/press-release/akamai-to-deploy-thousands-of-nvidia-blackwell-gpus-to-create-one-of-the-worlds-most-widely-distributed-ai-platforms">Akamai Blackwell GPUs</a> ·
+        <a href="https://www.akamai.com/products/global-traffic-management">GTM</a> ·
+        <a href="https://www.akamai.com/products/app-and-api-protector">App & API Protector</a> ·
+        <a href="https://www.akamai.com/products/api-security">API Security</a> ·
+        <a href="https://www.akamai.com/products/prolexic-solutions">Prolexic</a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
