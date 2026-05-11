@@ -1,1408 +1,692 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Perplexity Multi-Cloud Architecture — Complexity & Failure Analysis</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-:root {
-  --font-body: 'Inter', 'Helvetica Neue', sans-serif;
-  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
-  --color-bg: #0a0a0c;
-  --color-surface: #111114;
-  --color-surface-2: #161619;
-  --color-surface-3: #1c1c21;
-  --color-border: rgba(255,255,255,0.07);
-  --color-text: #e8e8ec;
-  --color-text-muted: #888890;
-  --color-text-faint: #4a4a55;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ΔTOM // Perplexity Crisis Convergence Brief</title>
+  <meta name="description" content="A classified-style infrastructure intelligence brief: Perplexity's multi-cloud orchestration crisis and how Akamai becomes the edge AI convergence layer." />
+  <meta name="theme-color" content="#050608" />
 
-  /* Provider brand colors */
-  --aws: #ff9900;
-  --aws-dim: rgba(255,153,0,0.15);
-  --aws-glow: rgba(255,153,0,0.25);
-  --azure: #0078d4;
-  --azure-dim: rgba(0,120,212,0.15);
-  --azure-glow: rgba(0,120,212,0.3);
-  --coreweave: #7c3aed;
-  --coreweave-dim: rgba(124,58,237,0.15);
-  --coreweave-glow: rgba(124,58,237,0.3);
-  --nvidia: #76b900;
-  --nvidia-dim: rgba(118,185,0,0.12);
-  --nvidia-glow: rgba(118,185,0,0.25);
-  --perplexity: #20b2aa;
-  --perplexity-dim: rgba(32,178,170,0.15);
-  --akamai: #009bde;
-  --akamai-dim: rgba(0,155,222,0.12);
-  --akamai-glow: rgba(0,155,222,0.3);
-  --akamai-green: #00c7b1;
+  <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,700,900&f[]=cabinet-grotesk@400,500,700,800,900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+  <link rel="stylesheet" href="./styles.css" />
 
-  /* Status colors */
-  --danger: #ef4444;
-  --danger-dim: rgba(239,68,68,0.15);
-  --warning: #f59e0b;
-  --warning-dim: rgba(245,158,11,0.12);
-  --ok: #10b981;
-
-  --radius: 10px;
-  --radius-sm: 6px;
-  --space: 16px;
-}
-
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-html { scroll-behavior: smooth; }
-
-body {
-  font-family: var(--font-body);
-  background: var(--color-bg);
-  color: var(--color-text);
-  font-size: 14px;
-  line-height: 1.6;
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-}
-
-/* ═══ HEADER ═══ */
-.page-header {
-  padding: 48px 40px 32px;
-  border-bottom: 1px solid var(--color-border);
-  background: linear-gradient(180deg, rgba(239,68,68,0.04) 0%, transparent 100%);
-  position: relative;
-  overflow: hidden;
-}
-.page-header::before {
-  content: '';
-  position: absolute;
-  top: -60px; right: -80px;
-  width: 400px; height: 400px;
-  background: radial-gradient(circle, rgba(239,68,68,0.05) 0%, transparent 70%);
-  pointer-events: none;
-}
-.header-eyebrow {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--danger);
-  margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.header-eyebrow::before {
-  content: '';
-  display: inline-block;
-  width: 6px; height: 6px;
-  background: var(--danger);
-  border-radius: 50%;
-  animation: pulse-danger 1.5s ease-in-out infinite;
-}
-@keyframes pulse-danger {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(1.4); }
-}
-.page-title {
-  font-size: clamp(22px, 3vw, 36px);
-  font-weight: 800;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  margin-bottom: 16px;
-  color: #f0f0f4;
-}
-.page-title span { color: var(--danger); }
-.page-subtitle {
-  font-size: 15px;
-  color: var(--color-text-muted);
-  max-width: 680px;
-  line-height: 1.7;
-}
-
-/* ═══ TIMELINE STRIP ═══ */
-.timeline-strip {
-  display: flex;
-  align-items: stretch;
-  padding: 0 40px;
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
-  overflow-x: auto;
-  gap: 0;
-}
-.timeline-event {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 24px;
-  border-right: 1px solid var(--color-border);
-  white-space: nowrap;
-  flex-shrink: 0;
-  transition: background 0.2s;
-}
-.timeline-event:hover { background: var(--color-surface-2); }
-.t-dot {
-  width: 10px; height: 10px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.t-label { font-family: var(--font-mono); font-size: 11px; color: var(--color-text-muted); }
-.t-desc { font-size: 12px; font-weight: 600; }
-.timeline-event.aws .t-dot { background: var(--aws); }
-.timeline-event.aws .t-desc { color: var(--aws); }
-.timeline-event.azure .t-dot { background: var(--azure); }
-.timeline-event.azure .t-desc { color: var(--azure); }
-.timeline-event.coreweave .t-dot { background: var(--coreweave); }
-.timeline-event.coreweave .t-desc { color: var(--coreweave); }
-.timeline-event.chaos .t-dot { background: var(--danger); animation: pulse-danger 1.5s ease-in-out infinite; }
-.timeline-event.chaos .t-desc { color: var(--danger); }
-
-/* ═══ MAIN LAYOUT ═══ */
-.main-content {
-  display: grid;
-  grid-template-columns: 1fr 360px;
-  gap: 0;
-  min-height: calc(100vh - 200px);
-}
-.diagram-area {
-  padding: 40px;
-  border-right: 1px solid var(--color-border);
-  overflow: hidden;
-}
-.sidebar {
-  padding: 32px 28px;
-  background: var(--color-surface);
-  overflow-y: auto;
-}
-
-/* ═══ SECTION LABELS ═══ */
-.section-label {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-text-faint);
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.section-label::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--color-border);
-}
-
-/* ═══ ARCHITECTURE CANVAS ═══ */
-.arch-canvas {
-  position: relative;
-  width: 100%;
-  min-height: 700px;
-}
-
-/* ═══ PERPLEXITY CORE ═══ */
-.perplexity-core {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 10;
-  text-align: center;
-}
-.core-node {
-  width: 130px;
-  height: 130px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, rgba(32,178,170,0.25), rgba(32,178,170,0.05));
-  border: 2px solid rgba(32,178,170,0.5);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  box-shadow: 0 0 40px rgba(32,178,170,0.15), 0 0 80px rgba(32,178,170,0.05);
-  animation: core-pulse 3s ease-in-out infinite;
-  cursor: pointer;
-  position: relative;
-}
-@keyframes core-pulse {
-  0%, 100% { box-shadow: 0 0 40px rgba(32,178,170,0.15), 0 0 80px rgba(32,178,170,0.05); }
-  50% { box-shadow: 0 0 60px rgba(32,178,170,0.25), 0 0 100px rgba(32,178,170,0.1); }
-}
-.core-icon {
-  width: 36px;
-  height: 36px;
-}
-.core-label {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--perplexity);
-  letter-spacing: -0.01em;
-}
-.core-sub {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  color: rgba(32,178,170,0.6);
-}
-
-/* ═══ PROVIDER CLUSTERS ═══ */
-.provider-cluster {
-  position: absolute;
-  border-radius: var(--radius);
-  padding: 18px;
-  cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  min-width: 200px;
-}
-.provider-cluster:hover { transform: translateY(-2px); }
-.provider-cluster.aws {
-  top: 20px; left: 20px;
-  background: var(--aws-dim);
-  border: 1.5px solid rgba(255,153,0,0.3);
-}
-.provider-cluster.aws:hover { border-color: rgba(255,153,0,0.6); box-shadow: 0 8px 32px var(--aws-glow); }
-.provider-cluster.azure {
-  top: 20px; right: 20px;
-  background: var(--azure-dim);
-  border: 1.5px solid rgba(0,120,212,0.3);
-  text-align: right;
-}
-.provider-cluster.azure:hover { border-color: rgba(0,120,212,0.6); box-shadow: 0 8px 32px var(--azure-glow); }
-.provider-cluster.coreweave {
-  bottom: 20px; left: 20px;
-  background: var(--coreweave-dim);
-  border: 1.5px solid rgba(124,58,237,0.3);
-}
-.provider-cluster.coreweave:hover { border-color: rgba(124,58,237,0.6); box-shadow: 0 8px 32px var(--coreweave-glow); }
-.provider-cluster.nvidia {
-  bottom: 20px; right: 20px;
-  background: var(--nvidia-dim);
-  border: 1.5px solid rgba(118,185,0,0.3);
-  text-align: right;
-}
-.provider-cluster.nvidia:hover { border-color: rgba(118,185,0,0.6); box-shadow: 0 8px 32px var(--nvidia-glow); }
-
-.cluster-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-.provider-cluster.azure .cluster-header,
-.provider-cluster.nvidia .cluster-header {
-  flex-direction: row-reverse;
-}
-.cluster-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.aws .cluster-dot { background: var(--aws); box-shadow: 0 0 8px var(--aws); }
-.azure .cluster-dot { background: var(--azure); box-shadow: 0 0 8px var(--azure); }
-.coreweave .cluster-dot { background: var(--coreweave); box-shadow: 0 0 8px var(--coreweave); }
-.nvidia .cluster-dot { background: var(--nvidia); box-shadow: 0 0 8px var(--nvidia); }
-
-.cluster-name {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--color-text);
-}
-.cluster-badge {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-weight: 500;
-}
-.aws .cluster-badge { background: rgba(255,153,0,0.2); color: var(--aws); border: 1px solid rgba(255,153,0,0.3); }
-.azure .cluster-badge { background: rgba(0,120,212,0.2); color: #60a5fa; border: 1px solid rgba(0,120,212,0.3); }
-.coreweave .cluster-badge { background: rgba(124,58,237,0.2); color: #a78bfa; border: 1px solid rgba(124,58,237,0.3); }
-.nvidia .cluster-badge { background: rgba(118,185,0,0.2); color: var(--nvidia); border: 1px solid rgba(118,185,0,0.3); }
-
-.service-list {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-.service-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  color: var(--color-text-muted);
-}
-.provider-cluster.azure .service-item,
-.provider-cluster.nvidia .service-item {
-  flex-direction: row-reverse;
-  text-align: right;
-}
-.service-dot {
-  width: 4px; height: 4px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.aws .service-dot { background: rgba(255,153,0,0.5); }
-.azure .service-dot { background: rgba(0,120,212,0.5); }
-.coreweave .service-dot { background: rgba(124,58,237,0.5); }
-.nvidia .service-dot { background: rgba(118,185,0,0.5); }
-
-.cluster-cost {
-  margin-top: 10px;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--color-text-faint);
-  padding-top: 8px;
-  border-top: 1px solid rgba(255,255,255,0.05);
-}
-
-/* ═══ SVG CONNECTOR LINES ═══ */
-.connector-svg {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  pointer-events: none;
-  z-index: 5;
-}
-
-/* ═══ CHAOS INDICATORS ═══ */
-.chaos-badge {
-  position: absolute;
-  z-index: 20;
-  background: var(--danger-dim);
-  border: 1px solid rgba(239,68,68,0.4);
-  border-radius: 20px;
-  padding: 4px 10px 4px 8px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--danger);
-  font-family: var(--font-mono);
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.chaos-badge:hover { background: rgba(239,68,68,0.2); transform: scale(1.05); }
-.chaos-badge-dot {
-  width: 6px; height: 6px;
-  background: var(--danger);
-  border-radius: 50%;
-  animation: pulse-danger 1.2s ease-in-out infinite;
-}
-
-/* ═══ FRICTION OVERLAY ═══ */
-.friction-zone {
-  position: absolute;
-  z-index: 3;
-  border-radius: 8px;
-  border: 1px dashed rgba(239,68,68,0.3);
-  background: rgba(239,68,68,0.03);
-  pointer-events: none;
-}
-
-/* ═══ SIDEBAR PANELS ═══ */
-.sidebar-section {
-  margin-bottom: 28px;
-}
-.sidebar-title {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-text-faint);
-  margin-bottom: 12px;
-  font-family: var(--font-mono);
-}
-
-/* Status cards */
-.status-card {
-  background: var(--color-surface-2);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  padding: 12px;
-  margin-bottom: 8px;
-}
-.status-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 6px;
-}
-.status-card-title {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--color-text);
-}
-.status-pill {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  padding: 2px 7px;
-  border-radius: 20px;
-  font-weight: 600;
-}
-.pill-critical { background: var(--danger-dim); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); }
-.pill-warn { background: var(--warning-dim); color: var(--warning); border: 1px solid rgba(245,158,11,0.3); }
-.pill-ok { background: rgba(16,185,129,0.1); color: var(--ok); border: 1px solid rgba(16,185,129,0.2); }
-.status-card-body {
-  font-size: 11px;
-  color: var(--color-text-muted);
-  line-height: 1.5;
-}
-
-/* Issue list */
-.issue-item {
-  display: flex;
-  gap: 10px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--color-border);
-}
-.issue-item:last-child { border-bottom: none; }
-.issue-num {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--danger);
-  font-weight: 700;
-  padding-top: 1px;
-  flex-shrink: 0;
-}
-.issue-text {
-  font-size: 11px;
-  color: var(--color-text-muted);
-  line-height: 1.5;
-}
-.issue-text strong {
-  display: block;
-  color: var(--color-text);
-  font-size: 12px;
-  margin-bottom: 2px;
-}
-
-/* Metrics */
-.metrics-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-.metric-box {
-  background: var(--color-surface-2);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  padding: 10px 12px;
-}
-.metric-value {
-  font-size: 20px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 1;
-  margin-bottom: 4px;
-}
-.metric-label {
-  font-size: 10px;
-  color: var(--color-text-muted);
-  font-family: var(--font-mono);
-}
-.metric-red .metric-value { color: var(--danger); }
-.metric-orange .metric-value { color: var(--aws); }
-.metric-blue .metric-value { color: #60a5fa; }
-.metric-purple .metric-value { color: #a78bfa; }
-
-/* Ticket card */
-.ticket-card {
-  background: var(--color-surface-2);
-  border: 1px solid rgba(245,158,11,0.3);
-  border-radius: var(--radius-sm);
-  padding: 14px;
-  margin-top: 8px;
-}
-.ticket-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-.ticket-icon {
-  width: 28px; height: 28px;
-  background: rgba(245,158,11,0.15);
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--warning);
-  font-size: 14px;
-}
-.ticket-from {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--color-text);
-}
-.ticket-time {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--color-text-faint);
-  margin-left: auto;
-}
-.ticket-body {
-  font-size: 11px;
-  color: var(--color-text-muted);
-  line-height: 1.6;
-  font-style: italic;
-  border-left: 2px solid rgba(245,158,11,0.3);
-  padding-left: 10px;
-}
-.ticket-tag {
-  display: inline-block;
-  margin-top: 8px;
-  font-family: var(--font-mono);
-  font-size: 9px;
-  padding: 2px 7px;
-  background: rgba(245,158,11,0.1);
-  color: var(--warning);
-  border-radius: 4px;
-  border: 1px solid rgba(245,158,11,0.2);
-}
-
-/* ═══ BOTTOM ANALYSIS STRIP ═══ */
-.analysis-strip {
-  padding: 32px 40px;
-  background: var(--color-surface);
-  border-top: 1px solid var(--color-border);
-}
-.analysis-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 16px;
-  margin-top: 20px;
-}
-.analysis-card {
-  background: var(--color-surface-2);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  padding: 18px;
-}
-.analysis-card-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-.analysis-icon {
-  width: 32px; height: 32px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  flex-shrink: 0;
-}
-.icon-red { background: var(--danger-dim); }
-.icon-orange { background: rgba(255,153,0,0.12); }
-.icon-yellow { background: rgba(245,158,11,0.12); }
-.icon-purple { background: rgba(124,58,237,0.12); }
-.analysis-card-title {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--color-text);
-}
-.analysis-card-body {
-  font-size: 12px;
-  color: var(--color-text-muted);
-  line-height: 1.65;
-}
-
-/* ═══ SCROLL HINT ═══ */
-.scroll-hint {
-  display: none;
-  text-align: center;
-  padding: 8px;
-  font-size: 10px;
-  font-family: var(--font-mono);
-  color: var(--color-text-faint);
-}
-
-/* ═══ TOOLTIP ═══ */
-.tooltip {
-  display: none;
-  position: fixed;
-  z-index: 100;
-  background: var(--color-surface-3);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  padding: 10px 14px;
-  max-width: 260px;
-  font-size: 11.5px;
-  color: var(--color-text-muted);
-  line-height: 1.55;
-  pointer-events: none;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-}
-.tooltip.active { display: block; }
-.tooltip-title {
-  font-weight: 700;
-  color: var(--color-text);
-  margin-bottom: 4px;
-  font-size: 12px;
-}
-
-/* ═══ RESPONSIVE ═══ */
-@media (max-width: 900px) {
-  .main-content { grid-template-columns: 1fr; }
-  .diagram-area { border-right: none; border-bottom: 1px solid var(--color-border); }
-  .sidebar { border-top: 1px solid var(--color-border); }
-  .page-header { padding: 32px 20px 24px; }
-  .timeline-strip { padding: 0 20px; }
-  .diagram-area { padding: 24px 16px; }
-  .analysis-strip { padding: 24px 20px; }
-  .scroll-hint { display: block; }
-  .arch-canvas { min-height: 600px; overflow-x: auto; }
-  .provider-cluster { min-width: 160px; }
-}
-
-/* ═══ CALLOUT BANNER ═══ */
-.callout-banner {
-  margin: 24px 40px 0;
-  background: rgba(239,68,68,0.06);
-  border: 1px solid rgba(239,68,68,0.2);
-  border-radius: var(--radius);
-  padding: 14px 20px;
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-}
-@media (max-width: 900px) { .callout-banner { margin: 16px 20px 0; } }
-.callout-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
-.callout-text {
-  font-size: 12.5px;
-  color: var(--color-text-muted);
-  line-height: 1.65;
-}
-.callout-text strong { color: var(--danger); }
-
-/* ═══ DATA FLOW ANIMATIONS ═══ */
-@keyframes dash-flow {
-  to { stroke-dashoffset: -20; }
-}
-.data-flow {
-  stroke-dasharray: 6 4;
-  animation: dash-flow 1s linear infinite;
-}
-.data-flow-slow {
-  stroke-dasharray: 6 4;
-  animation: dash-flow 2s linear infinite;
-}
-.data-flow-chaos {
-  stroke-dasharray: 4 6;
-  animation: dash-flow 0.6s linear infinite;
-}
-</style>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23050608'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%2300e6d3'/%3E%3Cellipse cx='16' cy='16' rx='10' ry='5' fill='none' stroke='%2300e6d3' stroke-width='1.4' opacity='.7'/%3E%3Cellipse cx='16' cy='16' rx='10' ry='5' fill='none' stroke='%2300e6d3' stroke-width='1.4' opacity='.4' transform='rotate(60 16 16)'/%3E%3Cellipse cx='16' cy='16' rx='10' ry='5' fill='none' stroke='%2300e6d3' stroke-width='1.4' opacity='.4' transform='rotate(-60 16 16)'/%3E%3C/svg%3E" />
 </head>
 <body>
+  <a class="skip-link" href="#main">Skip to content</a>
 
-<!-- PAGE HEADER -->
-<header class="page-header">
-  <div class="header-eyebrow">Infrastructure Intelligence Report — April 2026</div>
-  <h1 class="page-title">Perplexity's Multi-Cloud<br><span>Convergence Crisis</span></h1>
-  <p class="page-subtitle">
-    Three hyperscaler deals signed in under 90 days — AWS (primary), Azure ($750M, Jan 2026), and CoreWeave (multi-year, March 2026) —
-    have created a fragmented infrastructure ecosystem where no single provider is incentivized to coordinate with the others,
-    resulting in cascading platform reliability, billing visibility, and performance issues.
-  </p>
-</header>
-
-<!-- TIMELINE STRIP -->
-<div class="timeline-strip">
-  <div class="timeline-event aws">
-    <div class="t-dot"></div>
-    <div>
-      <div class="t-label">ONGOING — PRIMARY</div>
-      <div class="t-desc">AWS — EC2 P4de → P5 (H100)</div>
+  <!-- ============== ΔTOM BOOT LOADER ============== -->
+  <div class="dtom-boot" id="dtom-boot" role="status" aria-live="polite" aria-label="ΔTOM system initializing">
+    <div class="dtom-boot__inner">
+      <div class="dtom-boot__mark" aria-hidden="true">
+        <svg viewBox="0 0 40 40" fill="none">
+          <circle cx="20" cy="20" r="3" fill="currentColor"/>
+          <g class="dtom-boot__orbit">
+            <ellipse cx="20" cy="20" rx="14" ry="6" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".8"/>
+            <ellipse cx="20" cy="20" rx="14" ry="6" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".5" transform="rotate(60 20 20)"/>
+            <ellipse cx="20" cy="20" rx="14" ry="6" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".5" transform="rotate(-60 20 20)"/>
+            <circle cx="34" cy="20" r="1.6" fill="currentColor"/>
+          </g>
+        </svg>
+      </div>
+      <div class="dtom-boot__wordmark">ΔT<em>O</em>M</div>
+      <div class="dtom-boot__stack">
+        <div class="dtom-boot__row"><span class="dtom-boot__key">LLM</span><span class="dtom-boot__val">ΔTOM - NirmX-UFO</span><span class="dtom-boot__pip"></span></div>
+        <div class="dtom-boot__row"><span class="dtom-boot__key">Voice</span><span class="dtom-boot__val">Pi3 - SiQ</span><span class="dtom-boot__pip"></span></div>
+      </div>
+      <div class="dtom-boot__bar" aria-hidden="true"><span></span></div>
+      <div class="dtom-boot__caption">Initializing convergence fabric…</div>
     </div>
   </div>
-  <div class="timeline-event azure">
-    <div class="t-dot"></div>
-    <div>
-      <div class="t-label">JAN 29, 2026</div>
-      <div class="t-desc">Azure — $750M / 3-Year + Foundry</div>
+
+  <!-- ============== HEADER ============== -->
+  <header class="header" id="top">
+    <div class="container container--wide nav">
+      <a class="brand" href="#top" aria-label="ΔTOM home">
+        <svg class="logo-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+          <!-- nucleus -->
+          <circle cx="20" cy="20" r="3" fill="currentColor" />
+          <!-- counter-clockwise orbit group -->
+          <g class="orbit-group">
+            <ellipse cx="20" cy="20" rx="14" ry="6" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".8"/>
+            <ellipse cx="20" cy="20" rx="14" ry="6" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".5" transform="rotate(60 20 20)"/>
+            <ellipse cx="20" cy="20" rx="14" ry="6" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".5" transform="rotate(-60 20 20)"/>
+            <!-- orbit pip -->
+            <circle cx="34" cy="20" r="1.6" fill="currentColor"/>
+          </g>
+          <!-- inner clockwise orbit -->
+          <g class="orbit-inner">
+            <circle cx="20" cy="11" r="1.2" fill="currentColor" opacity=".8"/>
+            <circle cx="29" cy="25" r="1.2" fill="currentColor" opacity=".5"/>
+            <circle cx="11" cy="25" r="1.2" fill="currentColor" opacity=".5"/>
+          </g>
+        </svg>
+        <span class="brand-text">ΔT<em>O</em>M
+          <span class="brand-sub">Crisis Intelligence</span>
+        </span>
+      </a>
+
+      <nav class="nav-links" id="primary-nav" aria-label="Primary">
+        <a href="#thesis">Thesis</a>
+        <a href="#stack">Stack</a>
+        <a href="#flywheel">Convergence</a>
+        <a href="#pilot">Pilot</a>
+        <a href="/akamai-architecture.html">Architecture</a>
+        <a href="#evidence">Evidence</a>
+        <button class="nav-tool" type="button" data-evidence-open aria-haspopup="dialog" aria-controls="evidence-drawer">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 1v22"/><path d="M5 8l7-7 7 7"/></svg>
+          Sources
+        </button>
+        <button class="nav-tool" type="button" data-theme-toggle aria-label="Toggle theme">
+          <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        </button>
+      </nav>
+      <button class="nav-tool nav-toggle" type="button" data-nav-toggle aria-label="Toggle menu" aria-expanded="false" aria-controls="primary-nav">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
     </div>
-  </div>
-  <div class="timeline-event coreweave">
-    <div class="t-dot"></div>
-    <div>
-      <div class="t-label">MARCH 3, 2026</div>
-      <div class="t-desc">CoreWeave — GB200 NVL72 Multi-Year</div>
-    </div>
-  </div>
-  <div class="timeline-event chaos">
-    <div class="t-dot"></div>
-    <div>
-      <div class="t-label">MARCH–APRIL 2026</div>
-      <div class="t-desc">⚠ Platform Issues Begin Surfacing</div>
-    </div>
-  </div>
-  <div class="timeline-event" style="border-right:none;">
-    <div class="t-dot" style="background:#009bde;box-shadow:0 0 6px #009bde;"></div>
-    <div>
-      <div class="t-label">MAR 16 2026 — SOLUTION EXISTS</div>
-      <div class="t-desc" style="color:#009bde;">⚡ Akamai AI Grid — Board Pitch Below</div>
-    </div>
-  </div>
-</div>
+  </header>
 
-<!-- CALLOUT BANNER -->
-<div class="callout-banner">
-  <div class="callout-icon">⚠️</div>
-  <div class="callout-text">
-    <strong>Active incident:</strong> Credit visibility failures and invoice waiver requests are now entering Perplexity's billing support queue — a direct downstream symptom of multi-cloud cost fragmentation across AWS, Azure, and CoreWeave.
-    Engineering teams are conducting multi-party calls with all three providers simultaneously to diagnose cross-stack failures, as each provider operates its own siloed SLA, billing ledger, and support channel.
-  </div>
-</div>
+  <main id="main">
 
-<!-- MAIN CONTENT -->
-<div class="main-content">
+    <!-- ============== HERO ============== -->
+    <section class="hero">
+      <div class="container container--wide hero-grid">
 
-  <!-- ARCHITECTURE DIAGRAM -->
-  <div class="diagram-area">
-    <div class="section-label">Architecture Map — Live Infrastructure</div>
-
-    <div class="arch-canvas" id="archCanvas">
-
-      <!-- SVG CONNECTOR LINES -->
-      <svg class="connector-svg" viewBox="0 0 760 680" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-
-        <!-- AKAMAI EDGE RING — distributed inference overlay -->
-        <ellipse cx="380" cy="370" rx="155" ry="95" fill="none" stroke="rgba(0,155,222,0.2)" stroke-width="1.5" stroke-dasharray="8 5"/>
-        <ellipse cx="380" cy="370" rx="178" ry="112" fill="rgba(0,155,222,0.018)" stroke="rgba(0,155,222,0.07)" stroke-width="1" stroke-dasharray="4 8"/>
-        <circle cx="380" cy="258" r="5" fill="rgba(0,155,222,0.7)" stroke="#009bde" stroke-width="1"/>
-        <circle cx="380" cy="482" r="5" fill="rgba(0,155,222,0.7)" stroke="#009bde" stroke-width="1"/>
-        <circle cx="225" cy="370" r="5" fill="rgba(0,155,222,0.7)" stroke="#009bde" stroke-width="1"/>
-        <circle cx="535" cy="370" r="5" fill="rgba(0,155,222,0.7)" stroke="#009bde" stroke-width="1"/>
-        <circle cx="268" cy="288" r="4" fill="rgba(0,155,222,0.45)" stroke="rgba(0,155,222,0.8)" stroke-width="1"/>
-        <circle cx="492" cy="288" r="4" fill="rgba(0,155,222,0.45)" stroke="rgba(0,155,222,0.8)" stroke-width="1"/>
-        <circle cx="268" cy="452" r="4" fill="rgba(0,155,222,0.45)" stroke="rgba(0,155,222,0.8)" stroke-width="1"/>
-        <circle cx="492" cy="452" r="4" fill="rgba(0,155,222,0.45)" stroke="rgba(0,155,222,0.8)" stroke-width="1"/>
-        <text x="560" y="257" fill="rgba(0,155,222,0.85)" font-size="9" font-family="JetBrains Mono,monospace" text-anchor="middle">AKAMAI AI GRID</text>
-        <text x="560" y="268" fill="rgba(0,155,222,0.55)" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">4,400 EDGE NODES</text>
-        <text x="560" y="278" fill="rgba(0,155,222,0.35)" font-size="7" font-family="JetBrains Mono,monospace" text-anchor="middle">BLACKWELL RTX PRO 6000</text>
-        <!-- AWS to Core -->
-        <path d="M 215,165 Q 320,240 380,340" stroke="rgba(255,153,0,0.35)" stroke-width="1.5" fill="none" class="data-flow"/>
-        <!-- Azure to Core -->
-        <path d="M 545,165 Q 440,240 380,340" stroke="rgba(0,120,212,0.35)" stroke-width="1.5" fill="none" class="data-flow-slow"/>
-        <!-- CoreWeave to Core -->
-        <path d="M 215,520 Q 320,460 380,400" stroke="rgba(124,58,237,0.35)" stroke-width="1.5" fill="none" class="data-flow"/>
-        <!-- Nvidia to Core -->
-        <path d="M 545,520 Q 440,460 380,400" stroke="rgba(118,185,0,0.35)" stroke-width="1.5" fill="none" class="data-flow-slow"/>
-
-        <!-- CHAOS LINES — cross-provider non-cooperation -->
-        <path d="M 215,200 Q 380,20 545,200" stroke="rgba(239,68,68,0.2)" stroke-width="1" fill="none" class="data-flow-chaos" stroke-dasharray="3 7"/>
-        <path d="M 215,490 Q 380,660 545,490" stroke="rgba(239,68,68,0.2)" stroke-width="1" fill="none" class="data-flow-chaos" stroke-dasharray="3 7"/>
-
-        <!-- Friction zone border (AWS ↔ Azure gap) -->
-        <rect x="250" y="80" width="260" height="130" rx="8" fill="rgba(239,68,68,0.02)" stroke="rgba(239,68,68,0.15)" stroke-dasharray="4 4"/>
-
-        <!-- Weights & Biases satellite node -->
-        <circle cx="380" cy="560" r="24" fill="rgba(32,178,170,0.06)" stroke="rgba(32,178,170,0.25)" stroke-width="1"/>
-        <text x="380" y="556" text-anchor="middle" fill="rgba(32,178,170,0.7)" font-size="8" font-family="JetBrains Mono, monospace">W&B</text>
-        <text x="380" y="567" text-anchor="middle" fill="rgba(255,255,255,0.3)" font-size="7" font-family="JetBrains Mono, monospace">Models</text>
-        <path d="M 380,536 L 380,415" stroke="rgba(32,178,170,0.2)" stroke-width="1" stroke-dasharray="3 4"/>
-
-        <!-- Billing siloes indicator -->
-        <rect x="120" y="300" width="70" height="28" rx="4" fill="rgba(239,68,68,0.1)" stroke="rgba(239,68,68,0.25)"/>
-        <text x="155" y="315" text-anchor="middle" fill="rgba(239,68,68,0.8)" font-size="8" font-family="JetBrains Mono, monospace">$ AWS</text>
-        <text x="155" y="324" text-anchor="middle" fill="rgba(239,68,68,0.5)" font-size="7" font-family="JetBrains Mono, monospace">BILLING</text>
-
-        <rect x="575" y="300" width="70" height="28" rx="4" fill="rgba(239,68,68,0.1)" stroke="rgba(239,68,68,0.25)"/>
-        <text x="610" y="315" text-anchor="middle" fill="rgba(239,68,68,0.8)" font-size="8" font-family="JetBrains Mono, monospace">$ AZ</text>
-        <text x="610" y="324" text-anchor="middle" fill="rgba(239,68,68,0.5)" font-size="7" font-family="JetBrains Mono, monospace">BILLING</text>
-
-        <rect x="345" y="620" width="70" height="28" rx="4" fill="rgba(239,68,68,0.1)" stroke="rgba(239,68,68,0.25)"/>
-        <text x="380" y="635" text-anchor="middle" fill="rgba(239,68,68,0.8)" font-size="8" font-family="JetBrains Mono, monospace">$ CW</text>
-        <text x="380" y="644" text-anchor="middle" fill="rgba(239,68,68,0.5)" font-size="7" font-family="JetBrains Mono, monospace">BILLING</text>
-
-        <!-- No-comms barrier between billing boxes -->
-        <line x1="210" y1="314" x2="330" y2="314" stroke="rgba(239,68,68,0.4)" stroke-width="1.5" stroke-dasharray="4 3"/>
-        <text x="270" y="310" text-anchor="middle" fill="rgba(239,68,68,0.6)" font-size="9">✕</text>
-        <line x1="430" y1="314" x2="550" y2="314" stroke="rgba(239,68,68,0.4)" stroke-width="1.5" stroke-dasharray="4 3"/>
-        <text x="490" y="310" text-anchor="middle" fill="rgba(239,68,68,0.6)" font-size="9">✕</text>
-      </svg>
-
-      <!-- AWS CLUSTER -->
-      <div class="provider-cluster aws" id="aws-cluster"
-           onmouseenter="showTooltip(event, 'AWS — Primary Cloud', 'EC2 P4de instances (A100) used for AI training workloads; now transitioning to P5 instances powered by H100 GPUs for production inference. AWS remains Perplexity\'s primary cloud provider despite the Azure deal. AWS also has an active lawsuit over Perplexity\'s agentic shopping feature.')"
-           onmouseleave="hideTooltip()">
-        <div class="cluster-header">
-          <div class="cluster-dot"></div>
-          <span class="cluster-name">Amazon Web Services</span>
-          <span class="cluster-badge">PRIMARY</span>
-        </div>
-        <ul class="service-list">
-          <li class="service-item"><div class="service-dot"></div>EC2 P4de — NVIDIA A100 (Training)</li>
-          <li class="service-item"><div class="service-dot"></div>EC2 P5 — NVIDIA H100 (Inference)</li>
-          <li class="service-item"><div class="service-dot"></div>SageMaker (GPU Memory Transfer)</li>
-          <li class="service-item"><div class="service-dot"></div>EFA — 3,200 Gbps Network Fabric</li>
-          <li class="service-item"><div class="service-dot"></div>UltraClusters (up to 20K H100s)</li>
-        </ul>
-        <div class="cluster-cost">Primary spend • Ongoing • Active legal dispute ⚠</div>
-      </div>
-
-      <!-- AZURE CLUSTER -->
-      <div class="provider-cluster azure" id="azure-cluster"
-           onmouseenter="showTooltip(event, 'Microsoft Azure — $750M Deal (Jan 2026)', 'Three-year, $750M commitment signed January 29, 2026. Powers search and shopping features via Microsoft Foundry — giving Perplexity access to frontier models from OpenAI, Anthropic, and xAI, plus a library of 11,000+ models. Perplexity stated AWS spending was not reduced.')"
-           onmouseleave="hideTooltip()">
-        <div class="cluster-header">
-          <div class="cluster-dot"></div>
-          <span class="cluster-name">Microsoft Azure</span>
-          <span class="cluster-badge">$750M / 3YR</span>
-        </div>
-        <ul class="service-list">
-          <li class="service-item"><div class="service-dot"></div>Microsoft Foundry Platform</li>
-          <li class="service-item"><div class="service-dot"></div>OpenAI + Anthropic + xAI Models</li>
-          <li class="service-item"><div class="service-dot"></div>11,000+ Model Library</li>
-          <li class="service-item"><div class="service-dot"></div>Search Feature Inference</li>
-          <li class="service-item"><div class="service-dot"></div>Shopping Feature Inference</li>
-        </ul>
-        <div class="cluster-cost">$250M/yr committed • Signed Jan 29 2026</div>
-      </div>
-
-      <!-- COREWEAVE CLUSTER -->
-      <div class="provider-cluster coreweave" id="cw-cluster"
-           onmouseenter="showTooltip(event, 'CoreWeave — Multi-Year Partnership (Mar 2026)', 'Signed March 3, 2026. Dedicated NVIDIA GB200 NVL72 clusters (Blackwell architecture) power Perplexity\'s Sonar API and Search API inference workloads. Uses CoreWeave Kubernetes Services (CKS) for orchestration. CoreWeave is also deploying Perplexity Enterprise Max internally.')"
-           onmouseleave="hideTooltip()">
-        <div class="cluster-header">
-          <div class="cluster-dot"></div>
-          <span class="cluster-name">CoreWeave Cloud</span>
-          <span class="cluster-badge">BLACKWELL</span>
-        </div>
-        <ul class="service-list">
-          <li class="service-item"><div class="service-dot"></div>NVIDIA GB200 NVL72 Clusters</li>
-          <li class="service-item"><div class="service-dot"></div>CoreWeave Kubernetes (CKS)</li>
-          <li class="service-item"><div class="service-dot"></div>Sonar API + Search API Inference</li>
-          <li class="service-item"><div class="service-dot"></div>Weights & Biases Integration</li>
-          <li class="service-item"><div class="service-dot"></div>Next-Gen Production Inference</li>
-        </ul>
-        <div class="cluster-cost">Multi-year term • Signed Mar 3 2026 • Low-latency SLA</div>
-      </div>
-
-      <!-- NVIDIA DGX CLOUD CLUSTER -->
-      <div class="provider-cluster nvidia" id="nvidia-cluster"
-           onmouseenter="showTooltip(event, 'Nvidia DGX Cloud Lepton — International', 'Used for Perplexity\'s international expansion strategy via the DGX Cloud Lepton marketplace, connecting to cloud partners globally. Provides geographic compliance and compute access in regions where AWS/Azure/CoreWeave coverage is insufficient.')"
-           onmouseleave="hideTooltip()">
-        <div class="cluster-header">
-          <div class="cluster-dot"></div>
-          <span class="cluster-name">Nvidia DGX Cloud</span>
-          <span class="cluster-badge">INTL EXPANSION</span>
-        </div>
-        <ul class="service-list">
-          <li class="service-item"><div class="service-dot"></div>DGX Cloud Lepton Marketplace</li>
-          <li class="service-item"><div class="service-dot"></div>Global Cloud Partner Network</li>
-          <li class="service-item"><div class="service-dot"></div>Regional Geo Compliance</li>
-          <li class="service-item"><div class="service-dot"></div>International Inference Routing</li>
-        </ul>
-        <div class="cluster-cost">International workloads • Geo compliance layer</div>
-      </div>
-
-      <!-- PERPLEXITY CORE NODE -->
-      <div class="perplexity-core">
-        <div class="core-node">
-          <svg class="core-icon" viewBox="0 0 36 36" fill="none">
-            <circle cx="18" cy="18" r="16" stroke="rgba(32,178,170,0.6)" stroke-width="1.5"/>
-            <circle cx="18" cy="18" r="8" fill="rgba(32,178,170,0.15)" stroke="rgba(32,178,170,0.8)" stroke-width="1.5"/>
-            <circle cx="18" cy="18" r="3" fill="rgba(32,178,170,0.9)"/>
-            <line x1="18" y1="2" x2="18" y2="10" stroke="rgba(32,178,170,0.4)" stroke-width="1.5"/>
-            <line x1="18" y1="26" x2="18" y2="34" stroke="rgba(32,178,170,0.4)" stroke-width="1.5"/>
-            <line x1="2" y1="18" x2="10" y2="18" stroke="rgba(32,178,170,0.4)" stroke-width="1.5"/>
-            <line x1="26" y1="18" x2="34" y2="18" stroke="rgba(32,178,170,0.4)" stroke-width="1.5"/>
-          </svg>
-          <div class="core-label">Perplexity AI</div>
-          <div class="core-sub">inference orchestrator</div>
-        </div>
-      </div>
-
-      <!-- CHAOS BADGES -->
-      <div class="chaos-badge" style="bottom:42%;left:50%;transform:translateX(-50%);background:rgba(0,155,222,0.1);border-color:rgba(0,155,222,0.5);color:#009bde;font-size:9px;white-space:nowrap;z-index:25;"
-           onmouseenter="showTooltip(event,'Akamai AI Grid — The Missing Convergence Layer','Launched March 16, 2026 as the first global-scale NVIDIA AI Grid deployment. RTX PRO 6000 Blackwell GPUs at 4,400+ edge nodes serve inference at the point of user contact. Plugs over existing AWS/Azure/CoreWeave stack via LKE — no rip-and-replace required.')"
-           onmouseleave="hideTooltip()">
-        <div style="width:6px;height:6px;background:#009bde;border-radius:50%;flex-shrink:0;box-shadow:0 0 8px #009bde;animation:akai2 2s ease-in-out infinite;"></div>
-        AKAMAI = CONVERGENCE LAYER &#x26A1;
-      </div>
-      <div class="chaos-badge" style="top: 47%; left: 4%; font-size:9px;"
-           onmouseenter="showTooltip(event, 'No Cross-Provider Coordination', 'AWS, Azure, and CoreWeave have no incentive to cooperate on diagnosing Perplexity\'s issues. Each provider owns a separate support channel, SLA clock, and billing ledger — forcing engineers to coordinate all three simultaneously.')"
-           onmouseleave="hideTooltip()">
-        <div class="chaos-badge-dot"></div>NO CROSS-PROVIDER SLA
-      </div>
-      <div class="chaos-badge" style="top: 47%; right: 4%; font-size:9px;"
-           onmouseenter="showTooltip(event, 'Billing Fragmentation', 'Three separate billing systems (AWS, Azure, CoreWeave) with no unified credit visibility. Users are seeing credit disappear without traceable audit trails. The Perplexity support ticket in this report directly reflects this billing fragmentation.')"
-           onmouseleave="hideTooltip()">
-        <div class="chaos-badge-dot"></div>BILLING FRAGMENTATION
-      </div>
-      <div class="chaos-badge" style="top: 14%; left: 50%; transform: translateX(-50%); font-size:9px;"
-           onmouseenter="showTooltip(event, 'Egress Cost Trap', 'Multi-cloud strategies incur significant data egress fees when moving data between AWS and Azure. This is a well-documented cost multiplier that compounds total spend beyond the committed contract values.')"
-           onmouseleave="hideTooltip()">
-        <div class="chaos-badge-dot"></div>EGRESS COST TRAP
-      </div>
-
-    </div><!-- /arch-canvas -->
-  </div><!-- /diagram-area -->
-
-  <!-- SIDEBAR -->
-  <div class="sidebar">
-
-    <!-- Active Ticket -->
-    <div class="sidebar-section">
-      <div class="sidebar-title">Active Support Ticket</div>
-      <div class="ticket-card">
-        <div class="ticket-header">
-          <div class="ticket-icon">✉</div>
-          <div>
-            <div class="ticket-from">Sam — Perplexity Enterprise</div>
+        <div class="hero-copy">
+          <div class="hero-kicker reveal">
+            <span class="eyebrow eyebrow--plasma"><span class="dot"></span> Classified // Convergence Brief 04</span>
+            <a class="btn btn--primary btn--architecture" href="/akamai-architecture.html">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h7v7H3z"/><path d="M14 3h7v7h-7z"/><path d="M14 14h7v7h-7z"/><path d="M3 14h7v7H3z"/><path d="M10 6h4M6 10v4M18 10v4M10 18h4"/></svg>
+              View Akamai Architecture
+            </a>
           </div>
-          <div class="ticket-time">Yesterday 1:34PM</div>
+          <h1 class="reveal" data-delay="1">
+            Perplexity's crisis is not compute scarcity. It is <em style="color:var(--plasma); font-style:normal; text-shadow: 0 0 24px var(--plasma-glow);">orchestration collapse</em>.
+          </h1>
+          <p class="lead reveal" data-delay="2">
+            Across AWS, Microsoft Foundry / Azure, CoreWeave, and regional GPU capacity, every provider is rational alone.
+            Together — without a convergence layer above them — they generate fragmented support, egress drag, latency variance, and peak-hour fragility.
+            Akamai is the answer because it can sit on top of the stack as an <strong>edge AI convergence fabric</strong>: distributed inference, intelligent routing, semantic caching, and workload-aware token economics.
+          </p>
+          <div class="hero-actions reveal" data-delay="3">
+            <a class="btn btn--primary" href="/akamai-architecture.html">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h7v7H3z"/><path d="M14 3h7v7h-7z"/><path d="M14 14h7v7h-7z"/><path d="M3 14h7v7H3z"/><path d="M10 6h4M6 10v4M18 10v4M10 18h4"/></svg>
+              View Akamai Architecture
+            </a>
+            <a class="btn btn--ghost" href="#flywheel">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              See the convergence layer
+            </a>
+            <a class="btn btn--ghost" href="#pilot">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L9.5 8.5 3 11l6.5 2.5L12 20l2.5-6.5L21 11l-6.5-2.5z"/></svg>
+              Open pilot model
+            </a>
+          </div>
+          <div class="hero-meta reveal" data-delay="4">
+            <span><b>Audience</b> Founders · Infra leadership · Board</span>
+            <span class="sep">//</span>
+            <span><b>Sourced</b> Reuters · CNBC · AWS · Akamai · CoreWeave</span>
+          </div>
         </div>
-        <div class="ticket-body">
-          "Your ticket regarding the credit visibility issues and invoice waiver request is with our Computer Credits &amp; Billing team. They'll review your situation and get back to you as soon as possible."
-        </div>
-        <span class="ticket-tag">Re: Billing &amp; Subscription</span>
-      </div>
-    </div>
 
-    <!-- Platform Status -->
-    <div class="sidebar-section">
-      <div class="sidebar-title">Provider Status</div>
-      <div class="status-card">
-        <div class="status-card-header">
-          <div class="status-card-title">AWS (Primary)</div>
-          <span class="status-pill pill-warn">TRANSITIONING</span>
-        </div>
-        <div class="status-card-body">P4de → P5 migration in progress. Legal dispute with Amazon ongoing over agentic shopping.</div>
-      </div>
-      <div class="status-card">
-        <div class="status-card-header">
-          <div class="status-card-title">Azure / Foundry</div>
-          <span class="status-pill pill-warn">RAMPING</span>
-        </div>
-        <div class="status-card-body">89 days post-signing. Search + shopping features now routing through Foundry. Integration overhead accumulating.</div>
-      </div>
-      <div class="status-card">
-        <div class="status-card-header">
-          <div class="status-card-title">CoreWeave (CKS)</div>
-          <span class="status-pill pill-warn">ONBOARDING</span>
-        </div>
-        <div class="status-card-body">58 days post-signing. GB200 NVL72 clusters being provisioned. W&B pipeline integration active.</div>
-      </div>
-      <div class="status-card">
-        <div class="status-card-header">
-          <div class="status-card-title">Billing Unification</div>
-          <span class="status-pill pill-critical">BROKEN</span>
-        </div>
-        <div class="status-card-body">No unified credit ledger across 3 providers. Tickets escalating. Invoice waivers requested.</div>
-      </div>
-    </div>
+        <!-- HERO STAGE: cinematic command globe -->
+        <div class="hero-stage reveal" id="hero-stage" data-mode="crisis" data-delay="2" aria-label="Animated crisis architecture and Akamai convergence layer">
+          <div class="scan-line" aria-hidden="true"></div>
 
-    <!-- Key Metrics -->
-    <div class="sidebar-section">
-      <div class="sidebar-title">Infrastructure Metrics</div>
-      <div class="metrics-grid">
-        <div class="metric-box metric-red">
-          <div class="metric-value">3</div>
-          <div class="metric-label">Active Hyperscalers</div>
+          <svg class="hero-svg" viewBox="0 0 760 720" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+            <defs>
+              <radialGradient id="g-plasma" cx="50%" cy="50%">
+                <stop offset="0%" stop-color="rgba(0,230,211,.5)"/>
+                <stop offset="100%" stop-color="rgba(0,230,211,0)"/>
+              </radialGradient>
+              <radialGradient id="g-aws" cx="50%" cy="50%">
+                <stop offset="0%" stop-color="rgba(245,185,66,.34)"/>
+                <stop offset="100%" stop-color="rgba(245,185,66,0)"/>
+              </radialGradient>
+              <radialGradient id="g-az" cx="50%" cy="50%">
+                <stop offset="0%" stop-color="rgba(90,164,247,.38)"/>
+                <stop offset="100%" stop-color="rgba(90,164,247,0)"/>
+              </radialGradient>
+              <radialGradient id="g-cw" cx="50%" cy="50%">
+                <stop offset="0%" stop-color="rgba(255,115,85,.34)"/>
+                <stop offset="100%" stop-color="rgba(255,115,85,0)"/>
+              </radialGradient>
+              <linearGradient id="g-grid" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="rgba(255,255,255,.06)"/>
+                <stop offset="50%" stop-color="rgba(255,255,255,.02)"/>
+                <stop offset="100%" stop-color="rgba(255,255,255,.06)"/>
+              </linearGradient>
+            </defs>
+
+            <!-- provider auras -->
+            <g opacity=".75">
+              <circle cx="140" cy="160" r="100" fill="url(#g-aws)"/>
+              <circle cx="620" cy="160" r="100" fill="url(#g-az)"/>
+              <circle cx="140" cy="560" r="100" fill="url(#g-cw)"/>
+              <circle cx="620" cy="560" r="100" fill="url(#g-plasma)"/>
+            </g>
+
+            <!-- chaos bridges (inter-cloud crosstalk) -->
+            <path class="flow-chaos" d="M210 180 C 340 100, 460 100, 560 170" stroke-width="2" fill="none"/>
+            <path class="flow-chaos" d="M210 580 C 340 660, 460 660, 560 580" stroke-width="2" fill="none"/>
+            <path class="flow-chaos" d="M180 240 C 200 360, 200 480, 180 540" stroke-width="2" fill="none"/>
+            <path class="flow-chaos" d="M580 240 C 560 360, 560 480, 580 540" stroke-width="2" fill="none"/>
+
+            <!-- provider → core flows -->
+            <path class="flow-aws"   d="M210 200 C 280 240, 320 280, 360 320" stroke-width="2.4" fill="none"/>
+            <path class="flow-azure" d="M550 200 C 480 240, 440 280, 400 320" stroke-width="2.4" fill="none"/>
+            <path class="flow-cw"    d="M210 540 C 280 500, 320 460, 360 420" stroke-width="2.4" fill="none"/>
+            <path class="flow-converge" d="M550 540 C 480 500, 440 460, 400 420" stroke-width="2.4" fill="none"/>
+
+            <!-- provider node cards -->
+            <g transform="translate(60 120)">
+              <rect width="210" height="92" rx="14" fill="rgba(245,185,66,.06)" stroke="rgba(245,185,66,.34)"/>
+              <text x="20" y="30" fill="#f5b942" font-family="JetBrains Mono" font-size="11" letter-spacing="2">AWS // PRIMARY</text>
+              <text x="20" y="56" class="svg-title" font-family="Cabinet Grotesk" font-size="17" font-weight="700">EC2 · P5 · HyperPod</text>
+              <text x="20" y="76" class="svg-sub" font-family="Satoshi" font-size="12">Backend · search · training</text>
+            </g>
+            <g transform="translate(490 120)">
+              <rect width="210" height="92" rx="14" fill="rgba(90,164,247,.06)" stroke="rgba(90,164,247,.34)"/>
+              <text x="20" y="30" fill="#5aa4f7" font-family="JetBrains Mono" font-size="11" letter-spacing="2">AZURE // FOUNDRY</text>
+              <text x="20" y="56" class="svg-title" font-family="Cabinet Grotesk" font-size="17" font-weight="700">$750M · 3 yrs</text>
+              <text x="20" y="76" class="svg-sub" font-family="Satoshi" font-size="12">OpenAI · Anthropic · xAI</text>
+            </g>
+            <g transform="translate(60 510)">
+              <rect width="210" height="92" rx="14" fill="rgba(255,115,85,.06)" stroke="rgba(255,115,85,.34)"/>
+              <text x="20" y="30" fill="#ff7355" font-family="JetBrains Mono" font-size="11" letter-spacing="2">COREWEAVE // GB200</text>
+              <text x="20" y="56" class="svg-title" font-family="Cabinet Grotesk" font-size="17" font-weight="700">NVL72 clusters</text>
+              <text x="20" y="76" class="svg-sub" font-family="Satoshi" font-size="12">Real-time inference</text>
+            </g>
+            <g transform="translate(490 510)">
+              <rect width="210" height="92" rx="14" fill="rgba(0,230,211,.06)" stroke="rgba(0,230,211,.42)"/>
+              <text x="20" y="30" fill="#00e6d3" font-family="JetBrains Mono" font-size="11" letter-spacing="2">AKAMAI // EDGE AI</text>
+              <text x="20" y="56" class="svg-title" font-family="Cabinet Grotesk" font-size="17" font-weight="700">4,400+ POPs</text>
+              <text x="20" y="76" class="svg-sub" font-family="Satoshi" font-size="12">AI Grid · Blackwell</text>
+            </g>
+
+            <!-- Akamai convergence rings -->
+            <ellipse class="ring ring--outer" cx="380" cy="370" rx="220" ry="160"/>
+            <ellipse class="ring" cx="380" cy="370" rx="170" ry="120"/>
+
+            <!-- Akamai edge nodes -->
+            <circle class="node" cx="380" cy="210" r="6"/>
+            <circle class="node" cx="380" cy="530" r="6"/>
+            <circle class="node" cx="160" cy="370" r="6"/>
+            <circle class="node" cx="600" cy="370" r="6"/>
+            <circle class="node" cx="244" cy="262" r="4.5" style="animation-delay:.4s"/>
+            <circle class="node" cx="516" cy="262" r="4.5" style="animation-delay:.8s"/>
+            <circle class="node" cx="244" cy="478" r="4.5" style="animation-delay:1.2s"/>
+            <circle class="node" cx="516" cy="478" r="4.5" style="animation-delay:1.6s"/>
+
+            <!-- core node -->
+            <g transform="translate(304 320)">
+              <rect width="152" height="100" rx="20" fill="rgba(0,230,211,.04)" stroke="rgba(0,230,211,.42)"/>
+              <circle cx="76" cy="32" r="6" fill="#00e6d3"/>
+              <text x="76" y="62" text-anchor="middle" class="svg-title" font-family="Cabinet Grotesk" font-size="14" font-weight="700" letter-spacing="2">PERPLEXITY</text>
+              <text x="76" y="82" text-anchor="middle" class="svg-sub" font-family="Satoshi" font-size="11">Query routing under stress</text>
+            </g>
+          </svg>
+
+          <!-- HUD overlays -->
+          <div class="hud hud-tag danger" style="top: 5%; left: 38%;"><span class="pip"></span> SLA fracture</div>
+          <div class="hud hud-tag danger" style="top: 35%; left: 4%;"><span class="pip"></span> Egress drag</div>
+          <div class="hud hud-tag danger" style="top: 35%; right: 4%;"><span class="pip"></span> Support void</div>
+          <div class="hud hud-tag" style="bottom: 4%; left: 50%; transform: translateX(-50%);"><span class="pip"></span> Akamai convergence layer</div>
+
+          <!-- Mode toggle -->
+          <div class="stage-modes" role="tablist" aria-label="Architecture mode">
+            <button type="button" data-mode="crisis"   aria-pressed="true">Crisis</button>
+            <button type="button" data-mode="solution" aria-pressed="false">Convergence</button>
+          </div>
         </div>
-        <div class="metric-box metric-orange">
-          <div class="metric-value">$750M</div>
-          <div class="metric-label">Azure Commitment</div>
+      </div>
+
+      <!-- KPI BAR -->
+      <div class="container container--wide stats" aria-label="Key intelligence statistics">
+        <article class="metric reveal">
+          <div class="metric-value tabular"><span class="counter" data-target="750" data-prefix="$" data-suffix="M">$0M</span></div>
+          <div class="metric-label">Microsoft Foundry deal</div>
+          <p class="metric-note">Three-year, reported $750M Perplexity ↔ Microsoft commitment; Foundry becomes the primary model-acquisition platform.</p>
+        </article>
+        <article class="metric reveal" data-delay="1">
+          <div class="metric-value tabular"><span class="counter" data-target="4400" data-suffix="+">0+</span></div>
+          <div class="metric-label">Akamai edge locations</div>
+          <p class="metric-note">Distributed inference fabric for AI Grid orchestration positioned next to demand.</p>
+        </article>
+        <article class="metric reveal" data-delay="2">
+          <div class="metric-value tabular"><span class="counter" data-target="2.5" data-suffix="x">0x</span></div>
+          <div class="metric-label">Latency reduction (claim)</div>
+          <p class="metric-note">Akamai's headline benchmark vs traditional hyperscaler infrastructure for distributed inference.</p>
+        </article>
+        <article class="metric reveal" data-delay="3">
+          <div class="metric-value tabular"><span class="counter" data-target="86" data-suffix="%">0%</span></div>
+          <div class="metric-label">AI inference cost savings</div>
+          <p class="metric-note">Directional upside Akamai cites for AI Grid workloads compared with traditional hyperscalers.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ============== THESIS ============== -->
+    <section id="thesis" class="section">
+      <div class="container">
+        <div class="section-label reveal">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Crisis thesis
         </div>
-        <div class="metric-box metric-purple">
-          <div class="metric-value">&lt;90</div>
-          <div class="metric-label">Days AWS→Azure→CW</div>
+        <h2 class="section-heading reveal" data-delay="1">The problem is structural, not incidental.</h2>
+        <p class="section-sub reveal" data-delay="2">
+          Perplexity's stack has evolved into four parallel compute planes with no shared abstraction, no unified support owner, and expensive traffic bouncing between clouds.
+          Each provider deal is rational. The composite is fragile — and every incident becomes a multi-vendor blame spiral, exactly as users demand sub-second answers.
+        </p>
+
+        <div class="stack-grid">
+          <article class="stack-card reveal" data-vendor="aws" tabindex="0" aria-expanded="false" data-delay="1">
+            <span class="corner-id">01 / FOUNDATION</span>
+            <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+            <div class="vendor-name">Amazon Web Services</div>
+            <h3>Primary cloud, training factory.</h3>
+            <p>EC2 powers backend, frontend, and search. P4de drives training; P5 drives inference. SageMaker HyperPod runs large-scale training and fine-tuning.</p>
+            <div class="stat-row">
+              <b>40%</b><span>training time<br/>reduction</span>
+            </div>
+            <div class="expand"><div>
+              <p>AWS reports 2× training throughput on HyperPod, with capacity to support 10,000 concurrent users and 100,000+ queries per hour.</p>
+              <ul>
+                <li>P4de → P5 evolution anchors training</li>
+                <li>Regional concentration: support is bilateral</li>
+                <li>Recently: Comet shopping agent blocked by Amazon court order</li>
+              </ul>
+            </div></div>
+          </article>
+
+          <article class="stack-card reveal" data-vendor="azure" tabindex="0" aria-expanded="false" data-delay="2">
+            <span class="corner-id">02 / MODEL ACCESS</span>
+            <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 22 22 22 12 2"/></svg>
+            <div class="vendor-name">Microsoft Foundry / Azure</div>
+            <h3>$750M model-acquisition platform.</h3>
+            <p>Three-year deal positions Microsoft Foundry as Perplexity's main AI platform for acquiring models — OpenAI, Anthropic, xAI inside one catalog.</p>
+            <div class="stat-row">
+              <b>$750M</b><span>3-year<br/>commitment</span>
+            </div>
+            <div class="expand"><div>
+              <p>Foundry expands the model surface dramatically but adds another orchestration plane and another billing + support graph alongside AWS.</p>
+              <ul>
+                <li>Search and shopping pathways now hit Foundry</li>
+                <li>AWS remains the primary cloud — Foundry is additive</li>
+                <li>Two control planes, one user-facing product</li>
+              </ul>
+            </div></div>
+          </article>
+
+          <article class="stack-card reveal" data-vendor="coreweave" tabindex="0" aria-expanded="false" data-delay="3">
+            <span class="corner-id">03 / INFERENCE FACTORY</span>
+            <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+            <div class="vendor-name">CoreWeave</div>
+            <h3>GB200 NVL72 inference clusters.</h3>
+            <p>March 4, 2026 multi-year strategic partnership: dedicated NVIDIA GB200 NVL72-powered clusters powering Perplexity's AI inference workloads.</p>
+            <div class="stat-row">
+              <b>NVL72</b><span>dedicated<br/>clusters</span>
+            </div>
+            <div class="expand"><div>
+              <p>"AI products operate continuously in real-world environments where inference performance and reliability directly affect UX." Specialized cluster value can still suffer centralized first-mile latency.</p>
+              <ul>
+                <li>Next-generation Blackwell-class density</li>
+                <li>Multi-year commitment, real-time inference</li>
+                <li>Adds a third compute fabric and a third SLA boundary</li>
+              </ul>
+            </div></div>
+          </article>
+
+          <article class="stack-card reveal" data-vendor="akamai" tabindex="0" aria-expanded="false" data-delay="4">
+            <span class="corner-id">04 / CONVERGENCE</span>
+            <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            <div class="vendor-name">Akamai (proposed)</div>
+            <h3>Edge AI convergence fabric.</h3>
+            <p>Thousands of NVIDIA Blackwell GPUs distributed across 4,400+ edge locations. AI Grid: real-time broker, semantic caching, intelligent routing, workload-aware control plane.</p>
+            <div class="stat-row">
+              <b>&lt;50ms</b><span>time-to-first-token<br/>target</span>
+            </div>
+            <div class="expand"><div>
+              <p>Sub-50ms inference for select real-time workloads. Up to 2.5× latency reduction vs traditional hyperscaler infrastructure. As much as 86% AI inference cost savings.</p>
+              <ul>
+                <li>Sits above AWS, Foundry, and CoreWeave — not instead of</li>
+                <li>Cost-per-token, time-to-first-token, throughput optimization</li>
+                <li>One vendor owns the user-facing distribution layer</li>
+              </ul>
+            </div></div>
+          </article>
         </div>
-        <div class="metric-box metric-blue">
-          <div class="metric-value">11K+</div>
-          <div class="metric-label">Foundry Models</div>
+      </div>
+    </section>
+
+    <!-- ============== STACK / TIMELINE ============== -->
+    <section id="stack" class="section">
+      <div class="container container--wide">
+        <div class="section-label reveal">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h6"/><path d="M15 12h6"/><circle cx="12" cy="12" r="3"/></svg>
+          Timeline compression
+        </div>
+        <h2 class="section-heading reveal" data-delay="1">The architecture accelerated faster than the coordination model.</h2>
+        <p class="section-sub reveal" data-delay="2">
+          Foundation, then late-January, then early-March. Each step adds capability — and another orchestration, billing, observability, and compliance pathway. Great components do not automatically create a coherent system.
+        </p>
+
+        <div class="timeline">
+          <article class="timeline-card reveal" data-state="aws" data-delay="1">
+            <div class="marker"></div>
+            <div class="date">Foundation</div>
+            <h3>AWS — primary cloud</h3>
+            <p>EC2 backbone, P4de → P5, HyperPod. Reported 40% training time reduction; 2× throughput. Up to 10,000 concurrent users and 100,000+ QPH.</p>
+          </article>
+          <article class="timeline-card reveal" data-state="azure" data-delay="2">
+            <div class="marker"></div>
+            <div class="date">Jan 29, 2026</div>
+            <h3>Microsoft Foundry — $750M</h3>
+            <p>Three-year deal makes Foundry the main AI platform for acquiring models. Access to OpenAI, Anthropic, and xAI; AWS remains primary cloud.</p>
+          </article>
+          <article class="timeline-card reveal" data-state="coreweave" data-delay="3">
+            <div class="marker"></div>
+            <div class="date">Mar 4, 2026</div>
+            <h3>CoreWeave — GB200 NVL72</h3>
+            <p>Multi-year strategic partnership: dedicated NVIDIA GB200 NVL72 clusters for Perplexity's AI inference workloads — real-time, continuous environments.</p>
+          </article>
+          <article class="timeline-card reveal" data-state="akamai" data-delay="4">
+            <div class="marker"></div>
+            <div class="date">Now → Akamai</div>
+            <h3>Akamai — convergence layer</h3>
+            <p>Not replacement. Convergence: keep AI factories, distribute inference to 4,400+ edge POPs, restore one user-facing path with one operational owner.</p>
+          </article>
         </div>
       </div>
-    </div>
+    </section>
 
-    <!-- Root Cause Issues -->
-    <div class="sidebar-section">
-      <div class="sidebar-title">Root Cause Analysis</div>
-      <div class="issue-item">
-        <div class="issue-num">01</div>
-        <div class="issue-text">
-          <strong>Competitive Hyperscaler Isolation</strong>
-          AWS, Azure, and CoreWeave are direct competitors. None will proactively share logs, debug contexts, or coordinate SLAs with each other on Perplexity's behalf.
+    <!-- ============== ARCHITECTURE TABLE ============== -->
+    <section class="section section--tight">
+      <div class="container">
+        <div class="section-label reveal">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Architecture reading
+        </div>
+        <h2 class="section-heading reveal" data-delay="1">What the current stack is optimized for, and where it breaks.</h2>
+        <p class="section-sub reveal" data-delay="2">
+          Each provider solves a real problem. The break happens in the absence of a unifying runtime layer between AI factories and the user. The table below shows what changes when a convergence layer is inserted above — not instead of — what already exists.
+        </p>
+
+        <div class="card arch-card reveal" data-delay="3" style="margin-top: var(--s-8)">
+          <table class="arch-table">
+            <thead>
+              <tr>
+                <th>Layer</th>
+                <th>Role today</th>
+                <th>Failure vector</th>
+                <th>What a convergence layer changes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>AWS</td>
+                <td>EC2 backend, P4de/P5, HyperPod training and inference</td>
+                <td>Regional concentration; bilateral support; cross-cloud egress</td>
+                <td>Offload user-proximate inference; keep heavy compute where it belongs</td>
+              </tr>
+              <tr>
+                <td>Foundry / Azure</td>
+                <td>Model catalog (OpenAI, Anthropic, xAI); search and shopping pathways</td>
+                <td>Another orchestration plane; another billing + support graph</td>
+                <td>Keep model logic; shorten the runtime path to the user</td>
+              </tr>
+              <tr>
+                <td>CoreWeave</td>
+                <td>GB200 NVL72 dedicated inference clusters</td>
+                <td>Specialized capacity still suffers centralized first-mile latency</td>
+                <td>Use it as a factory for hardest workloads; deliver from the edge</td>
+              </tr>
+              <tr>
+                <td>Regional GPU capacity</td>
+                <td>Compliance, geography, sovereign deployments</td>
+                <td>More fragmentation without an intelligent intermediary</td>
+                <td>Region-aware routing built into the broker, not bolted on</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
-      <div class="issue-item">
-        <div class="issue-num">02</div>
-        <div class="issue-text">
-          <strong>Speed-of-Signing vs. Integration Reality</strong>
-          Azure (Jan 29) + CoreWeave (Mar 3) = two major infrastructure pivots in 33 days. Integration debt is accumulating faster than engineering can absorb.
+    </section>
+
+    <!-- ============== AKAMAI FLYWHEEL ============== -->
+    <section id="flywheel" class="section">
+      <div class="container container--wide">
+        <div class="section-label reveal">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Akamai value flywheel
+        </div>
+        <h2 class="section-heading reveal" data-delay="1">Six forces, one fabric. Click any node.</h2>
+        <p class="section-sub reveal" data-delay="2">
+          Akamai is not pitched as a replacement; it is the distribution brain. AI Grid orchestrates inference across 4,400+ edge POPs, with semantic caching, intelligent routing, and workload-aware token economics layered above existing AI factories.
+        </p>
+
+        <div class="flywheel-grid">
+          <div class="flywheel-stage reveal" data-delay="1" id="flywheel-stage" aria-label="Interactive Akamai value flywheel">
+            <svg class="flywheel-svg" viewBox="0 0 500 500" aria-hidden="true">
+              <defs>
+                <radialGradient id="fw-core" cx="50%" cy="50%">
+                  <stop offset="0%" stop-color="rgba(0,230,211,.4)"/>
+                  <stop offset="100%" stop-color="rgba(0,230,211,0)"/>
+                </radialGradient>
+              </defs>
+              <circle cx="250" cy="250" r="180" fill="none" stroke="rgba(255,255,255,.06)" stroke-dasharray="4 6"/>
+              <circle cx="250" cy="250" r="120" fill="none" stroke="rgba(0,230,211,.18)" stroke-dasharray="6 5">
+                <animateTransform attributeName="transform" type="rotate" from="0 250 250" to="360 250 250" dur="40s" repeatCount="indefinite"/>
+              </circle>
+              <circle cx="250" cy="250" r="180" fill="none" stroke="rgba(0,230,211,.1)" stroke-dasharray="3 8">
+                <animateTransform attributeName="transform" type="rotate" from="360 250 250" to="0 250 250" dur="60s" repeatCount="indefinite"/>
+              </circle>
+              <!-- core -->
+              <circle cx="250" cy="250" r="60" fill="url(#fw-core)"/>
+              <circle cx="250" cy="250" r="36" fill="rgba(8,10,14,.72)" stroke="var(--plasma)" stroke-width="1.4"/>
+              <text x="250" y="245" text-anchor="middle" class="svg-title" font-family="Cabinet Grotesk" font-size="13" font-weight="800" letter-spacing="2">AI GRID</text>
+              <text x="250" y="262" text-anchor="middle" class="svg-sub" font-family="JetBrains Mono" font-size="9" letter-spacing="2">REAL-TIME BROKER</text>
+
+              <!-- spokes -->
+              <line x1="250" y1="250" x2="250" y2="70"  stroke="rgba(0,230,211,.22)" stroke-width="1" stroke-dasharray="3 4"/>
+              <line x1="250" y1="250" x2="406" y2="160" stroke="rgba(0,230,211,.22)" stroke-width="1" stroke-dasharray="3 4"/>
+              <line x1="250" y1="250" x2="406" y2="340" stroke="rgba(0,230,211,.22)" stroke-width="1" stroke-dasharray="3 4"/>
+              <line x1="250" y1="250" x2="250" y2="430" stroke="rgba(0,230,211,.22)" stroke-width="1" stroke-dasharray="3 4"/>
+              <line x1="250" y1="250" x2="94"  y2="340" stroke="rgba(0,230,211,.22)" stroke-width="1" stroke-dasharray="3 4"/>
+              <line x1="250" y1="250" x2="94"  y2="160" stroke="rgba(0,230,211,.22)" stroke-width="1" stroke-dasharray="3 4"/>
+            </svg>
+
+            <button class="flywheel-pill" type="button" data-fw="0" aria-pressed="true" style="left:50%;  top:14%;"><span class="pip"></span> Distributed inference</button>
+            <button class="flywheel-pill" type="button" data-fw="1" style="left:81%; top:32%;"><span class="pip"></span> Intelligent routing</button>
+            <button class="flywheel-pill" type="button" data-fw="2" style="left:81%; top:68%;"><span class="pip"></span> Semantic caching</button>
+            <button class="flywheel-pill" type="button" data-fw="3" style="left:50%; top:86%;"><span class="pip"></span> Edge security</button>
+            <button class="flywheel-pill" type="button" data-fw="4" style="left:19%; top:68%;"><span class="pip"></span> Egress mitigation</button>
+            <button class="flywheel-pill" type="button" data-fw="5" style="left:19%; top:32%;"><span class="pip"></span> Token economics</button>
+          </div>
+
+          <article class="flywheel-detail glass reveal" id="flywheel-detail" data-delay="2">
+            <div class="num">01 / 06</div>
+            <h3 id="fw-title">Distributed inference</h3>
+            <p id="fw-body">
+              AI Grid runs thousands of NVIDIA Blackwell GPUs across 4,400+ edge locations — one of the world's most widely distributed AI platforms.
+              User requests land at a POP near the demand, not in a single hyperscaler region. Centralized clusters keep training and heavy fine-tuning; edge POPs serve user-facing inference at sub-50ms time-to-first-token for select workloads.
+            </p>
+            <div class="quants">
+              <div class="quant"><b>4,400+</b><span>Edge POPs</span></div>
+              <div class="quant"><b>&lt;50ms</b><span>TTFT (target)</span></div>
+              <div class="quant"><b>2.5×</b><span>Latency reduction</span></div>
+              <div class="quant"><b>86%</b><span>Inference cost savings</span></div>
+            </div>
+          </article>
         </div>
       </div>
-      <div class="issue-item">
-        <div class="issue-num">03</div>
-        <div class="issue-text">
-          <strong>Billing Ledger Fragmentation</strong>
-          Three independent billing systems with no shared credit visibility. The active support ticket is a direct symptom.
+    </section>
+
+    <!-- ============== WITHOUT / WITH ============== -->
+    <section class="section section--tight">
+      <div class="container">
+        <div class="section-label reveal">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"/></svg>
+          Insertion strategy
+        </div>
+        <h2 class="section-heading reveal" data-delay="1">Akamai is the distribution brain, not the new religion.</h2>
+        <p class="section-sub reveal" data-delay="2">
+          Leave training and heavyweight fine-tuning where they already run. Insert Akamai's AI Grid between AI factories and the end user. Surgical, not theological — and directly attacks latency variance, routing incoherence, and support fragmentation.
+        </p>
+        <div class="compare">
+          <article class="card without reveal" data-delay="1">
+            <h3>Without convergence</h3>
+            <ul role="list">
+              <li>Queries bounce across centralized origins — peak-hour TTFT degrades</li>
+              <li>Cross-cloud egress quietly compounds cost as scale grows</li>
+              <li>Support tickets straddle three or four competing vendors</li>
+              <li>International routing and compliance multiply edge cases</li>
+              <li>Comet-style agent disputes (e.g. Amazon court order) leak into UX</li>
+            </ul>
+          </article>
+          <article class="card with reveal" data-delay="2">
+            <h3>With Akamai as inference distribution</h3>
+            <ul role="list">
+              <li>User requests route to the nearest of 4,400+ POPs by AI Grid policy</li>
+              <li>Semantic caching trims repeat work on the same token surface</li>
+              <li>Workload-aware control plane: cost-per-token, TTFT, throughput</li>
+              <li>One additional vendor owns the user-facing distribution layer</li>
+              <li>Region-aware routing keeps compliance traffic geographically honest</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="quote reveal" data-delay="3">
+          <blockquote>
+            Akamai is not there to replace AWS, Foundry, or CoreWeave.<br/>It is there to make their existing strategy <em>behave like one system.</em>
+          </blockquote>
+          <cite>// Convergence brief — pitch framing</cite>
         </div>
       </div>
-      <div class="issue-item">
-        <div class="issue-num">04</div>
-        <div class="issue-text">
-          <strong>Multi-Cloud Egress Tax</strong>
-          Data moving between AWS, Azure, and CoreWeave incurs egress fees that compound total infrastructure cost beyond contracted values.
+    </section>
+
+    <!-- ============== PILOT ============== -->
+    <section id="pilot" class="section">
+      <div class="container container--wide">
+        <div class="section-label reveal">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+          Interactive pilot model
+        </div>
+        <h2 class="section-heading reveal" data-delay="1">Stress-test the insertion strategy.</h2>
+        <p class="section-sub reveal" data-delay="2">
+          A directional simulator — not a pricing guarantee. Tune query mix, peak-load pressure, and edge offload to see how AI Grid would change latency, monthly spend pressure, support burden, and effective edge-served share.
+        </p>
+
+        <div class="calc-grid">
+          <div class="calc-card glass reveal" data-delay="1">
+            <div class="control">
+              <label for="qpm">Monthly query volume</label>
+              <div class="row"><b><span id="qpmVal" class="tabular">600</span></b><span>million queries</span></div>
+              <input id="qpm" type="range" min="50" max="2000" step="10" value="600" />
+            </div>
+            <div class="control">
+              <label for="offload">Akamai inference offload</label>
+              <div class="row"><b><span id="offloadVal" class="tabular">35</span>%</b><span>of user-facing demand</span></div>
+              <input id="offload" type="range" min="5" max="80" step="1" value="35" />
+            </div>
+            <div class="control">
+              <label for="peak">Peak-hour stress factor</label>
+              <div class="row"><b><span id="peakVal" class="tabular">6</span> / 10</b><span>centralized load pressure</span></div>
+              <input id="peak" type="range" min="1" max="10" step="1" value="6" />
+            </div>
+            <div class="control">
+              <label for="cache">Semantic cache hit rate</label>
+              <div class="row"><b><span id="cacheVal" class="tabular">18</span>%</b><span>repeat-token compression</span></div>
+              <input id="cache" type="range" min="0" max="60" step="1" value="18" />
+            </div>
+          </div>
+          <div class="calc-result glass reveal" data-delay="2">
+            <div class="calc-cells">
+              <article class="cell" id="cell-latency" style="--bar:0%">
+                <div class="cell-value tabular" id="latencyMetric">—</div>
+                <div class="cell-label">Latency improvement</div>
+                <div class="cell-note">Time-to-first-token, directional</div>
+              </article>
+              <article class="cell" id="cell-cost" style="--bar:0%">
+                <div class="cell-value tabular" id="costMetric">—</div>
+                <div class="cell-label">Cost pressure relief</div>
+                <div class="cell-note">Relative monthly spend</div>
+              </article>
+              <article class="cell" id="cell-support" style="--bar:0%">
+                <div class="cell-value tabular" id="supportMetric">—</div>
+                <div class="cell-label">Incident compression</div>
+                <div class="cell-note">Cross-vendor support burden</div>
+              </article>
+              <article class="cell" id="cell-edge" style="--bar:0%">
+                <div class="cell-value tabular" id="edgeMetric">—</div>
+                <div class="cell-label">Edge-served share</div>
+                <div class="cell-note">Offload + cache, blended</div>
+              </article>
+            </div>
+            <div class="calc-tip">
+              Pilot framing: deploy AI Grid against a narrow but painful slice of real-time search demand — peak-hour US/EU — then compare user-path TTFT, egress behavior, and incident ownership before broader rollout.
+            </div>
+          </div>
         </div>
       </div>
-      <div class="issue-item">
-        <div class="issue-num">05</div>
-        <div class="issue-text">
-          <strong>Orchestration Complexity</strong>
-          AWS EFA/EKS + Azure Foundry API + CoreWeave CKS + DGX Cloud Lepton = four separate orchestration layers with no common abstraction.
+    </section>
+
+    <!-- ============== EVIDENCE ============== -->
+    <section id="evidence" class="section">
+      <div class="container">
+        <div class="section-label reveal">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          Evidence dossier
         </div>
+        <h2 class="section-heading reveal" data-delay="1">Sourced. Linkable. Defensible.</h2>
+        <p class="section-sub reveal" data-delay="2">
+          Every claim above is anchored to a primary or first-party source. Open the dossier on the right (Sources button) at any time, or follow the citations directly.
+        </p>
+
+        <div class="evidence" id="evidence-list"></div>
       </div>
-    </div>
+    </section>
+  </main>
 
-  </div><!-- /sidebar -->
-</div><!-- /main-content -->
-
-<!-- BOTTOM ANALYSIS STRIP -->
-<div class="analysis-strip">
-  <div class="section-label">Strategic Diagnosis — Why the "Multi-Cloud" Thesis Is Now Backfiring</div>
-  <div class="analysis-grid">
-    <div class="analysis-card">
-      <div class="analysis-card-header">
-        <div class="analysis-icon icon-red">🔥</div>
-        <div class="analysis-card-title">The Philosophical Trap</div>
-      </div>
-      <div class="analysis-card-body">
-        Perplexity's multi-cloud strategy was predicated on the classical thesis: better performance, lower cost, and geographic compliance through provider redundancy. In theory, sound. In practice,
-        the coordination overhead of three competing hyperscalers — each with proprietary tooling, separate SLA structures, and zero incentive to help competitors' customers — has created
-        more operational debt than any single-provider lock-in would have.
-      </div>
-    </div>
-    <div class="analysis-card">
-      <div class="analysis-card-header">
-        <div class="analysis-icon icon-orange">⚡</div>
-        <div class="analysis-card-title">The Timing Problem</div>
-      </div>
-      <div class="analysis-card-body">
-        The Azure deal (Jan 29) and CoreWeave deal (March 3) were signed 33 days apart. Each requires months of deep integration work — custom Kubernetes configurations,
-        routing logic, observability pipelines, billing reconciliation, and network tuning. Layering a third hyperscaler onto an already-complex AWS foundation before either new
-        deal was fully integrated is a textbook case of compounding integration debt.
-      </div>
-    </div>
-    <div class="analysis-card">
-      <div class="analysis-card-header">
-        <div class="analysis-icon icon-yellow">💸</div>
-        <div class="analysis-card-title">The Billing Black Hole</div>
-      </div>
-      <div class="analysis-card-body">
-        AWS, Azure, and CoreWeave each maintain isolated billing ledgers with incompatible credit structures. There is no native cross-cloud unified cost visibility — it must be
-        built by Perplexity's engineering team using third-party tools (e.g. Spot.io, Apptio, or custom dashboards). Until that abstraction layer exists,
-        users experience credit disappearance, invoice surprises, and unresolved waiver requests like the ticket shown here.
-      </div>
-    </div>
-    <div class="analysis-card">
-      <div class="analysis-card-header">
-        <div class="analysis-icon icon-purple">🧩</div>
-        <div class="analysis-card-title">The Path Forward</div>
-      </div>
-      <div class="analysis-card-body">
-        Resolution requires a dedicated multi-cloud abstraction layer: a unified control plane (likely Kubernetes-based), a single-pane billing aggregator,
-        and formalized escalation bridges to each hyperscaler's enterprise support org. Without it, Perplexity's engineering capacity is being consumed
-        by infrastructure firefighting rather than product velocity — the most expensive kind of technical debt.
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- TOOLTIP -->
-<div class="tooltip" id="tooltip">
-  <div class="tooltip-title" id="tooltip-title"></div>
-  <div id="tooltip-body"></div>
-</div>
-
-<script>
-function showTooltip(event, title, body) {
-  var tip = document.getElementById('tooltip');
-  document.getElementById('tooltip-title').textContent = title;
-  document.getElementById('tooltip-body').textContent = body;
-  tip.classList.add('active');
-  moveTip(event);
-  event.currentTarget._moveHandler = function(e) { moveTip(e); };
-  event.currentTarget.addEventListener('mousemove', event.currentTarget._moveHandler);
-}
-function moveTip(e) {
-  var tip = document.getElementById('tooltip');
-  var x = e.clientX + 14, y = e.clientY + 14;
-  if (x + 270 > window.innerWidth) x = e.clientX - 270;
-  if (y + 160 > window.innerHeight) y = e.clientY - 160;
-  tip.style.left = x + 'px';
-  tip.style.top = y + 'px';
-}
-function hideTooltip() {
-  document.getElementById('tooltip').classList.remove('active');
-}
-</script>
-
-<!-- ═══════════════════════════════════════════════════════════════════ -->
-<!-- AKAMAI SOLUTION SECTION — BOARD PITCH                              -->
-<!-- ═══════════════════════════════════════════════════════════════════ -->
-<style>
-.akamai-section {
-  border-top: 2px solid rgba(0,155,222,0.35);
-  background: linear-gradient(180deg, rgba(0,155,222,0.04) 0%, transparent 100px);
-}
-.ak-header { padding: 44px 40px 0; }
-.ak-eyebrow {
-  font-family: var(--font-mono);
-  font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
-  color: #009bde; margin-bottom: 16px;
-  display: flex; align-items: center; gap: 8px;
-}
-.ak-pulse {
-  width: 8px; height: 8px; background: #009bde; border-radius: 50%;
-  box-shadow: 0 0 12px #009bde;
-  animation: akpulse 2s ease-in-out infinite;
-}
-@keyframes akpulse { 0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.5;transform:scale(1.4);} }
-@keyframes akai2 { 0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.5;transform:scale(1.4);} }
-.ak-title {
-  font-size: clamp(20px, 2.5vw, 30px); font-weight: 800;
-  line-height: 1.15; letter-spacing: -0.02em; color: #f0f0f4;
-  margin-bottom: 12px;
-}
-.ak-title .akh { color: #009bde; }
-.ak-subtitle {
-  font-size: 13.5px; color: var(--color-text-muted);
-  max-width: 600px; line-height: 1.7; margin-bottom: 0;
-}
-.ak-header-row { display: flex; align-items: flex-start; gap: 40px; flex-wrap: wrap; margin-bottom: 36px; }
-.ak-kpis {
-  display: flex; border: 1px solid rgba(0,155,222,0.2);
-  border-radius: var(--radius); overflow: hidden; flex-shrink: 0;
-  align-self: flex-start; margin-top: 4px;
-}
-.akpi {
-  padding: 14px 20px; text-align: center;
-  border-right: 1px solid rgba(0,155,222,0.12);
-  background: rgba(0,155,222,0.04); min-width: 88px;
-}
-.akpi:last-child { border-right: none; }
-.akpi-v { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; line-height: 1; margin-bottom: 4px; }
-.akpi-l { font-family: var(--font-mono); font-size: 9px; color: var(--color-text-muted); }
-
-/* THREE TIER */
-.ak-three-tier-wrap { padding: 0 40px 32px; }
-.ak-tier-row {
-  display: flex; align-items: stretch;
-  border: 1px solid var(--color-border); border-radius: var(--radius);
-  overflow: hidden; background: var(--color-surface);
-}
-.ak-tier {
-  flex: 1; padding: 20px;
-  border-right: 1px solid var(--color-border);
-}
-.ak-tier:last-child { border-right: none; }
-.ak-tier-arr {
-  display: flex; align-items: center; padding: 0 4px;
-  color: var(--color-text-faint); font-size: 20px; flex-shrink: 0;
-}
-.ak-tier-badge { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; font-weight: 700; margin-bottom: 6px; }
-.ak-tier-title { font-size: 14px; font-weight: 700; color: var(--color-text); margin-bottom: 8px; }
-.ak-tier-body { font-size: 11.5px; color: var(--color-text-muted); line-height: 1.6; margin-bottom: 12px; }
-.ak-tags { display: flex; flex-wrap: wrap; gap: 4px; }
-.ak-tag { font-family: var(--font-mono); font-size: 9px; padding: 2px 7px; border-radius: 4px; background: rgba(0,155,222,0.1); color: #009bde; border: 1px solid rgba(0,155,222,0.2); }
-
-/* SOLUTION TABLE */
-.ak-sol-wrap { padding: 0 40px 32px; }
-.ak-sol-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-text-faint); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-.ak-sol-label::after { content:''; flex:1; height:1px; background: var(--color-border); }
-.ak-sol-table { border: 1px solid var(--color-border); border-radius: var(--radius); overflow: hidden; }
-.ak-sol-row { display: grid; grid-template-columns: 200px 1fr 1fr 190px; border-bottom: 1px solid var(--color-border); }
-.ak-sol-row:last-child { border-bottom: none; }
-.ak-sol-head { background: var(--color-surface-2); }
-.ak-sol-head .ak-sol-col { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-faint); font-weight: 700; }
-.ak-sol-col { padding: 12px 14px; font-size: 11.5px; color: var(--color-text-muted); border-right: 1px solid var(--color-border); line-height: 1.5; }
-.ak-sol-col:last-child { border-right: none; }
-.ak-sol-prob { font-weight: 700; color: var(--color-text); font-size: 12px; display: block; }
-.ak-sol-sub { font-family: var(--font-mono); font-size: 9px; color: var(--danger); }
-.ak-sol-cause-col { background: rgba(239,68,68,0.025); }
-.ak-sol-fix-col { background: rgba(0,155,222,0.03); }
-.ak-sol-impact { font-weight: 700; color: #00c7b1; font-size: 11.5px; }
-
-/* PITCH GRID */
-.ak-pitch-wrap { padding: 0 40px 52px; }
-.ak-pitch-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-text-faint); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-.ak-pitch-label::after { content:''; flex:1; height:1px; background: var(--color-border); }
-.ak-pitch-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; }
-.ak-pitch-card { background: var(--color-surface-2); border: 1px solid var(--color-border); border-radius: var(--radius); padding: 20px; }
-.ak-pitch-card.accent { border-color: rgba(0,155,222,0.35); background: rgba(0,155,222,0.05); }
-.ak-pitch-num { font-family: var(--font-mono); font-size: 11px; color: #009bde; font-weight: 700; margin-bottom: 8px; }
-.ak-pitch-title { font-size: 14px; font-weight: 700; color: var(--color-text); margin-bottom: 8px; }
-.ak-pitch-body { font-size: 12px; color: var(--color-text-muted); line-height: 1.7; max-width: none; }
-
-@media (max-width: 900px) {
-  .ak-header { padding: 28px 20px 0; }
-  .ak-three-tier-wrap, .ak-sol-wrap, .ak-pitch-wrap { padding-left: 20px; padding-right: 20px; }
-  .ak-tier-row { flex-direction: column; }
-  .ak-tier-arr { display: none; }
-  .ak-sol-row { grid-template-columns: 1fr 1fr; }
-  .ak-kpis { width: 100%; }
-  .akpi { flex: 1; min-width: 0; }
-}
-@media (max-width: 560px) {
-  .ak-sol-row { grid-template-columns: 1fr; }
-}
-</style>
-
-<section class="akamai-section">
-  <!-- HEADER -->
-  <div class="ak-header">
-    <div class="ak-eyebrow"><div class="ak-pulse"></div>Strategic Board Pitch — Nirmata Holdings / Ben Oleary</div>
-    <div class="ak-header-row">
+  <!-- ============== FOOTER ============== -->
+  <footer class="footer">
+    <div class="container container--wide footer-grid">
       <div>
-        <h2 class="ak-title"><span class="akh">Akamai</span> is the Convergence Layer<br>Perplexity Doesn't Know It Needs Yet</h2>
-        <p class="ak-subtitle">Not a replacement for AWS, Azure, or CoreWeave — a dedicated inference distribution layer that plugs between Perplexity's AI factories and the end user, eliminating the hyperscaler round-trip entirely. The world's first NVIDIA AI Grid deployment. Live March 16, 2026.</p>
+        <p style="font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; letter-spacing: -.02em; color: var(--ink);">ΔTOM // Crisis Intelligence</p>
+        <p style="margin-top: var(--s-2); color: var(--ink-muted); max-width: 56ch;">A classified-style infrastructure intelligence brief. Single-page static application. Dark-first, theme-aware, motion-aware, mobile-responsive.</p>
+        <p style="margin-top: var(--s-3); font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-muted);">
+          Nirmata Holdings · ΔTOM · AntimatterAI · <a href="https://AtomDominator.com" style="color: var(--plasma); text-decoration: none;">AtomDominator.com</a>
+        </p>
       </div>
-      <div class="ak-kpis">
-        <div class="akpi">
-          <div class="akpi-v" style="color:#009bde;">4,400+</div>
-          <div class="akpi-l">Edge Locations</div>
-        </div>
-        <div class="akpi">
-          <div class="akpi-v" style="color:#00c7b1;">2.5×</div>
-          <div class="akpi-l">Latency Reduction</div>
-        </div>
-        <div class="akpi">
-          <div class="akpi-v" style="color:#f59e0b;">86%</div>
-          <div class="akpi-l">Cost Savings</div>
-        </div>
-        <div class="akpi">
-          <div class="akpi-v" style="color:#a78bfa;">3×</div>
-          <div class="akpi-l">Throughput</div>
-        </div>
+      <div class="footer-meta">
+        <span>v1.0.0</span>
+        <span>//</span>
+        <span>Built for executive forwarding</span>
+        <span>//</span>
+        <span>Honors prefers-reduced-motion</span>
       </div>
     </div>
-  </div>
+  </footer>
 
-  <!-- THREE TIER ARCHITECTURE -->
-  <div class="ak-three-tier-wrap">
-    <div class="ak-sol-label">Akamai Three-Tier Inference Architecture</div>
-    <div class="ak-tier-row">
-      <div class="ak-tier" style="border-left:3px solid rgba(0,155,222,0.5);background:rgba(0,155,222,0.04);">
-        <div class="ak-tier-badge" style="color:#009bde;">TIER 1 — THE EDGE</div>
-        <div class="ak-tier-title">4,400+ Edge Nodes</div>
-        <div class="ak-tier-body">NVIDIA RTX PRO 6000 Blackwell Server Edition GPUs deployed at points of presence globally (130+ countries, 1,200+ networks). Semantic caching + EdgeWorkers (WebAssembly) intercept Perplexity queries before they hit a centralized data center. Sub-50ms time-to-first-token for cached and lightweight inference.</div>
-        <div class="ak-tags">
-          <span class="ak-tag">RTX PRO 6000</span><span class="ak-tag">Semantic Cache</span><span class="ak-tag">EdgeWorkers</span><span class="ak-tag">WebAssembly</span><span class="ak-tag">Sub-50ms</span>
-        </div>
-      </div>
-      <div class="ak-tier-arr">→</div>
-      <div class="ak-tier" style="border-left:3px solid rgba(0,199,177,0.5);background:rgba(0,199,177,0.03);">
-        <div class="ak-tier-badge" style="color:#00c7b1;">TIER 2 — METRO CORE</div>
-        <div class="ak-tier-title">Dedicated GPU Clusters</div>
-        <div class="ak-tier-body">Multi-thousand RTX PRO 6000 GPU clusters at metro-scale data centers handle full LLM inference, multi-modal workloads, and continuous post-training for Perplexity's deeper reasoning and deep research features. Backed by a $200M 4-year enterprise contract already validating production-grade demand.</div>
-        <div class="ak-tags">
-          <span class="ak-tag">Full LLM Inference</span><span class="ak-tag">Multi-Modal</span><span class="ak-tag">Post-Training</span><span class="ak-tag">$200M Validated</span>
-        </div>
-      </div>
-      <div class="ak-tier-arr">→</div>
-      <div class="ak-tier" style="border-left:3px solid rgba(167,139,250,0.5);background:rgba(167,139,250,0.03);">
-        <div class="ak-tier-badge" style="color:#a78bfa;">TIER 3 — CLOUD IaaS + LKE</div>
-        <div class="ak-tier-title">Linode Kubernetes Engine</div>
-        <div class="ak-tier-body">LKE provides multicloud portability, demand-based autoscaling, and containerized AI workload management — built on vanilla Kubernetes + Linux with zero proprietary OS lock-in. Plugs over the existing AWS/Azure/CoreWeave stack as a unified orchestration tier. No rip-and-replace required.</div>
-        <div class="ak-tags">
-          <span class="ak-tag">LKE Enterprise</span><span class="ak-tag">No Lock-in</span><span class="ak-tag">Autoscaling</span><span class="ak-tag">Multicloud Portable</span>
-        </div>
-      </div>
+  <!-- ============== EVIDENCE DRAWER ============== -->
+  <div class="drawer-backdrop" data-evidence-close></div>
+  <aside class="drawer" id="evidence-drawer" role="dialog" aria-label="Evidence dossier" aria-modal="true">
+    <div class="drawer-header">
+      <h3>Evidence dossier · 6 sources</h3>
+      <button class="drawer-close" type="button" data-evidence-close aria-label="Close evidence drawer">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
     </div>
-  </div>
+    <div class="drawer-body" id="drawer-list"></div>
+  </aside>
 
-  <!-- SOLUTION MAPPING TABLE -->
-  <div class="ak-sol-wrap">
-    <div class="ak-sol-label">Perplexity Problem → Akamai Solution Mapping</div>
-    <div class="ak-sol-table">
-      <div class="ak-sol-row ak-sol-head">
-        <div class="ak-sol-col">Perplexity Problem</div>
-        <div class="ak-sol-col">Root Cause</div>
-        <div class="ak-sol-col">Akamai Solution</div>
-        <div class="ak-sol-col">Impact</div>
-      </div>
-      <div class="ak-sol-row">
-        <div class="ak-sol-col"><span class="ak-sol-prob">Peak-hour inference latency</span><span class="ak-sol-sub">10AM–2PM EST degradation</span></div>
-        <div class="ak-sol-col ak-sol-cause-col">Queries routing to centralized AWS/Azure/CoreWeave data centers, overwhelming capacity during peak demand windows</div>
-        <div class="ak-sol-col ak-sol-fix-col">Blackwell edge inference at 4,400+ nodes — queries served at point of contact, never reach a hyperscaler for standard search</div>
-        <div class="ak-sol-col"><span class="ak-sol-impact">2.5× latency cut, sub-50ms routing at edge</span></div>
-      </div>
-      <div class="ak-sol-row">
-        <div class="ak-sol-col"><span class="ak-sol-prob">Cross-provider egress costs</span><span class="ak-sol-sub">AWS ↔ Azure ↔ CoreWeave transfers</span></div>
-        <div class="ak-sol-col ak-sol-cause-col">Multi-cloud data movement between hyperscaler origins generates compounding egress fees on top of committed contract values</div>
-        <div class="ak-sol-col ak-sol-fix-col">Generous open-source egress policy on Akamai Cloud; inference stays at edge node — cross-datacenter transfer is eliminated for user traffic</div>
-        <div class="ak-sol-col"><span class="ak-sol-impact">Up to 86% cost reduction vs hyperscaler infra</span></div>
-      </div>
-      <div class="ak-sol-row">
-        <div class="ak-sol-col"><span class="ak-sol-prob">No unified orchestration</span><span class="ak-sol-sub">4 disparate compute planes</span></div>
-        <div class="ak-sol-col ak-sol-cause-col">AWS EFA/EKS + Azure Foundry + CoreWeave CKS + DGX Lepton have no common abstraction layer — each requires proprietary management tooling</div>
-        <div class="ak-sol-col ak-sol-fix-col">NVIDIA AI Grid intelligent orchestrator provides model affinity, semantic caching, and smart workload routing across all tiers via LKE</div>
-        <div class="ak-sol-col"><span class="ak-sol-impact">Single control plane; workload-aware routing</span></div>
-      </div>
-      <div class="ak-sol-row">
-        <div class="ak-sol-col"><span class="ak-sol-prob">Billing fragmentation</span><span class="ak-sol-sub">3 isolated cost ledgers</span></div>
-        <div class="ak-sol-col ak-sol-cause-col">No cross-provider credit visibility; billing tickets unresolvable by any single provider; invoice waivers requested as seen in the active support ticket</div>
-        <div class="ak-sol-col ak-sol-fix-col">Single Akamai vendor SLA and unified billing for inference layer; reduces 3-provider coordination to 1 for majority of user-facing query traffic</div>
-        <div class="ak-sol-col"><span class="ak-sol-impact">One SLA. One invoice. One escalation path.</span></div>
-      </div>
-      <div class="ak-sol-row">
-        <div class="ak-sol-col"><span class="ak-sol-prob">EU / MENA sovereign compliance</span><span class="ak-sol-sub">Geographic data residency risk</span></div>
-        <div class="ak-sol-col ak-sol-cause-col">Hyperscaler inference routes through US-based availability zones, creating GDPR and data residency exposure in regulated international markets</div>
-        <div class="ak-sol-col ak-sol-fix-col">Edge inference keeps data in-region at local node; localized fine-tuning capabilities ensure query data never leaves the user's legal jurisdiction</div>
-        <div class="ak-sol-col"><span class="ak-sol-impact">Compliance-native by architecture; data residency by default</span></div>
-      </div>
-      <div class="ak-sol-row">
-        <div class="ak-sol-col"><span class="ak-sol-prob">Support accountability gaps</span><span class="ak-sol-sub">Multi-vendor incident finger-pointing</span></div>
-        <div class="ak-sol-col ak-sol-cause-col">Incidents span 3+ vendor SLAs simultaneously; no provider owns the incident end-to-end; engineering burns capacity coordinating calls across all three</div>
-        <div class="ak-sol-col ak-sol-fix-col">Akamai owns the user-facing inference delivery SLA with direct enterprise escalation — 1 call instead of 3 for the overwhelming majority of incidents</div>
-        <div class="ak-sol-col"><span class="ak-sol-impact">Clear ownership; engineering capacity reclaimed</span></div>
-      </div>
-      <div class="ak-sol-row">
-        <div class="ak-sol-col"><span class="ak-sol-prob">Agentic AI feature latency</span><span class="ak-sol-sub">Shopping, deep research agents</span></div>
-        <div class="ak-sol-col ak-sol-cause-col">Agentic workloads require rapid context chaining — each round-trip to a centralized cluster multiplies latency per chain step, compounding for multi-step agents</div>
-        <div class="ak-sol-col ak-sol-fix-col">NVIDIA AI Enterprise stack + EdgeWorkers + WebAssembly edge functions execute lightweight agentic reasoning steps at the network edge</div>
-        <div class="ak-sol-col"><span class="ak-sol-impact">3× throughput for concurrent agentic chains</span></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- FOUR PITCH CARDS -->
-  <div class="ak-pitch-wrap">
-    <div class="ak-pitch-label">Board Pitch — Four Strategic Arguments</div>
-    <div class="ak-pitch-grid">
-      <div class="ak-pitch-card accent">
-        <div class="ak-pitch-num">01</div>
-        <h3 class="ak-pitch-title">Don't Replace — Layer</h3>
-        <p class="ak-pitch-body">Training stays on CoreWeave GB200. Fine-tuning stays on AWS P5. Large frontier model inference stays on Azure Foundry when model availability demands it. But the moment a Perplexity query hits the API, Akamai's AI Grid takes the handoff — routes to the nearest Blackwell edge node, serves from semantic cache when possible, returns a result in milliseconds without a hyperscaler round-trip. The existing infra becomes the backend factory. Akamai becomes the distribution network.</p>
-      </div>
-      <div class="ak-pitch-card">
-        <div class="ak-pitch-num">02</div>
-        <h3 class="ak-pitch-title">The Timing Is Surgical</h3>
-        <p class="ak-pitch-body">Akamai launched the AI Grid on March 16, 2026 — 13 days after the CoreWeave deal was signed, and exactly when Perplexity's infrastructure chaos was peaking. This isn't a future roadmap item: it's in production today, backed by a $200M enterprise customer contract that validates real-world scale. Perplexity would be the highest-profile inference-at-edge deployment on the planet at the exact moment that architecture is winning.</p>
-      </div>
-      <div class="ak-pitch-card">
-        <div class="ak-pitch-num">03</div>
-        <h3 class="ak-pitch-title">No Lock-In. Genuine Portability.</h3>
-        <p class="ak-pitch-body">AWS EKS, Azure AKS, and CoreWeave CKS are all proprietary Kubernetes forks with hidden migration costs. Akamai's LKE is built on vanilla Kubernetes + Linux — Perplexity's existing container workloads port immediately, with zero re-tooling and no future hostage leverage from the vendor. This is the anti-lock-in argument that every engineer on Perplexity's platform team will independently arrive at once the current chaos becomes unmanageable.</p>
-      </div>
-      <div class="ak-pitch-card">
-        <div class="ak-pitch-num">04</div>
-        <h3 class="ak-pitch-title">The Structural Moat Play</h3>
-        <p class="ak-pitch-body">Perplexity's core product promise is faster, better answers. If Akamai delivers sub-50ms inference at the network edge while Perplexity's competitors — ChatGPT, Gemini, Copilot — are still routing through centralized US data centers, Perplexity locks in a structural latency advantage that no amount of GPU procurement can replicate. Because it's not a compute advantage. It's a distribution advantage. And distribution advantages compound over time in ways compute advantages never do.</p>
-      </div>
-    </div>
-  </div>
-
-</section>
-
+  <script src="./app.js" defer></script>
 </body>
 </html>

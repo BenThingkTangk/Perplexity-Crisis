@@ -1,0 +1,13 @@
+{
+  "name": "perplexity-crisis",
+  "version": "1.1.0",
+  "private": true,
+  "description": "ΔTOM // Crisis Intelligence — static intelligence brief on Perplexity's multi-cloud orchestration crisis and the Akamai convergence layer.",
+  "scripts": {
+    "build": "echo 'Static site — no build step.'",
+    "vercel-build": "echo 'Static site — no build step.'"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
