@@ -74,6 +74,7 @@
       <nav class="nav-links" id="primary-nav" aria-label="Primary">
         <a href="#thesis">Thesis</a>
         <a href="#crisis-map">Crisis Map</a>
+        <a href="#cloudflare-routing-cache">Cloudflare Gap</a>
         <a href="#stack">Stack</a>
         <a href="#flywheel">Convergence</a>
         <a href="#pilot">Pilot</a>
@@ -442,6 +443,235 @@
             and put <b style="color:var(--plasma)">Akamai AI Grid</b> as the convergence layer above all of them
             that owns the user-facing runtime, the token economics, the latency guarantees, and the single SLA.
           </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== CLOUDFLARE ROUTING / CACHE GAP ============== -->
+    <section id="cloudflare-routing-cache" class="section section--cfgap">
+      <div class="container container--wide">
+        <div class="section-label reveal">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19a4.5 4.5 0 1 0-.5-9 6 6 0 1 0-11.5 2A4 4 0 0 0 6 19z"/></svg>
+          Routing &amp; cache · Cloudflare gap analysis
+        </div>
+        <h2 class="section-heading reveal" data-delay="1">
+          Cloudflare routes the front door. <em style="color:var(--plasma); font-style:normal; text-shadow: 0 0 24px var(--plasma-glow);">Akamai can own the AI runtime.</em>
+        </h2>
+        <p class="section-sub reveal" data-delay="2">
+          Perplexity's public edge appears Cloudflare-proxied, but the crisis pattern lives deeper: inference placement, billing/auth failover, semantic cache economics, and single-SLA orchestration.
+        </p>
+
+        <!-- Executive readout -->
+        <div class="cfgap-readout reveal" data-delay="2">
+          <div class="cfgap-readout__label"><span class="pip"></span> EXECUTIVE READOUT // CLOUDFLARE TODAY → AKAMAI TOMORROW</div>
+          <ul class="cfgap-readout__list">
+            <li>Perplexity appears to use <b>Cloudflare</b> as the public front-door layer for many web and API surfaces.</li>
+            <li>That likely gives them DNS/proxy routing, WAF, bot control, static CDN cache, API protection, and potentially AI Gateway-style controls.</li>
+            <li>But it does <b style="color:var(--danger)">not fully resolve</b> the documented crisis pattern: billing cascades, multi-cloud orchestration, GPU placement, TTFT spikes, cross-provider egress, and fragmented SLA ownership.</li>
+            <li><b style="color:var(--plasma)">Cloudflare keeps the front door fast and protected. Akamai can make the AI factory resilient.</b></li>
+          </ul>
+        </div>
+
+        <!-- Cloudflare today / cache working / cache breaks -->
+        <div class="cfgap-trio">
+          <article class="card cfgap-card reveal" data-delay="1">
+            <span class="corner-id">01 / FRONT DOOR</span>
+            <h3>What Cloudflare likely handles today</h3>
+            <ul role="list">
+              <li>DNS / proxy front door across www, api, console, status, enterprise, shopping subdomains</li>
+              <li>Load balancing with steering: failover order, latency/RTT, geo, proximity, least outstanding requests, weights, health checks, session affinity</li>
+              <li>Static asset / CDN cache acceleration</li>
+              <li>WAF, API, and bot controls</li>
+              <li>Potential AI Gateway: retries, rate limits, model fallback, exact-match response caching</li>
+            </ul>
+          </article>
+
+          <article class="card cfgap-card cfgap-card--ok reveal" data-delay="2">
+            <span class="corner-id">02 / WHERE CACHING WORKS</span>
+            <h3>Cache hits Cloudflare can claim</h3>
+            <ul role="list">
+              <li>Static web shell · JS · CSS · images · docs / status assets</li>
+              <li>Exact-repeat AI/API calls routed through an AI Gateway cache</li>
+              <li>Cache Reserve / upper-tier object persistence in R2 when configured</li>
+              <li>Origin egress reduction for cacheable, byte-identical content</li>
+            </ul>
+          </article>
+
+          <article class="card cfgap-card cfgap-card--break reveal" data-delay="3">
+            <span class="corner-id">03 / WHERE IT BREAKS</span>
+            <h3>Where exact-match caching fails Perplexity</h3>
+            <ul role="list">
+              <li>User prompts vary constantly — exact-match AI cache has <b>low hit rate</b> unless normalized or custom-keyed</li>
+              <li>RAG citations, embeddings, SERP retrieval, and synthesis need <b>semantic / embedding-aware</b> caching, not byte-identical request caching</li>
+              <li>Authenticated and org-specific responses must isolate cache by tenant, org, model, freshness, and source policy</li>
+              <li>Search answers go <b>stale quickly</b> — cache freshness governs answer quality, not just throughput</li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Failure map comparison table -->
+        <div class="card arch-card reveal" data-delay="3" style="margin-top: var(--s-10)">
+          <div class="cfgap-table-header">
+            <span class="pip"></span>
+            <b>CRISIS FAILURE MAP</b>
+            <span class="cfgap-table-header__sep">//</span>
+            <span>CLOUDFLARE vs AKAMAI WEDGE</span>
+          </div>
+          <table class="arch-table cfgap-table">
+            <thead>
+              <tr>
+                <th>Failure mode</th>
+                <th>What Cloudflare provides</th>
+                <th>Where it stops short</th>
+                <th>Akamai wedge</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="cfgap-row-dot" style="--c:#ef4444"></span> Billing Cascade</td>
+                <td>Retries · rate-limit · proxy guard</td>
+                <td>No credential or payment-state failover</td>
+                <td><b>Credential failover, payment-webhook circuit breaker, policy swap under 500ms</b></td>
+              </tr>
+              <tr>
+                <td><span class="cfgap-row-dot" style="--c:#f5b942"></span> Orchestration Chaos</td>
+                <td>Endpoint pool routing · health checks</td>
+                <td>No cross-provider convergence above AWS / Foundry / CoreWeave</td>
+                <td><b>AI Grid convergence fabric sitting above the hyperscalers</b></td>
+              </tr>
+              <tr>
+                <td><span class="cfgap-row-dot" style="--c:#00e6d3"></span> TTFT Spikes</td>
+                <td>Network distance reduction at the edge</td>
+                <td>Cannot decide where the inference itself should run</td>
+                <td><b>Inference placement · queue-aware routing · edge / regional GPU placement</b></td>
+              </tr>
+              <tr>
+                <td><span class="cfgap-row-dot" style="--c:#5aa4f7"></span> Support Fragmentation</td>
+                <td>Edge logs · WAF events · analytics</td>
+                <td>No SLA spanning AWS, Foundry, CoreWeave, and Perplexity internal runtime</td>
+                <td><b>One SLA owner across runtime + providers</b></td>
+              </tr>
+              <tr>
+                <td><span class="cfgap-row-dot" style="--c:#a855f7"></span> Egress Cost Drag</td>
+                <td>Object cache for static / origin offload</td>
+                <td>Exact-match cache has low hit rate on AI traffic</td>
+                <td><b>Semantic cache · token economics · cross-cloud egress minimization</b></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Akamai leadership wedge -->
+        <div class="cfgap-wedge reveal" data-delay="2">
+          <div class="cfgap-wedge__label"><span class="pip"></span> AKAMAI LEADERSHIP WEDGE</div>
+          <h3 class="cfgap-wedge__heading">Do not say "replace Cloudflare." Say <em>Cloudflare is the public shield; Akamai becomes the AI convergence fabric.</em></h3>
+          <div class="cfgap-wedge__grid">
+            <div>
+              <div class="cfgap-wedge__sub">Position</div>
+              <p>Akamai AI Grid / Inference Cloud sits <b>above</b> AWS, Microsoft Foundry / Azure, CoreWeave, and Perplexity API surfaces.</p>
+            </div>
+            <div>
+              <div class="cfgap-wedge__sub">Owns</div>
+              <p>Request placement · cache policy · failover · provider health · billing &amp; auth state · token economics · SLA reporting.</p>
+            </div>
+            <div>
+              <div class="cfgap-wedge__sub">Recommendation</div>
+              <p>Keep Cloudflare where it is strong. Add Akamai where the crisis actually lives: <b style="color:var(--plasma)">workload placement, semantic cache, and operational convergence.</b></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Proposed architecture strip -->
+        <div class="cfgap-arch reveal" data-delay="3">
+          <div class="cfgap-arch__label"><span class="pip"></span> PROPOSED ARCHITECTURE // REQUEST FLOW</div>
+          <div class="cfgap-arch__flow" role="list">
+            <div class="cfgap-arch__node" role="listitem">
+              <div class="cfgap-arch__num">01</div>
+              <div class="cfgap-arch__title">Client / Comet / API users</div>
+              <div class="cfgap-arch__sub">Inbound request surface</div>
+            </div>
+            <div class="cfgap-arch__arrow" aria-hidden="true">→</div>
+            <div class="cfgap-arch__node cfgap-arch__node--cf" role="listitem">
+              <div class="cfgap-arch__num">02</div>
+              <div class="cfgap-arch__title">Cloudflare</div>
+              <div class="cfgap-arch__sub">DNS · WAF · bot · public edge</div>
+            </div>
+            <div class="cfgap-arch__arrow" aria-hidden="true">→</div>
+            <div class="cfgap-arch__node cfgap-arch__node--akamai" role="listitem">
+              <div class="cfgap-arch__num">03</div>
+              <div class="cfgap-arch__title">Akamai AI Convergence Fabric</div>
+              <div class="cfgap-arch__sub">Policy engine: billing/auth · provider health · TTFT · cache hit probability · data locality · cost/token</div>
+            </div>
+            <div class="cfgap-arch__arrow" aria-hidden="true">→</div>
+            <div class="cfgap-arch__node" role="listitem">
+              <div class="cfgap-arch__num">04</div>
+              <div class="cfgap-arch__title">Workload targets</div>
+              <div class="cfgap-arch__sub">Akamai edge / regional inference · AWS · Azure / Foundry · CoreWeave · Perplexity internal</div>
+            </div>
+            <div class="cfgap-arch__arrow" aria-hidden="true">→</div>
+            <div class="cfgap-arch__node cfgap-arch__node--obs" role="listitem">
+              <div class="cfgap-arch__num">05</div>
+              <div class="cfgap-arch__title">Observability</div>
+              <div class="cfgap-arch__sub">Single SLA · per-provider health · cache hit rate · TTFT · egress · incident owner</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Leadership closing line -->
+        <div class="cfgap-closing reveal" data-delay="3">
+          <div class="cfgap-closing__label"><span class="pip"></span> LEADERSHIP CLOSING LINE</div>
+          <blockquote>
+            Cloudflare routes the request. <em>Akamai decides where the intelligence should run.</em>
+          </blockquote>
+        </div>
+
+        <!-- Source strip -->
+        <div class="cfgap-sources reveal" data-delay="3">
+          <div class="cfgap-sources__label"><span class="pip"></span> SOURCE STRIP // PUBLIC EVIDENCE</div>
+          <ul class="cfgap-sources__list">
+            <li>
+              <a href="https://www.vedbex.com/subdomain-finder/perplexity.ai" target="_blank" rel="noopener noreferrer">
+                <span class="cfgap-src-tag">Subdomain map</span>
+                <span class="cfgap-src-body">Public subdomains for perplexity.ai sitting behind Cloudflare reverse proxy (www, api, console, status, enterprise, shopping, …)</span>
+                <span class="cfgap-src-host">vedbex.com</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://developers.cloudflare.com/reference-architecture/architectures/load-balancing/" target="_blank" rel="noopener noreferrer">
+                <span class="cfgap-src-tag">Cloudflare LB</span>
+                <span class="cfgap-src-body">Load balancing reference architecture: pool / endpoint steering, failover, latency, geo, proximity, weights, health checks, session affinity</span>
+                <span class="cfgap-src-host">developers.cloudflare.com</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://developers.cloudflare.com/ai-gateway/features/caching/" target="_blank" rel="noopener noreferrer">
+                <span class="cfgap-src-tag">AI Gateway · caching</span>
+                <span class="cfgap-src-body">Default AI Gateway cache hashes provider, endpoint, model, auth header, and full request body — exact-match-oriented unless custom keyed</span>
+                <span class="cfgap-src-host">developers.cloudflare.com</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://developers.cloudflare.com/ai-gateway/features/dynamic-routing/json-configuration/" target="_blank" rel="noopener noreferrer">
+                <span class="cfgap-src-tag">AI Gateway · routing</span>
+                <span class="cfgap-src-body">Dynamic routing JSON configuration: retries, model fallback, rate limits — gateway-level controls without runtime placement</span>
+                <span class="cfgap-src-host">developers.cloudflare.com</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://developers.cloudflare.com/cache/advanced-configuration/cache-reserve/" target="_blank" rel="noopener noreferrer">
+                <span class="cfgap-src-tag">Cache Reserve</span>
+                <span class="cfgap-src-body">R2-backed persistent cache for cacheable objects — strongest for static / rule-bound content, not live inference orchestration</span>
+                <span class="cfgap-src-host">developers.cloudflare.com</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://www.akamai.com/blog/cloud/distributed-ai-inference-why-placement-new-bottleneck" target="_blank" rel="noopener noreferrer">
+                <span class="cfgap-src-tag">Akamai · placement</span>
+                <span class="cfgap-src-body">Distributed AI inference: bottlenecks moved from raw compute to inference placement — hyperscale training · regional inference · edge real-time</span>
+                <span class="cfgap-src-host">akamai.com</span>
+              </a>
+            </li>
+          </ul>
         </div>
       </div>
     </section>
