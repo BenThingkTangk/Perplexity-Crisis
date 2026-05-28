@@ -7,7 +7,7 @@
 const MODES = {
   simple: {
     label: 'Simple',
-    greeting: 'Simple mode online. Ask me to make the Akamai thesis obvious, clean, and impossible to misunderstand.',
+    greeting: '<strong>Akamai AI Grid Copilot is online.</strong> Ask me to make the Akamai wedge for Perplexity obvious, clean, and impossible to misunderstand.',
     chips: [
       'Walk me through the end-to-end failure flow',
       'Explain this like I have 30 seconds',
@@ -245,7 +245,7 @@ const FALLBACK = {
     msg.className = 'atom-message';
     msg.dataset.role = role;
     msg.innerHTML = `
-      <div class="atom-message__who">${role === 'user' ? 'You' : 'ATOM'}</div>
+      <div class="atom-message__who">${role === 'user' ? 'You' : 'Akamai Copilot'}</div>
       <div class="atom-message__text">${html}</div>
     `;
     body.appendChild(msg);
@@ -292,18 +292,52 @@ const FALLBACK = {
     return FALLBACK[mode];
   }
 
-  function submitPrompt(rawPrompt) {
+  async function submitPrompt(rawPrompt) {
     const prompt = (rawPrompt || '').trim();
     if (!prompt) return;
     appendMessage('user', `<p>${escapeHtml(prompt)}</p>`);
     input.value = '';
+    input.disabled = true;
 
-    // Tiny "thinking" placeholder to feel agentic (no real network call).
-    const thinking = appendMessage('assistant', '<p style="color: var(--ink-muted);">analyzing…</p>');
-    const delay = 280 + Math.random() * 260;
-    window.setTimeout(() => {
-      thinking.querySelector('.atom-message__text').innerHTML = pickResponse(currentMode, prompt);
-    }, delay);
+    const thinking = appendMessage('assistant', '<p style="color: var(--ink-muted);"><span class="atom-typing"><i></i><i></i><i></i></span> Akamai AI Grid is thinking…</p>');
+    const textEl = thinking.querySelector('.atom-message__text');
+
+    // Always have a deterministic answer ready — we'll only show it on failure.
+    const deterministic = pickResponse(currentMode, prompt);
+
+    try {
+      const res = await fetch('/api/atom-agent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt, mode: currentMode }),
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      const live = (data && typeof data.html === 'string' && data.html.trim()) ? data.html : deterministic;
+      const badge = data && data.source === 'perplexity'
+        ? '<div class="atom-badge atom-badge--live"><span class="pip"></span>Live · sonar-pro</div>'
+        : '<div class="atom-badge atom-badge--offline"><span class="pip"></span>Brief mode · offline copilot</div>';
+      const citationsHtml = Array.isArray(data && data.citations) && data.citations.length
+        ? '<div class="atom-citations"><div class="atom-citations__label">Sources</div><ol>' +
+            data.citations.slice(0, 6).map((c) => {
+              const url = typeof c === 'string' ? c : (c && c.url) || '';
+              if (!/^https?:\/\//i.test(url)) return '';
+              const host = url.replace(/^https?:\/\//, '').split('/')[0];
+              return `<li><a href="${url}" target="_blank" rel="noopener noreferrer">${host}</a></li>`;
+            }).join('') +
+          '</ol></div>'
+        : '';
+      textEl.innerHTML = badge + live + citationsHtml;
+      wireMessageLinks(thinking);
+    } catch (err) {
+      textEl.innerHTML =
+        '<div class="atom-badge atom-badge--offline"><span class="pip"></span>Brief mode · offline copilot</div>' +
+        deterministic;
+      wireMessageLinks(thinking);
+    } finally {
+      input.disabled = false;
+      input.focus({ preventScroll: true });
+    }
   }
 
   /* ------------ Open / close ------------ */

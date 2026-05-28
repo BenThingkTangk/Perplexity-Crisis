@@ -44,6 +44,10 @@
     "api/discord-github-bot.js": {
       "maxDuration": 10,
       "memory": 256
+    },
+    "api/atom-agent.js": {
+      "maxDuration": 30,
+      "memory": 512
     }
   }
 }
