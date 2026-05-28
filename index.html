@@ -221,7 +221,7 @@
         + '<span class="pip"></span> SEVEN STAGE PIPELINE · USER DEMAND → AKAMAI FIX'
         + '<span class="flow-canvas__hint">Click any node · arrow keys to navigate</span></div>'
         + '<svg class="flow-canvas__svg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet">'
-        + '<text x="' + (W/2) + '" y="42" text-anchor="middle" font-family="JetBrains Mono" font-size="10" letter-spacing="3" fill="#5a6478">USER REGION  →  PUBLIC EDGE  →  CACHE  →  AUTH/BILLING  →  PLACEMENT  →  RETRIEVAL  →  STREAM</text>'
+        + '<text x="' + (W/2) + '" y="42" text-anchor="middle" font-family="Plus Jakarta Sans, JetBrains Mono" font-size="11" letter-spacing="3" fill="#a8a9d6" opacity=".75">REQUEST  ·  EDGE  ·  CACHE  ·  AUTH  ·  PLACEMENT  ·  RETRIEVAL  ·  STREAM</text>'
         + edges + nodes
         + '</svg>';
     }
@@ -1125,201 +1125,224 @@
       </div>
     </section>
 
-    <!-- ============== CLAIMS RISK MATRIX ============== -->
+    <!-- ============== CLAIMS RISK MATRIX (2D: Confidence × Executive Impact) ============== -->
     <section id="claims-risk" class="section section--claims">
       <div class="container container--wide">
         <div class="section-label reveal">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg>
           Claims risk matrix
         </div>
         <h2 class="section-heading reveal" data-delay="1">
-          Every claim is labeled. <em style="color:var(--plasma); font-style:normal; text-shadow: 0 0 24px var(--plasma-glow);">Confidence is visible.</em>
+          Confidence on one axis. <em style="color:var(--atom-secondary,#a2a3e9); font-style:normal;">Executive impact on the other.</em>
         </h2>
         <p class="section-sub reveal" data-delay="2">
-          The dashboard never overstates. Each architecture claim is tagged <b style="color:var(--atom-secondary,#a2a3e9)">Confirmed</b>, <b style="color:#5aa4f7">Likely</b>, <b style="color:#f5b942">Unknown</b>, or <b style="color:#8587e3">Ask Perplexity</b> — sourced to primary public references in the evidence drawer.
+          The dashboard never overstates. Every architectural claim sits on a 2D grid — confidence (rows) by executive impact (columns) — so leadership sees at a glance what is safe to say, what is roadmap, and what to ask Perplexity directly.
         </p>
 
-        <div class="claims-grid reveal" data-delay="3">
-          <article class="claim-card claim-card--confirmed">
-            <div class="claim-card__head"><span class="claim-card__dot"></span><span class="claim-card__status">Confirmed</span></div>
-            <div class="claim-card__body">
-              <p class="claim-card__title">Akamai · 4,400+ global edge PoPs</p>
-              <p class="claim-card__src">Akamai AI Grid press release · March 2026</p>
+        <div class="risk-matrix reveal" data-delay="3" id="risk-matrix">
+          <div class="risk-matrix__head">
+            <div class="risk-matrix__yaxis"><span>Confidence</span></div>
+            <div class="risk-matrix__cols">
+              <div class="risk-matrix__col-label">Low impact</div>
+              <div class="risk-matrix__col-label">Medium impact</div>
+              <div class="risk-matrix__col-label">High impact</div>
             </div>
-          </article>
-          <article class="claim-card claim-card--confirmed">
-            <div class="claim-card__head"><span class="claim-card__dot"></span><span class="claim-card__status">Confirmed</span></div>
-            <div class="claim-card__body">
-              <p class="claim-card__title">Thousands of NVIDIA RTX PRO 6000 Blackwell GPUs deploying at the edge</p>
-              <p class="claim-card__src">Akamai Blackwell GPU press release · March 3, 2026</p>
+          </div>
+          <div class="risk-matrix__body">
+            <!-- Row 1: Confirmed -->
+            <div class="risk-row" data-row="confirmed">
+              <div class="risk-row__label">
+                <span class="risk-row__dot" style="--c:#a2a3e9"></span>
+                <span class="risk-row__name">Confirmed</span>
+                <span class="risk-row__hint">Primary source · safe to state</span>
+              </div>
+              <div class="risk-cell" data-impact="low">
+                <button class="risk-tile" data-claim="c1" style="--c:#a2a3e9">
+                  <span class="risk-tile__title">Akamai EdgeWorkers cold start &lt;5&nbsp;ms</span>
+                  <span class="risk-tile__src">Akamai tech docs</span>
+                </button>
+              </div>
+              <div class="risk-cell" data-impact="medium">
+                <button class="risk-tile" data-claim="c2" style="--c:#a2a3e9">
+                  <span class="risk-tile__title">Search API · 358&nbsp;ms median · P95 &lt;800&nbsp;ms</span>
+                  <span class="risk-tile__src">Perplexity Research May 2026</span>
+                </button>
+                <button class="risk-tile" data-claim="c3" style="--c:#a2a3e9">
+                  <span class="risk-tile__title">Public AI Gateway · exact-match cache only</span>
+                  <span class="risk-tile__src">Cloudflare docs · independent analyses</span>
+                </button>
+              </div>
+              <div class="risk-cell" data-impact="high">
+                <button class="risk-tile" data-claim="c4" style="--c:#a2a3e9">
+                  <span class="risk-tile__title">Akamai · 4,400+ global edge PoPs</span>
+                  <span class="risk-tile__src">Akamai AI Grid PR March 2026</span>
+                </button>
+                <button class="risk-tile" data-claim="c5" style="--c:#a2a3e9">
+                  <span class="risk-tile__title">AI Grid target · sub-50&nbsp;ms TTFT</span>
+                  <span class="risk-tile__src">Akamai AI Grid PR</span>
+                </button>
+                <button class="risk-tile" data-claim="c6" style="--c:#a2a3e9">
+                  <span class="risk-tile__title">25+ Perplexity API outages since May 2025</span>
+                  <span class="risk-tile__src">StatusGator public record</span>
+                </button>
+                <button class="risk-tile" data-claim="c7" style="--c:#a2a3e9">
+                  <span class="risk-tile__title">Credit-based metering · 401/402 cascade</span>
+                  <span class="risk-tile__src">Perplexity API documentation</span>
+                </button>
+              </div>
             </div>
-          </article>
-          <article class="claim-card claim-card--confirmed">
-            <div class="claim-card__head"><span class="claim-card__dot"></span><span class="claim-card__status">Confirmed</span></div>
-            <div class="claim-card__body">
-              <p class="claim-card__title">AI Grid target: sub-50&nbsp;ms TTFT for select real-time workloads</p>
-              <p class="claim-card__src">Akamai AI Grid press release</p>
+            <!-- Row 2: Likely -->
+            <div class="risk-row" data-row="likely">
+              <div class="risk-row__label">
+                <span class="risk-row__dot" style="--c:#5aa4f7"></span>
+                <span class="risk-row__name">Likely</span>
+                <span class="risk-row__hint">Inferable · qualify in writing</span>
+              </div>
+              <div class="risk-cell" data-impact="low"></div>
+              <div class="risk-cell" data-impact="medium">
+                <button class="risk-tile" data-claim="l1" style="--c:#5aa4f7">
+                  <span class="risk-tile__title">Inference concentrated in us-east-1</span>
+                  <span class="risk-tile__src">Benchmarks from us-east-1</span>
+                </button>
+              </div>
+              <div class="risk-cell" data-impact="high">
+                <button class="risk-tile" data-claim="l2" style="--c:#5aa4f7">
+                  <span class="risk-tile__title">Akamai semantic caching at edge · roadmap</span>
+                  <span class="risk-tile__src">PR uses &ldquo;will leverage&rdquo; language</span>
+                </button>
+              </div>
             </div>
-          </article>
-          <article class="claim-card claim-card--confirmed">
-            <div class="claim-card__head"><span class="claim-card__dot"></span><span class="claim-card__status">Confirmed</span></div>
-            <div class="claim-card__body">
-              <p class="claim-card__title">Up to 2.5× latency reduction vs. traditional hyperscaler</p>
-              <p class="claim-card__src">Akamai Inference Cloud · cited benchmark</p>
+            <!-- Row 3: Unknown -->
+            <div class="risk-row" data-row="unknown">
+              <div class="risk-row__label">
+                <span class="risk-row__dot" style="--c:#f5b942"></span>
+                <span class="risk-row__name">Unknown</span>
+                <span class="risk-row__hint">Do not state as fact</span>
+              </div>
+              <div class="risk-cell" data-impact="low">
+                <button class="risk-tile" data-claim="u1" style="--c:#f5b942">
+                  <span class="risk-tile__title">Specific payment processor in use</span>
+                  <span class="risk-tile__src">Not publicly disclosed</span>
+                </button>
+              </div>
+              <div class="risk-cell" data-impact="medium">
+                <button class="risk-tile" data-claim="u2" style="--c:#f5b942">
+                  <span class="risk-tile__title">AI router implementation · Worker vs. custom proxy</span>
+                  <span class="risk-tile__src">Not publicly disclosed</span>
+                </button>
+              </div>
+              <div class="risk-cell" data-impact="high">
+                <button class="risk-tile" data-claim="u3" style="--c:#f5b942">
+                  <span class="risk-tile__title">Front-door routing in front of api.perplexity.ai</span>
+                  <span class="risk-tile__src">No public statement</span>
+                </button>
+              </div>
             </div>
-          </article>
-          <article class="claim-card claim-card--confirmed">
-            <div class="claim-card__head"><span class="claim-card__dot"></span><span class="claim-card__status">Confirmed</span></div>
-            <div class="claim-card__body">
-              <p class="claim-card__title">Up to 86% AI inference cost savings vs. traditional hyperscaler</p>
-              <p class="claim-card__src">Akamai Blackwell GPU press release</p>
+            <!-- Row 4: Ask Perplexity -->
+            <div class="risk-row" data-row="ask">
+              <div class="risk-row__label">
+                <span class="risk-row__dot" style="--c:#8587e3"></span>
+                <span class="risk-row__name">Ask Perplexity</span>
+                <span class="risk-row__hint">Discovery question for the next meeting</span>
+              </div>
+              <div class="risk-cell" data-impact="low"></div>
+              <div class="risk-cell" data-impact="medium">
+                <button class="risk-tile" data-claim="a1" style="--c:#8587e3">
+                  <span class="risk-tile__title">Foundry endpoint topology vs. Sonar</span>
+                  <span class="risk-tile__src">Discovery question</span>
+                </button>
+              </div>
+              <div class="risk-cell" data-impact="high">
+                <button class="risk-tile" data-claim="a2" style="--c:#8587e3">
+                  <span class="risk-tile__title">Is the credit-entitlement check synchronous on every API call?</span>
+                  <span class="risk-tile__src">Discovery question</span>
+                </button>
+                <button class="risk-tile" data-claim="a3" style="--c:#8587e3">
+                  <span class="risk-tile__title">us-east-1 failover · AWS ↔ CoreWeave handoff time</span>
+                  <span class="risk-tile__src">Discovery question</span>
+                </button>
+              </div>
             </div>
-          </article>
-          <article class="claim-card claim-card--confirmed">
-            <div class="claim-card__head"><span class="claim-card__dot"></span><span class="claim-card__status">Confirmed</span></div>
-            <div class="claim-card__body">
-              <p class="claim-card__title">AWS is Perplexity's primary cloud provider</p>
-              <p class="claim-card__src">Reuters Jan 2026 · AWS case study</p>
+          </div>
+          <div class="risk-matrix__xaxis"><span>Executive impact &rarr;</span></div>
+
+          <aside class="risk-detail" id="risk-detail" aria-live="polite">
+            <div class="risk-detail__eyebrow" id="risk-detail-eyebrow"><span class="risk-detail__dot" style="--c:#a2a3e9"></span>Confirmed · high impact</div>
+            <h3 class="risk-detail__title" id="risk-detail-title">Akamai · 4,400+ global edge PoPs</h3>
+            <p class="risk-detail__body" id="risk-detail-body">A confirmed primary-source claim. Safe to state in any executive briefing without qualification. Anchors the geographic distribution argument behind AI Grid.</p>
+            <div class="risk-detail__meta">
+              <span class="risk-detail__src-label">Source</span>
+              <span class="risk-detail__src" id="risk-detail-src">Akamai AI Grid press release · March 2026</span>
             </div>
-          </article>
-          <article class="claim-card claim-card--confirmed">
-            <div class="claim-card__head"><span class="claim-card__dot"></span><span class="claim-card__status">Confirmed</span></div>
-            <div class="claim-card__body">
-              <p class="claim-card__title">$750M / 3-year Perplexity ↔ Microsoft Foundry deal</p>
-              <p class="claim-card__src">Reuters · January 2026</p>
-            </div>
-          </article>
-          <article class="claim-card claim-card--confirmed">
-            <div class="claim-card__head"><span class="claim-card__dot"></span><span class="claim-card__status">Confirmed</span></div>
-            <div class="claim-card__body">
-              <p class="claim-card__title">CoreWeave GB200 NVL72 clusters for Perplexity</p>
-              <p class="claim-card__src">CoreWeave press release · March 4, 2026</p>
-            </div>
-          </article>
-          <article class="claim-card claim-card--confirmed">
-            <div class="claim-card__head"><span class="claim-card__dot"></span><span class="claim-card__status">Confirmed</span></div>
-            <div class="claim-card__body">
-              <p class="claim-card__title">Search API median latency 358&nbsp;ms · P95 &lt; 800&nbsp;ms · from us-east-1</p>
-              <p class="claim-card__src">Perplexity Research · May 2026</p>
-            </div>
-          </article>
-          <article class="claim-card claim-card--confirmed">
-            <div class="claim-card__head"><span class="claim-card__dot"></span><span class="claim-card__status">Confirmed</span></div>
-            <div class="claim-card__body">
-              <p class="claim-card__title">25+ Perplexity API outages publicly tracked since May 2025</p>
-              <p class="claim-card__src">StatusGator · public incident history</p>
-            </div>
-          </article>
-          <article class="claim-card claim-card--confirmed">
-            <div class="claim-card__head"><span class="claim-card__dot"></span><span class="claim-card__status">Confirmed</span></div>
-            <div class="claim-card__body">
-              <p class="claim-card__title">Public AI Gateway products provide exact-match cache only</p>
-              <p class="claim-card__src">Cloudflare AI Gateway docs · independent analyses</p>
-            </div>
-          </article>
-          <article class="claim-card claim-card--confirmed">
-            <div class="claim-card__head"><span class="claim-card__dot"></span><span class="claim-card__status">Confirmed</span></div>
-            <div class="claim-card__body">
-              <p class="claim-card__title">Perplexity API uses credit-based per-token metering · 401/402 on exhaustion</p>
-              <p class="claim-card__src">Perplexity API documentation</p>
-            </div>
-          </article>
-          <article class="claim-card claim-card--likely">
-            <div class="claim-card__head"><span class="claim-card__dot"></span><span class="claim-card__status">Likely</span></div>
-            <div class="claim-card__body">
-              <p class="claim-card__title">Perplexity inference concentrated in us-east-1</p>
-              <p class="claim-card__src">Benchmarks from us-east-1; not confirmed as exclusive</p>
-            </div>
-          </article>
-          <article class="claim-card claim-card--likely">
-            <div class="claim-card__head"><span class="claim-card__dot"></span><span class="claim-card__status">Likely</span></div>
-            <div class="claim-card__body">
-              <p class="claim-card__title">Akamai semantic caching at edge · roadmap, not GA today</p>
-              <p class="claim-card__src">Akamai AI Grid press release uses "will leverage" language</p>
-            </div>
-          </article>
-          <article class="claim-card claim-card--unknown">
-            <div class="claim-card__head"><span class="claim-card__dot"></span><span class="claim-card__status">Unknown</span></div>
-            <div class="claim-card__body">
-              <p class="claim-card__title">Front-door routing implementation in front of api.perplexity.ai</p>
-              <p class="claim-card__src">No public statement · ask Perplexity</p>
-            </div>
-          </article>
-          <article class="claim-card claim-card--unknown">
-            <div class="claim-card__head"><span class="claim-card__dot"></span><span class="claim-card__status">Unknown</span></div>
-            <div class="claim-card__body">
-              <p class="claim-card__title">Which managed Worker or custom router serves as the AI router</p>
-              <p class="claim-card__src">Not publicly disclosed</p>
-            </div>
-          </article>
-          <article class="claim-card claim-card--ask">
-            <div class="claim-card__head"><span class="claim-card__dot"></span><span class="claim-card__status">Ask Perplexity</span></div>
-            <div class="claim-card__body">
-              <p class="claim-card__title">Is the billing entitlement check synchronous on every API call?</p>
-              <p class="claim-card__src">Discovery question · next meeting</p>
-            </div>
-          </article>
-          <article class="claim-card claim-card--ask">
-            <div class="claim-card__head"><span class="claim-card__dot"></span><span class="claim-card__status">Ask Perplexity</span></div>
-            <div class="claim-card__body">
-              <p class="claim-card__title">us-east-1 failover behavior · AWS ↔ CoreWeave handoff time</p>
-              <p class="claim-card__src">Discovery question · next meeting</p>
-            </div>
-          </article>
+          </aside>
         </div>
       </div>
     </section>
 
-    <!-- ============== INFRASTRUCTURE TIMELINE ============== -->
+    <!-- ============== INFRASTRUCTURE TIMELINE (stepper + active detail) ============== -->
     <section id="infra-timeline" class="section section--infra-timeline">
       <div class="container container--wide">
         <div class="section-label reveal">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           Infrastructure timeline
         </div>
-        <h2 class="section-heading reveal" data-delay="1">
-          The architecture accelerated. <em style="color:var(--plasma); font-style:normal; text-shadow: 0 0 24px var(--plasma-glow);">The coordination did not.</em>
+        <h2 class="section-heading section-heading--md reveal" data-delay="1">
+          The architecture accelerated. <em style="color:var(--atom-secondary,#a2a3e9); font-style:normal;">The coordination did not.</em>
         </h2>
         <p class="section-sub reveal" data-delay="2">
-          A horizontal record of the public deal history and incident cluster — each event sourced to a primary public reference.
+          Five public milestones from January to May 2026 — each sourced. Click a node to open its primary reference.
         </p>
 
-        <div class="infra-timeline reveal" data-delay="3">
-          <div class="infra-timeline__rail"></div>
-          <article class="infra-timeline__node" style="--c:#f5b942">
-            <div class="infra-timeline__date">Jan 21, 2026</div>
-            <div class="infra-timeline__dot"></div>
-            <div class="infra-timeline__title">Microsoft Foundry · $750M</div>
-            <div class="infra-timeline__body">Three-year commitment makes Foundry the main AI platform for model acquisition (OpenAI, Anthropic, xAI). AWS remains primary cloud.</div>
-            <div class="infra-timeline__src">Reuters</div>
-          </article>
-          <article class="infra-timeline__node" style="--c:#a2a3e9">
-            <div class="infra-timeline__date">Mar 3, 2026</div>
-            <div class="infra-timeline__dot"></div>
-            <div class="infra-timeline__title">Akamai · Blackwell GPU deployment</div>
-            <div class="infra-timeline__body">Thousands of NVIDIA RTX PRO 6000 Blackwell Server Edition GPUs across the edge network.</div>
-            <div class="infra-timeline__src">Akamai press release</div>
-          </article>
-          <article class="infra-timeline__node" style="--c:#ff7355">
-            <div class="infra-timeline__date">Mar 4, 2026</div>
-            <div class="infra-timeline__dot"></div>
-            <div class="infra-timeline__title">CoreWeave · GB200 NVL72</div>
-            <div class="infra-timeline__body">Multi-year strategic partnership · dedicated GB200 NVL72-powered clusters for Perplexity's AI inference workloads.</div>
-            <div class="infra-timeline__src">CoreWeave press release</div>
-          </article>
-          <article class="infra-timeline__node" style="--c:#00e6d3">
-            <div class="infra-timeline__date">Mar 16, 2026</div>
-            <div class="infra-timeline__dot"></div>
-            <div class="infra-timeline__title">Akamai AI Grid · launch</div>
-            <div class="infra-timeline__body">Intelligent orchestration for distributed inference across 4,400+ edge locations. Sub-50&nbsp;ms TTFT target for select workloads.</div>
-            <div class="infra-timeline__src">Akamai press release</div>
-          </article>
-          <article class="infra-timeline__node" style="--c:#ef4444">
-            <div class="infra-timeline__date">May 8, 2026</div>
-            <div class="infra-timeline__dot"></div>
-            <div class="infra-timeline__title">Perplexity API · incident cluster</div>
-            <div class="infra-timeline__body">Sonar API down-severity incident plus two major incidents · "service unavailable due to internal server error" acknowledged.</div>
-            <div class="infra-timeline__src">StatusGator</div>
+        <div class="tl reveal" data-delay="3" id="tl">
+          <div class="tl__rail" aria-hidden="true">
+            <div class="tl__rail-line"></div>
+            <div class="tl__rail-progress" id="tl-rail-progress"></div>
+          </div>
+          <div class="tl__steps" role="tablist" aria-label="Infrastructure timeline">
+            <button class="tl__step is-active" role="tab" aria-selected="true" data-tl-idx="0" style="--c:#f5b942">
+              <span class="tl__dot"></span>
+              <span class="tl__date">Jan 21, 2026</span>
+              <span class="tl__step-title">Microsoft Foundry</span>
+              <span class="tl__step-sub">$750M · 3 years</span>
+            </button>
+            <button class="tl__step" role="tab" aria-selected="false" data-tl-idx="1" style="--c:#a2a3e9">
+              <span class="tl__dot"></span>
+              <span class="tl__date">Mar 3, 2026</span>
+              <span class="tl__step-title">Akamai Blackwell</span>
+              <span class="tl__step-sub">RTX PRO 6000 deploy</span>
+            </button>
+            <button class="tl__step" role="tab" aria-selected="false" data-tl-idx="2" style="--c:#ff7355">
+              <span class="tl__dot"></span>
+              <span class="tl__date">Mar 4, 2026</span>
+              <span class="tl__step-title">CoreWeave</span>
+              <span class="tl__step-sub">GB200 NVL72</span>
+            </button>
+            <button class="tl__step" role="tab" aria-selected="false" data-tl-idx="3" style="--c:#00e6d3">
+              <span class="tl__dot"></span>
+              <span class="tl__date">Mar 16, 2026</span>
+              <span class="tl__step-title">Akamai AI Grid</span>
+              <span class="tl__step-sub">Launch · orchestration</span>
+            </button>
+            <button class="tl__step" role="tab" aria-selected="false" data-tl-idx="4" style="--c:#ef4444">
+              <span class="tl__dot"></span>
+              <span class="tl__date">May 8, 2026</span>
+              <span class="tl__step-title">Sonar API incidents</span>
+              <span class="tl__step-sub">Public outage cluster</span>
+            </button>
+          </div>
+          <article class="tl__detail" id="tl-detail" aria-live="polite">
+            <div class="tl__detail-eyebrow" id="tl-detail-eyebrow"><span class="tl__detail-pip" style="--c:#f5b942"></span>Jan 21, 2026 · Microsoft Foundry</div>
+            <h3 class="tl__detail-title" id="tl-detail-title">$750M / 3-year model-acquisition deal</h3>
+            <p class="tl__detail-body" id="tl-detail-body">Three-year commitment makes Foundry the main AI platform for model acquisition (OpenAI, Anthropic, xAI). AWS remains the primary cloud — Foundry is additive, not a replacement.</p>
+            <div class="tl__detail-meta">
+              <div class="tl__detail-stat"><b>$750M</b><span>commitment</span></div>
+              <div class="tl__detail-stat"><b>3 yr</b><span>term</span></div>
+              <div class="tl__detail-stat"><b>OpenAI · Anthropic · xAI</b><span>model access</span></div>
+            </div>
+            <div class="tl__detail-src">
+              <span class="tl__detail-src-label">Source</span>
+              <span class="tl__detail-src-name" id="tl-detail-src">Reuters · January 2026</span>
+            </div>
           </article>
         </div>
       </div>
@@ -1339,19 +1362,24 @@
           A cinematic walkthrough from user request to streaming response — front-door routing uncertainty, exact-match cache gaps, billing/auth fragility, multi-cloud inference placement, and the Akamai convergence fix. Click any stage. Claims are labeled <b style="color:var(--atom-secondary,#a2a3e9)">Confirmed</b>, <b style="color:#5aa4f7">Likely</b>, <b style="color:#f5b942">Unknown</b>, or <b style="color:#8587e3">Ask Perplexity</b>.
         </p>
 
-        <!-- Intake bar -->
+        <!-- Intake bar — single row, two clean groups, no awkward wrap -->
         <div class="flow-intake reveal" data-delay="2">
-          <div class="flow-intake__label"><span class="pip"></span> FIELD OBSERVATIONS · REGIONAL DEMAND DISTRIBUTION</div>
-          <div class="flow-intake__chips">
-            <span class="flow-intake__chip flow-intake__chip--region">Texas</span>
-            <span class="flow-intake__chip flow-intake__chip--region">Atlanta</span>
-            <span class="flow-intake__chip flow-intake__chip--region">Palo Alto</span>
-            <span class="flow-intake__chip flow-intake__chip--region">Montreal</span>
-            <span class="flow-intake__chip flow-intake__chip--region">Switzerland</span>
-            <span class="flow-intake__chip flow-intake__chip--theme">Reliability first</span>
-            <span class="flow-intake__chip flow-intake__chip--theme">Semantic cache · roadmap</span>
-            <span class="flow-intake__chip flow-intake__chip--theme">EdgeWorkers circuit breaker</span>
-            <span class="flow-intake__chip flow-intake__chip--theme">One SLA owner</span>
+          <div class="flow-intake__row">
+            <div class="flow-intake__group">
+              <span class="flow-intake__group-label">Regions</span>
+              <span class="flow-intake__chip flow-intake__chip--region">TX</span>
+              <span class="flow-intake__chip flow-intake__chip--region">ATL</span>
+              <span class="flow-intake__chip flow-intake__chip--region">PA</span>
+              <span class="flow-intake__chip flow-intake__chip--region">MTL</span>
+              <span class="flow-intake__chip flow-intake__chip--region">CH</span>
+            </div>
+            <div class="flow-intake__group">
+              <span class="flow-intake__group-label">Akamai moves</span>
+              <span class="flow-intake__chip flow-intake__chip--theme">Reliability first</span>
+              <span class="flow-intake__chip flow-intake__chip--theme">EdgeWorkers</span>
+              <span class="flow-intake__chip flow-intake__chip--theme">Semantic cache · roadmap</span>
+              <span class="flow-intake__chip flow-intake__chip--theme">One SLA</span>
+            </div>
           </div>
         </div>
 
@@ -1803,6 +1831,7 @@
   <script type="module" src="./crisis-map.js"></script>
   <script type="module" src="./crisis-flow.js"></script>
   <script type="module" src="./routing-cache.js"></script>
+  <script type="module" src="./risk-and-timeline.js"></script>
   <script type="module" src="./atom-agent.js"></script>
 </body>
 </html>

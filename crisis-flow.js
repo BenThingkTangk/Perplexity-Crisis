@@ -235,8 +235,8 @@ const ICONS = {
         </defs>
         <rect x="0" y="0" width="${W}" height="${H}" fill="url(#fc-bg)" />
         <text x="${W/2}" y="42" text-anchor="middle"
-              font-family="JetBrains Mono" font-size="10" letter-spacing="3" fill="#5a6478">
-          USER REGION  →  PUBLIC EDGE  →  CACHE  →  AUTH/BILLING  →  PLACEMENT  →  RETRIEVAL  →  STREAM
+              font-family="Plus Jakarta Sans, JetBrains Mono" font-size="11" letter-spacing="3" fill="#a8a9d6" opacity=".75">
+          REQUEST  ·  EDGE  ·  CACHE  ·  AUTH  ·  PLACEMENT  ·  RETRIEVAL  ·  STREAM
         </text>
         ${connectors}
         ${nodes}
