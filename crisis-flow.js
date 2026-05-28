@@ -123,6 +123,7 @@ const ICONS = {
 };
 
 (function initCrisisFlow() {
+  const canvas = document.getElementById('flow-canvas');
   const rail = document.getElementById('flow-rail');
   const panel = document.getElementById('flow-panel');
   if (!rail || !panel) return;
@@ -130,6 +131,124 @@ const ICONS = {
   let activeIdx = 0;
   let autoTimer = null;
   let userInteracted = false;
+
+  /* ---------- Hero pipeline canvas (real graphical pipeline) ---------- */
+  function renderCanvas() {
+    if (!canvas) return;
+    const W = 1200;
+    const H = 380;
+    const padX = 80;
+    const innerW = W - padX * 2;
+    const step = innerW / (STAGES.length - 1);
+    const cy = 200;
+    const nodeR = 38;
+
+    // Connectors first (so nodes paint over them).
+    const connectors = STAGES.slice(1).map((_, i) => {
+      const x1 = padX + step * i + nodeR;
+      const x2 = padX + step * (i + 1) - nodeR;
+      const done = i < activeIdx;
+      const active = i === activeIdx - 1; // segment leading INTO the active node
+      const color = done ? 'var(--plasma)' : 'rgba(140,150,170,.28)';
+      const width = done ? 2.6 : 1.6;
+      return `
+        <g class="fc-edge ${done ? 'fc-edge--done' : ''} ${active ? 'fc-edge--active' : ''}">
+          <line x1="${x1}" y1="${cy}" x2="${x2}" y2="${cy}"
+                stroke="${color}" stroke-width="${width}"
+                stroke-dasharray="${done ? '0' : '6 6'}"/>
+          ${done ? `<circle class="fc-pulse" cx="${x1}" cy="${cy}" r="3" fill="var(--plasma)">
+              <animate attributeName="cx" from="${x1}" to="${x2}" dur="1.6s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="0;1;0" dur="1.6s" repeatCount="indefinite"/>
+            </circle>` : ''}
+        </g>`;
+    }).join('');
+
+    // Nodes — circular with status ring + hotspot pulse + label + sub.
+    const nodes = STAGES.map((s, i) => {
+      const cx = padX + step * i;
+      const active = i === activeIdx;
+      const done = i < activeIdx;
+      const isFail = ['unconfirmed', 'next'].includes(s.status) || s.id === 'auth' || s.id === 'crisis';
+      const statusColor = STATUS_META[s.status].color;
+      return `
+        <g class="fc-node ${active ? 'fc-node--active' : ''} ${done ? 'fc-node--done' : ''}"
+           data-flow-canvas-idx="${i}" role="button" tabindex="0"
+           aria-label="Stage ${s.num} ${s.label}: ${s.title}"
+           style="--accent:${s.accent}; --status:${statusColor}">
+          ${isFail ? `<circle class="fc-hotspot" cx="${cx}" cy="${cy - 56}" r="6" fill="${statusColor}">
+              <animate attributeName="r" values="5;9;5" dur="2.4s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="1;.35;1" dur="2.4s" repeatCount="indefinite"/>
+            </circle>` : ''}
+          <circle class="fc-node__halo" cx="${cx}" cy="${cy}" r="${nodeR + 14}" fill="none"
+                  stroke="${s.accent}" stroke-opacity="${active ? .55 : .12}" stroke-width="${active ? 1.4 : 1}"
+                  stroke-dasharray="${active ? '4 6' : '2 8'}">
+            ${active ? `<animateTransform attributeName="transform" type="rotate"
+              from="0 ${cx} ${cy}" to="360 ${cx} ${cy}" dur="14s" repeatCount="indefinite"/>` : ''}
+          </circle>
+          <circle class="fc-node__ring" cx="${cx}" cy="${cy}" r="${nodeR}"
+                  fill="${active ? 'rgba(8,12,18,.92)' : 'rgba(8,12,18,.7)'}"
+                  stroke="${s.accent}" stroke-width="${active ? 2.4 : 1.6}"
+                  ${active ? `filter="drop-shadow(0 0 16px ${s.accent})"` : ''}/>
+          <text x="${cx}" y="${cy - 4}" text-anchor="middle"
+                font-family="JetBrains Mono" font-size="10" letter-spacing="2"
+                fill="${active ? s.accent : '#8a93a3'}">${s.num}</text>
+          <text x="${cx}" y="${cy + 12}" text-anchor="middle"
+                font-family="Cabinet Grotesk" font-size="11" font-weight="800"
+                fill="${active ? '#eef2f6' : '#c4cdda'}">${s.label.toUpperCase()}</text>
+          <text x="${cx}" y="${cy + 64}" text-anchor="middle"
+                font-family="Satoshi" font-size="11" fill="${active ? '#eef2f6' : '#7a8497'}">${s.sub}</text>
+          <g transform="translate(${cx - 36} ${cy + 78})">
+            <rect width="72" height="20" rx="10" fill="rgba(8,12,18,.85)" stroke="${statusColor}" stroke-opacity=".7"/>
+            <text x="36" y="14" text-anchor="middle"
+                  font-family="JetBrains Mono" font-size="9" letter-spacing="1.4"
+                  fill="${statusColor}">${STATUS_META[s.status].label.toUpperCase()}</text>
+          </g>
+        </g>`;
+    }).join('');
+
+    canvas.innerHTML = `
+      <div class="flow-canvas__label">
+        <span class="pip"></span> SEVEN STAGE PIPELINE · USER DEMAND → AKAMAI FIX
+        <span class="flow-canvas__hint">Click any node · arrow keys to navigate</span>
+      </div>
+      <svg class="flow-canvas__svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" aria-hidden="false">
+        <defs>
+          <radialGradient id="fc-bg" cx="50%" cy="50%">
+            <stop offset="0%" stop-color="rgba(0,230,211,.08)"/>
+            <stop offset="100%" stop-color="rgba(0,230,211,0)"/>
+          </radialGradient>
+        </defs>
+        <rect x="0" y="0" width="${W}" height="${H}" fill="url(#fc-bg)" />
+        <text x="${W/2}" y="42" text-anchor="middle"
+              font-family="JetBrains Mono" font-size="10" letter-spacing="3" fill="#5a6478">
+          USER REGIONS · TX · ATL · PA · MONTREAL · CH  →  CLOUDFLARE FRONT DOOR  →  AKAMAI AI RUNTIME
+        </text>
+        ${connectors}
+        ${nodes}
+      </svg>
+    `;
+
+    // Wire click + keyboard on canvas nodes.
+    canvas.querySelectorAll('[data-flow-canvas-idx]').forEach((g) => {
+      g.addEventListener('click', () => {
+        userInteracted = true; stopAutoplay();
+        setActive(Number(g.dataset.flowCanvasIdx));
+      });
+      g.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          userInteracted = true; stopAutoplay();
+          setActive(Number(g.dataset.flowCanvasIdx));
+        } else if (e.key === 'ArrowRight') {
+          e.preventDefault(); userInteracted = true; stopAutoplay();
+          setActive((activeIdx + 1) % STAGES.length, true);
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault(); userInteracted = true; stopAutoplay();
+          setActive((activeIdx - 1 + STAGES.length) % STAGES.length, true);
+        }
+      });
+    });
+  }
 
   /* ---------- Rail ---------- */
   function renderRail() {
@@ -260,6 +379,7 @@ const ICONS = {
   function setActive(idx, focusBtn = false) {
     activeIdx = ((idx % STAGES.length) + STAGES.length) % STAGES.length;
     syncRail();
+    renderCanvas();
     renderPanel();
     if (focusBtn) {
       const btn = rail.querySelector(`[data-flow-idx="${activeIdx}"]`);
@@ -281,6 +401,7 @@ const ICONS = {
   }
 
   /* ---------- Boot when section enters viewport ---------- */
+  renderCanvas();
   renderRail();
   renderPanel();
 

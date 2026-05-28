@@ -15,6 +15,42 @@
 
   <link rel="stylesheet" href="./styles.css" />
 
+  <!-- Inline boot fallback: document-level delegation guarantees the ATOM
+       drawer opens from every [data-atom-open] launcher even if the bundled
+       atom-agent.js module fails to load. The full module replaces this
+       handler on boot. Kept tiny and dependency-free. -->
+  <script>
+    (function () {
+      function findOpenTarget(el) { return el && el.closest && el.closest('[data-atom-open]'); }
+      function findCloseTarget(el) { return el && el.closest && el.closest('[data-atom-close]'); }
+      document.addEventListener('click', function (e) {
+        var t = e.target;
+        if (!t || !t.closest) return;
+        var open  = findOpenTarget(t);
+        var close = findCloseTarget(t);
+        if (!open && !close) return;
+        var drawer = document.getElementById('atom-agent');
+        var backdrop = document.querySelector('.atom-backdrop');
+        if (!drawer || !backdrop) return;
+        // If the full module already booted, defer to it.
+        if (window.dtomAtomAgent) return;
+        e.preventDefault();
+        if (open) {
+          drawer.hidden = false;
+          void drawer.offsetWidth;
+          drawer.classList.add('open');
+          backdrop.classList.add('open');
+          document.body.classList.add('atom-open');
+        } else if (close) {
+          drawer.classList.remove('open');
+          backdrop.classList.remove('open');
+          document.body.classList.remove('atom-open');
+          setTimeout(function () { drawer.hidden = true; }, 240);
+        }
+      }, false);
+    })();
+  </script>
+
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23050608'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%2300e6d3'/%3E%3Cellipse cx='16' cy='16' rx='10' ry='5' fill='none' stroke='%2300e6d3' stroke-width='1.4' opacity='.7'/%3E%3Cellipse cx='16' cy='16' rx='10' ry='5' fill='none' stroke='%2300e6d3' stroke-width='1.4' opacity='.4' transform='rotate(60 16 16)'/%3E%3Cellipse cx='16' cy='16' rx='10' ry='5' fill='none' stroke='%2300e6d3' stroke-width='1.4' opacity='.4' transform='rotate(-60 16 16)'/%3E%3C/svg%3E" />
 </head>
 <body>
@@ -795,16 +831,23 @@
                 <div class="cmd-health-card__meta"><b class="tabular">94</b>% reach · 4,400 POPs · Blackwell</div>
               </article>
             </div>
-            <div class="cmd-health__note">
-              Routing decision inputs the Akamai policy engine consumes today on other accounts:
-              <b>billing/auth state</b> · <b>provider health</b> · <b>TTFT</b> · <b>cache hit probability</b> · <b>data locality</b> · <b>cost/token</b>.
-              For Perplexity, these numbers are directional until the pilot collects real telemetry.
+            <div class="cmd-health__inputs">
+              <span class="cmd-health__inputs-label">Routing decision inputs</span>
+              <span class="cmd-input-chip">Billing/auth state</span>
+              <span class="cmd-input-chip">Provider health</span>
+              <span class="cmd-input-chip">TTFT</span>
+              <span class="cmd-input-chip">Cache hit probability</span>
+              <span class="cmd-input-chip">Data locality</span>
+              <span class="cmd-input-chip">Cost / token</span>
             </div>
           </div>
 
-          <!-- Source chips -->
-          <div class="cmd-sources">
-            <div class="cmd-sources__label"><span class="pip"></span> EVIDENCE · PUBLIC SOURCES (CLICK TO OPEN)</div>
+          <!-- Source drawer (collapsible — no raw text dump in main viewport) -->
+          <details class="cmd-sources-drawer">
+            <summary>
+              <span class="cmd-sources__label"><span class="pip"></span> EVIDENCE · 6 PUBLIC SOURCES</span>
+              <span class="cmd-sources-drawer__hint">tap to expand</span>
+            </summary>
             <div class="cmd-sources__chips">
               <a class="cmd-source-chip" href="https://www.vedbex.com/subdomain-finder/perplexity.ai" target="_blank" rel="noopener noreferrer">
                 <span class="cmd-source-chip__tag">Subdomain map</span><span>vedbex.com</span>
@@ -825,7 +868,7 @@
                 <span class="cmd-source-chip__tag">Akamai · placement</span><span>akamai.com</span>
               </a>
             </div>
-          </div>
+          </details>
 
           <!-- Leadership closing -->
           <blockquote class="cmd-closing">
@@ -866,47 +909,52 @@
           </div>
         </div>
 
-        <!-- Stage rail -->
+        <!-- ============ Hero pipeline canvas (SVG) ============ -->
+        <div class="flow-canvas reveal" data-delay="3" id="flow-canvas" aria-label="Crisis flow pipeline — click any node to drill in"></div>
+
+        <!-- Stage rail (compact chips below the canvas, in sync with it) -->
         <div class="flow-rail reveal" data-delay="3" role="tablist" aria-label="Crisis flow stages" id="flow-rail"></div>
 
         <!-- Cinematic detail panel -->
         <div class="flow-panel reveal" data-delay="3" id="flow-panel" aria-live="polite"></div>
 
-        <!-- Action panel -->
-        <div class="flow-actions reveal" data-delay="3">
-          <article class="flow-action flow-action--perplexity">
-            <div class="flow-action__label"><span class="pip"></span> NEXT PERPLEXITY MEETING · ASK FOR</div>
-            <ul>
-              <li>Latest org-tier <b>routing analytics</b> (Ben's tier — deeper pulse promised)</li>
-              <li><b>Cloudflare Worker / routing policy</b> — is it Workers, custom, or haphazard?</li>
-              <li><b>Cache hit / miss</b> by traffic class (static vs API vs AI inference)</li>
-              <li><b>TTFT by region &amp; provider</b> — Texas, Atlanta, Palo Alto, Montreal, Switzerland</li>
-              <li><b>Billing / auth failure logs</b> + ATOM integration outage correlation</li>
-              <li><b>Refund / credit correlation</b> against the Discord complaint signal</li>
-            </ul>
-          </article>
-          <article class="flow-action flow-action--akamai">
-            <div class="flow-action__label"><span class="pip"></span> AKAMAI NEXT STEPS</div>
-            <ul>
-              <li><b>Reliability first</b> — pitch is performance and incident compression, not CDN</li>
-              <li><b>Semantic cache fast-follow</b> — after reliability lands</li>
-              <li><b>Akamai Functions cutover POC</b> — repoint LLM/functions from Vercel to Akamai Functions</li>
-              <li>Secure first <b>Perplexity meeting</b> early next week — Johnny Love path</li>
-              <li>Add <b>Neil &amp; Lior</b> to the JSOC / HVT engagement team thread</li>
-              <li>Visualize routing / caching / Cloudflare flows in this brief (this section)</li>
-            </ul>
-          </article>
+        <!-- Action chips (compact, not bullet dumps) -->
+        <div class="flow-chips-row reveal" data-delay="3">
+          <div class="flow-chips-col flow-chips-col--perplexity">
+            <div class="flow-chips-col__label"><span class="pip"></span> NEXT PERPLEXITY MEETING · ASK FOR</div>
+            <div class="flow-chips-col__chips">
+              <span class="flow-chip">Routing analytics · org tier</span>
+              <span class="flow-chip">Worker vs custom vs haphazard</span>
+              <span class="flow-chip">Cache hit/miss · by class</span>
+              <span class="flow-chip">TTFT · by region</span>
+              <span class="flow-chip">Billing/auth failure logs</span>
+              <span class="flow-chip">Refund / credit correlation</span>
+            </div>
+          </div>
+          <div class="flow-chips-col flow-chips-col--akamai">
+            <div class="flow-chips-col__label"><span class="pip"></span> AKAMAI NEXT STEPS</div>
+            <div class="flow-chips-col__chips">
+              <span class="flow-chip flow-chip--plasma">Reliability first</span>
+              <span class="flow-chip flow-chip--plasma">Semantic cache fast-follow</span>
+              <span class="flow-chip flow-chip--plasma">Vercel → Akamai Functions cutover</span>
+              <span class="flow-chip flow-chip--plasma">Johnny Love · first meeting</span>
+              <span class="flow-chip flow-chip--plasma">Add Neil &amp; Lior to thread</span>
+            </div>
+          </div>
         </div>
 
-        <!-- Honesty footer -->
-        <div class="flow-honesty reveal" data-delay="3">
-          <div class="flow-honesty__label"><span class="pip" style="background:#f5b942; box-shadow:0 0 10px #f5b942"></span> WHAT IS STILL UNCONFIRMED</div>
-          <ul>
-            <li>Routing implementation at Perplexity — Cloudflare Workers, custom router, or ad-hoc — <b>not confirmed</b>.</li>
-            <li>Cache implementation — whether exact-match or semantic caching exists — <b>not confirmed</b>.</li>
-            <li>Discord complaints were <b>discussed in the Plaud call</b>; the Discord connector was <b>not</b> scanned and no Discord content is reproduced here.</li>
-          </ul>
-        </div>
+        <!-- Honesty footer — collapsible to keep viewport clean -->
+        <details class="flow-honesty-collapse reveal" data-delay="3">
+          <summary>
+            <span class="flow-honesty__label"><span class="pip" style="background:#f5b942; box-shadow:0 0 10px #f5b942"></span> WHAT IS STILL UNCONFIRMED</span>
+            <span class="flow-honesty__hint">tap to expand</span>
+          </summary>
+          <div class="flow-honesty-collapse__body">
+            <p>Routing implementation at Perplexity — Cloudflare Workers, custom router, or ad-hoc — <b>not confirmed</b>.</p>
+            <p>Cache implementation — whether exact-match or semantic caching exists — <b>not confirmed</b>.</p>
+            <p>Discord complaints were <b>discussed in the Plaud call</b>; the Discord connector was <b>not</b> scanned and no Discord content is reproduced here.</p>
+          </div>
+        </details>
       </div>
     </section>
 
@@ -1219,25 +1267,10 @@
     </div>
   </footer>
 
-  <!-- ============== ATOM AGENT // DEAL COPILOT ============== -->
-  <!-- Persistent right-side dock so the agent is unmistakable on desktop -->
-  <aside class="atom-dock" aria-label="Akamai AI Grid Copilot dock">
-    <button class="atom-dock__btn" type="button" data-atom-open aria-haspopup="dialog" aria-controls="atom-agent">
-      <span class="atom-dock__rail" aria-hidden="true"></span>
-      <svg class="atom-dock__mark" viewBox="0 0 40 40" fill="none" aria-hidden="true">
-        <circle cx="20" cy="20" r="3" fill="currentColor"/>
-        <g class="atom-fab__orbit">
-          <ellipse cx="20" cy="20" rx="14" ry="6" fill="none" stroke="currentColor" stroke-width="1.4" opacity=".85"/>
-          <ellipse cx="20" cy="20" rx="14" ry="6" fill="none" stroke="currentColor" stroke-width="1.4" opacity=".55" transform="rotate(60 20 20)"/>
-          <ellipse cx="20" cy="20" rx="14" ry="6" fill="none" stroke="currentColor" stroke-width="1.4" opacity=".55" transform="rotate(-60 20 20)"/>
-        </g>
-      </svg>
-      <span class="atom-dock__label">Ask ATOM · Akamai Copilot</span>
-      <span class="atom-dock__live"><span class="pip"></span>LIVE</span>
-    </button>
-  </aside>
-
-  <button class="atom-fab" type="button" data-atom-open aria-haspopup="dialog" aria-controls="atom-agent" aria-label="Open Akamai AI Grid copilot">
+  <!-- ============== ATOM AGENT // DEAL COPILOT ==============
+       Single, unmistakable, always-on bottom-right launcher.
+       Event delegation in atom-agent.js binds clicks via document. -->
+  <button class="atom-fab" type="button" data-atom-open aria-haspopup="dialog" aria-controls="atom-agent" aria-label="Open Akamai AI Grid Copilot">
     <svg class="atom-fab__mark" viewBox="0 0 40 40" fill="none" aria-hidden="true">
       <circle cx="20" cy="20" r="3" fill="currentColor"/>
       <g class="atom-fab__orbit">

@@ -1696,7 +1696,7 @@ body.atom-open .atom-fab { opacity: 0; pointer-events: none; transform: translat
 
 /* ---- Backdrop ---- */
 .atom-backdrop {
-  position: fixed; inset: 0; z-index: 90;
+  position: fixed; inset: 0; z-index: 1005;
   background: radial-gradient(40rem 28rem at 80% 100%, rgba(0,230,211,.08), transparent 60%),
               rgba(2, 4, 7, .72);
   backdrop-filter: blur(6px);
@@ -1708,7 +1708,7 @@ body.atom-open .atom-fab { opacity: 0; pointer-events: none; transform: translat
 
 /* ---- Drawer / modal ---- */
 .atom-agent {
-  position: fixed; z-index: 95;
+  position: fixed; z-index: 1010;
   right: clamp(.5rem, 2vw, 1.6rem); bottom: clamp(.5rem, 2vw, 1.6rem);
   width: min(440px, calc(100vw - 1rem));
   max-height: min(86vh, 760px);
@@ -2133,6 +2133,10 @@ body.atom-open .atom-fab { opacity: 0; pointer-events: none; transform: translat
    AKAMAI AI GRID // ATOM Copilot — visibility boosters
    =========================================================== */
 
+/* Ensure inner svg/spans never swallow clicks on copilot launchers */
+.btn--hero-copilot > *,
+.nav-tool--copilot > * { pointer-events: none; }
+
 /* Hero CTA button — large, glowing, unmistakable */
 .btn--hero-copilot {
   position: relative;
@@ -2183,60 +2187,19 @@ body.atom-open .atom-fab { opacity: 0; pointer-events: none; transform: translat
   animation: pulseDot 2s ease-in-out infinite;
 }
 
-/* Right-side vertical dock — persistent on desktop */
-.atom-dock {
-  position: fixed; right: 0; top: 50%;
-  transform: translateY(-50%);
-  z-index: 70;
-  pointer-events: none;
-}
-.atom-dock__btn {
-  pointer-events: auto;
-  position: relative;
-  display: inline-flex; align-items: center; gap: 10px;
-  padding: 12px 14px 12px 12px;
-  border-radius: 18px 0 0 18px;
-  border: 1px solid var(--plasma);
-  border-right: none;
-  background:
-    radial-gradient(18rem 12rem at 100% 50%, rgba(0,230,211,.18), transparent 60%),
-    linear-gradient(180deg, color-mix(in srgb, var(--surface-3) 92%, transparent) 0%, color-mix(in srgb, var(--surface-2) 92%, transparent) 100%);
-  color: var(--ink);
-  font-family: var(--font-display);
-  cursor: pointer;
-  box-shadow: 0 18px 48px rgba(0,0,0,.55), 0 0 0 1px rgba(0,230,211,.14), 0 0 36px var(--plasma-glow);
-  transition: transform .2s ease, padding-right .2s ease, box-shadow .2s ease;
-  backdrop-filter: blur(10px);
-}
-.atom-dock__btn:hover { transform: translateX(-4px); padding-right: 18px; box-shadow: 0 22px 60px rgba(0,0,0,.6), 0 0 48px var(--plasma-glow-strong); }
-.atom-dock__btn:focus-visible { outline: 2px solid var(--plasma); outline-offset: 2px; }
-.atom-dock__rail {
-  position: absolute; left: -4px; top: 8px; bottom: 8px; width: 3px; border-radius: 99px;
-  background: linear-gradient(180deg, transparent, var(--plasma), transparent);
-  filter: drop-shadow(0 0 8px var(--plasma));
-  animation: dockRail 3.6s ease-in-out infinite;
-}
-@keyframes dockRail { 0%,100% { opacity: .6; } 50% { opacity: 1; } }
-.atom-dock__mark { width: 26px; height: 26px; color: var(--plasma); filter: drop-shadow(0 0 8px var(--plasma-glow)); flex: 0 0 auto; }
-.atom-dock__label { font-weight: 800; font-size: .92rem; letter-spacing: -.01em; color: var(--ink); }
-.atom-dock__live {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 4px 8px; border-radius: 99px;
-  font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .22em;
-  color: var(--plasma); border: 1px solid var(--border-plasma);
-}
-.atom-dock__live .pip { width: 6px; height: 6px; border-radius: 50%; background: var(--plasma); box-shadow: 0 0 8px var(--plasma); animation: pulseDot 1.6s ease-in-out infinite; }
-body.atom-open .atom-dock { opacity: 0; pointer-events: none; transition: opacity .2s ease; }
-@media (max-width: 1100px) { .atom-dock { display: none; } }
-
-/* Make the FAB bigger and more obvious */
+/* Single bottom-right launcher — pinned safely above scroll, never clipped */
 .atom-fab {
+  right: clamp(16px, 2.4vw, 28px) !important;
+  bottom: clamp(16px, 2.4vw, 28px) !important;
+  z-index: 1000 !important;
   padding: 14px 22px 14px 16px;
   border-radius: 999px;
 }
-.atom-fab__mark { width: 34px; height: 34px; }
-.atom-fab__title { font-size: 1.05rem; }
+.atom-fab__mark { width: 32px; height: 32px; }
+.atom-fab__title { font-size: 1.02rem; }
 .atom-fab__sub { font-size: 10.5px; letter-spacing: .22em; }
+/* Make sure children never block clicks on the button itself */
+.atom-fab > * { pointer-events: none; }
 
 /* ===========================================================
    ROUTING & CACHE COMMAND DASHBOARD
@@ -2646,3 +2609,142 @@ body.atom-open .atom-dock { opacity: 0; pointer-events: none; transition: opacit
 
 [data-theme="light"] .flow-panel__diagram { background: #ffffff; }
 [data-theme="light"] .flow-rail { background: #ffffff; }
+
+/* ===========================================================
+   CRISIS FLOW — graphical hero canvas
+   =========================================================== */
+.flow-canvas {
+  margin-top: var(--s-6);
+  padding: var(--s-5) var(--s-5) var(--s-4);
+  border-radius: 22px;
+  border: 1px solid var(--border-bright);
+  background:
+    radial-gradient(60rem 24rem at 50% 0%, rgba(0,230,211,.08), transparent 70%),
+    linear-gradient(180deg, #0b0e13 0%, #07090d 100%);
+  box-shadow: 0 32px 80px rgba(0,0,0,.55), inset 0 0 80px rgba(0,230,211,.04);
+  position: relative; overflow: hidden;
+}
+.flow-canvas__label {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: var(--s-3);
+}
+.flow-canvas__label .pip { width: 8px; height: 8px; border-radius: 50%; background: var(--plasma); box-shadow: 0 0 10px var(--plasma); animation: pulseDot 2s ease-in-out infinite; }
+.flow-canvas__hint { color: var(--ink-faint); margin-left: 6px; letter-spacing: .14em; }
+.flow-canvas__svg { width: 100%; height: auto; display: block; }
+.fc-node { cursor: pointer; transition: transform .15s ease; outline: none; }
+.fc-node:hover .fc-node__ring { stroke-width: 2.4; filter: drop-shadow(0 0 18px var(--accent)); }
+.fc-node:focus-visible .fc-node__ring { stroke-width: 2.8; filter: drop-shadow(0 0 22px var(--accent)); }
+.fc-edge--active line { stroke: var(--plasma); }
+
+[data-theme="light"] .flow-canvas {
+  background: linear-gradient(180deg, #ffffff 0%, #f8f7f2 100%);
+  border-color: rgba(0,0,0,.08);
+}
+[data-theme="light"] .flow-canvas .fc-node__ring { fill: #ffffff; }
+[data-theme="light"] .flow-canvas text { fill: #1a1f29 !important; }
+
+@media (max-width: 760px) {
+  .flow-canvas { padding: var(--s-3); }
+  .flow-canvas__hint { display: none; }
+}
+
+/* ===========================================================
+   COMPACT CHIPS + COLLAPSIBLE DETAILS
+   =========================================================== */
+.cmd-health__inputs {
+  display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+  padding-top: var(--s-3);
+  border-top: 1px dashed var(--border-bright);
+}
+.cmd-health__inputs-label {
+  font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--ink-faint); margin-right: 8px;
+}
+.cmd-input-chip {
+  display: inline-flex; align-items: center;
+  padding: 6px 10px; border-radius: 99px;
+  border: 1px solid var(--border-plasma);
+  background: color-mix(in srgb, var(--plasma) 8%, transparent);
+  color: var(--plasma);
+  font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .14em;
+}
+
+.cmd-sources-drawer {
+  border: 1px solid var(--border-bright);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--surface-3) 90%, transparent);
+}
+.cmd-sources-drawer > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 12px var(--s-4);
+  display: flex; align-items: center; justify-content: space-between; gap: var(--s-3);
+}
+.cmd-sources-drawer > summary::-webkit-details-marker { display: none; }
+.cmd-sources-drawer[open] > summary { border-bottom: 1px dashed var(--border-bright); }
+.cmd-sources-drawer__hint {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: .18em; color: var(--ink-faint);
+}
+.cmd-sources-drawer[open] .cmd-sources-drawer__hint::before { content: "− "; }
+.cmd-sources-drawer:not([open]) .cmd-sources-drawer__hint::before { content: "+ "; }
+.cmd-sources-drawer > .cmd-sources__chips { padding: var(--s-3) var(--s-4); }
+
+/* ===========================================================
+   CRISIS FLOW — compact chip rows + collapsible honesty
+   =========================================================== */
+.flow-chips-row {
+  margin-top: var(--s-6);
+  display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-4);
+}
+.flow-chips-col {
+  padding: var(--s-4) var(--s-5);
+  border-radius: 16px;
+  border: 1px solid var(--border-bright);
+  background: color-mix(in srgb, var(--surface-3) 90%, transparent);
+}
+.flow-chips-col--perplexity { border-color: rgba(90,164,247,.32); }
+.flow-chips-col--akamai     { border-color: var(--border-plasma); background: linear-gradient(180deg, rgba(0,230,211,.06), transparent), color-mix(in srgb, var(--surface-3) 90%, transparent); }
+.flow-chips-col__label {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .22em; text-transform: uppercase;
+  margin-bottom: var(--s-3);
+}
+.flow-chips-col--perplexity .flow-chips-col__label { color: #5aa4f7; }
+.flow-chips-col--akamai     .flow-chips-col__label { color: var(--plasma); }
+.flow-chips-col__label .pip { width: 8px; height: 8px; border-radius: 50%; background: currentColor; box-shadow: 0 0 10px currentColor; }
+.flow-chips-col__chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.flow-chip {
+  display: inline-flex; align-items: center;
+  padding: 6px 11px; border-radius: 99px;
+  border: 1px solid rgba(90,164,247,.32);
+  background: color-mix(in srgb, #5aa4f7 7%, transparent);
+  color: #5aa4f7;
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em;
+}
+.flow-chip--plasma {
+  color: var(--plasma); border-color: var(--border-plasma);
+  background: color-mix(in srgb, var(--plasma) 8%, transparent);
+}
+@media (max-width: 760px) { .flow-chips-row { grid-template-columns: 1fr; } }
+
+.flow-honesty-collapse {
+  margin-top: var(--s-5);
+  border: 1px dashed rgba(245,185,66,.42);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(245,185,66,.05), transparent);
+}
+.flow-honesty-collapse > summary {
+  list-style: none; cursor: pointer;
+  padding: 12px var(--s-4);
+  display: flex; align-items: center; justify-content: space-between; gap: var(--s-3);
+}
+.flow-honesty-collapse > summary::-webkit-details-marker { display: none; }
+.flow-honesty-collapse[open] > summary { border-bottom: 1px dashed rgba(245,185,66,.32); }
+.flow-honesty__hint { font-family: var(--font-mono); font-size: 10px; letter-spacing: .18em; color: #f5b942; }
+.flow-honesty-collapse[open] .flow-honesty__hint::before { content: "− "; }
+.flow-honesty-collapse:not([open]) .flow-honesty__hint::before { content: "+ "; }
+.flow-honesty-collapse__body { padding: var(--s-3) var(--s-4); display: grid; gap: 6px; }
+.flow-honesty-collapse__body p { margin: 0; color: var(--ink-2); font-size: var(--tx-sm); line-height: 1.5; }
+.flow-honesty-collapse__body b { color: var(--ink); }

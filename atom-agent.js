@@ -188,26 +188,26 @@ const FALLBACK = {
   sales: `<p>Ask for the <strong>one-sentence pitch</strong>, how to <strong>open with the CTO</strong> or <strong>CFO</strong>, or how to handle the <strong>"Cloudflare already does this"</strong> objection.</p>`,
 };
 
-(function initAtomAgent() {
+/* Bootstraps the ATOM agent. Uses document-level event delegation so clicks
+ * fire regardless of when launchers mount, even if other init scripts throw.
+ * Safe to run before DOMContentLoaded — handlers walk the DOM at click time. */
+function bootAtomAgent() {
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
-  const launcher = $('.atom-fab');
   const drawer = $('#atom-agent');
   const backdrop = $('.atom-backdrop');
-  if (!launcher || !drawer || !backdrop) return;
+  // Drawer + backdrop are required; absent of either means the page is broken.
+  if (!drawer || !backdrop) return;
 
-  const closeBtns = $$('[data-atom-close]');
-  const openBtns = $$('[data-atom-open]');
-  const tabBtns = $$('.atom-tab');
   const body = $('#atom-body');
-  const messageText = $('#atom-message-text');
   const chipsRoot = $('#atom-chips');
   const form = $('#atom-form');
   const input = $('#atom-input');
 
   let currentMode = 'simple';
   let lastFocus = null;
+  let isOpen = false;
 
   function renderChips(mode) {
     const chips = MODES[mode].chips;
@@ -225,7 +225,7 @@ const FALLBACK = {
   function setMode(mode) {
     if (!MODES[mode]) return;
     currentMode = mode;
-    tabBtns.forEach((btn) => {
+    $$('.atom-tab').forEach((btn) => {
       const isActive = btn.dataset.atomMode === mode;
       btn.classList.toggle('is-active', isActive);
       btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
@@ -342,6 +342,8 @@ const FALLBACK = {
 
   /* ------------ Open / close ------------ */
   function openAgent() {
+    if (isOpen) return;
+    isOpen = true;
     lastFocus = document.activeElement;
     drawer.hidden = false;
     // force reflow so transition runs
@@ -349,11 +351,12 @@ const FALLBACK = {
     drawer.classList.add('open');
     backdrop.classList.add('open');
     document.body.classList.add('atom-open');
-    // focus the input for keyboard-first users
-    window.setTimeout(() => input.focus({ preventScroll: true }), 60);
+    window.setTimeout(() => { if (input) input.focus({ preventScroll: true }); }, 60);
   }
 
   function closeAgent() {
+    if (!isOpen) return;
+    isOpen = false;
     drawer.classList.remove('open');
     backdrop.classList.remove('open');
     document.body.classList.remove('atom-open');
@@ -365,23 +368,49 @@ const FALLBACK = {
     }, 240);
   }
 
-  openBtns.forEach((b) => b.addEventListener('click', openAgent));
-  closeBtns.forEach((b) => b.addEventListener('click', closeAgent));
-  backdrop.addEventListener('click', closeAgent);
+  /* ------------ Document-level event delegation ------------
+   * One listener at document covers every launcher anywhere on the page,
+   * including elements rendered later by other scripts. Click target may be
+   * an inner <svg> / <span> — Element.closest() walks up to find the trigger. */
+  document.addEventListener('click', (e) => {
+    const t = e.target;
+    if (!(t instanceof Element)) return;
+    const open  = t.closest('[data-atom-open]');
+    const close = t.closest('[data-atom-close]');
+    const mode  = t.closest('.atom-tab[data-atom-mode]');
+    const chip  = t.closest('[data-atom-chip]');
+    if (open)  { e.preventDefault(); openAgent(); return; }
+    if (close) { e.preventDefault(); closeAgent(); return; }
+    if (mode)  { setMode(mode.dataset.atomMode); return; }
+    if (chip && chipsRoot && chipsRoot.contains(chip)) {
+      const text = chip.textContent || '';
+      if (input) input.value = text;
+      submitPrompt(text);
+    }
+  }, { capture: false });
 
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !drawer.hidden) closeAgent();
+    if (e.key === 'Escape' && isOpen) closeAgent();
   });
 
-  tabBtns.forEach((btn) =>
-    btn.addEventListener('click', () => setMode(btn.dataset.atomMode))
-  );
-
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    submitPrompt(input.value);
-  });
+  if (form) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      submitPrompt(input ? input.value : '');
+    });
+  }
 
   // Initial render
   setMode('simple');
-})();
+
+  // Expose a global hook for emergency / external callers.
+  window.dtomAtomAgent = { open: openAgent, close: closeAgent, setMode };
+}
+
+/* Run as early as possible, then again on DOMContentLoaded to handle late
+ * insertion. boot is idempotent because openAgent guards on isOpen. */
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootAtomAgent, { once: true });
+} else {
+  bootAtomAgent();
+}
