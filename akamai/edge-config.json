@@ -1,0 +1,124 @@
+{
+  "name": "perplexity-crisis-atom-edge",
+  "description": "ΔTOM Akamai Edge Security Config for Perplexity-Crisis infrastructure",
+  "rules": {
+    "waf": {
+      "enabled": true,
+      "mode": "block",
+      "rulesets": ["OWASP_CRS_3.3", "AKAMAI_ADAPTIVE"],
+      "exceptions": [],
+      "rateLimit": {
+        "enabled": true,
+        "requestsPerSecond": 100,
+        "burstLimit": 200,
+        "action": "deny",
+        "statusCode": 429
+      }
+    },
+    "botManagement": {
+      "enabled": true,
+      "allowKnownBots": ["googlebot", "bingbot", "applebot"],
+      "blockBadBots": true,
+      "challengeSuspicious": true,
+      "agenticTrafficPolicy": {
+        "perplexityComet": "allow",
+        "unknownAgents": "challenge",
+        "rateLimitAgents": true,
+        "agentRateLimit": 10
+      }
+    },
+    "ddosProtection": {
+      "enabled": true,
+      "layer3": true,
+      "layer7": true,
+      "volumetricThreshold": "10Gbps",
+      "applicationThreshold": "50krps",
+      "geoBlocking": {
+        "enabled": false,
+        "blockedCountries": []
+      }
+    },
+    "apiSecurity": {
+      "enabled": true,
+      "endpoints": [
+        {
+          "path": "/api/*",
+          "methods": ["POST", "GET"],
+          "rateLimit": { "rpm": 60, "burst": 10 },
+          "authRequired": true,
+          "allowedOrigins": ["https://perplexity-crisis-atom.vercel.app", "https://perplexity.ai"],
+          "schemaValidation": false
+        },
+        {
+          "path": "/api/discord-webhook",
+          "methods": ["POST"],
+          "rateLimit": { "rpm": 120, "burst": 20 },
+          "authRequired": false,
+          "ipWhitelist": ["discord_webhook_ips"],
+          "maxPayloadBytes": 4096
+        }
+      ]
+    },
+    "caching": {
+      "enabled": true,
+      "semanticCache": {
+        "enabled": true,
+        "ttl": 300,
+        "varyBy": ["accept-encoding", "accept-language"],
+        "excludePaths": ["/api/*"]
+      },
+      "staticAssets": {
+        "ttl": 31536000,
+        "patterns": ["*.js", "*.css", "*.woff2", "*.png", "*.svg", "*.ico"]
+      },
+      "html": {
+        "ttl": 0,
+        "mustRevalidate": true
+      }
+    },
+    "edgeRouting": {
+      "enabled": true,
+      "preferredPOPs": ["IAD", "LHR", "NRT", "SYD", "SIN"],
+      "failover": {
+        "enabled": true,
+        "healthCheckInterval": 5,
+        "failoverThresholdMs": 200
+      },
+      "aiInferenceRouting": {
+        "enabled": true,
+        "providers": [
+          { "name": "aws", "weight": 40, "healthEndpoint": "https://aws.perplexity-origin.internal/health" },
+          { "name": "coreweave", "weight": 40, "healthEndpoint": "https://cw.perplexity-origin.internal/health" },
+          { "name": "akamai-edge", "weight": 20, "healthEndpoint": "/health" }
+        ],
+        "routingStrategy": "least-latency",
+        "fallbackOnError": true
+      }
+    },
+    "tlsConfig": {
+      "minVersion": "TLS1.3",
+      "preferredCiphers": ["TLS_AES_256_GCM_SHA384", "TLS_CHACHA20_POLY1305_SHA256"],
+      "hsts": { "enabled": true, "maxAge": 63072000, "includeSubDomains": true, "preload": true },
+      "certificatePinning": false
+    },
+    "observability": {
+      "datadogExport": false,
+      "edgeLogs": {
+        "enabled": true,
+        "fields": ["timestamp", "clientIP", "country", "method", "path", "status", "bytesSent", "ttfb", "cacheStatus", "edgePOP"]
+      },
+      "realUserMonitoring": {
+        "enabled": true,
+        "sampleRate": 10,
+        "trackCoreWebVitals": true,
+        "trackTTFB": true,
+        "trackTTFT": true
+      },
+      "alerting": {
+        "errorRate": { "threshold": 1, "windowMinutes": 5, "action": "page" },
+        "latencyP99": { "thresholdMs": 2000, "windowMinutes": 5, "action": "alert" },
+        "cacheHitRate": { "minPercent": 15, "windowMinutes": 60, "action": "notify" }
+      }
+    }
+  }
+}

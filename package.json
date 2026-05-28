@@ -1,13 +1,22 @@
 {
-  "name": "perplexity-crisis",
-  "version": "1.1.0",
+  "name": "perplexity-crisis-atom",
+  "version": "2.0.0",
+  "description": "ΔTOM // Perplexity Crisis Intelligence — Akamai deal war room",
   "private": true,
-  "description": "ΔTOM // Crisis Intelligence — static intelligence brief on Perplexity's multi-cloud orchestration crisis and the Akamai convergence layer.",
   "scripts": {
-    "build": "echo 'Static site — no build step.'",
-    "vercel-build": "echo 'Static site — no build step.'"
+    "dev": "serve . -p 3000",
+    "deploy": "vercel --prod",
+    "bot": "node discord-github-bot.js",
+    "bot:dev": "nodemon discord-github-bot.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.15.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0",
+    "serve": "^14.2.3"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=18.0.0"
   }
 }
