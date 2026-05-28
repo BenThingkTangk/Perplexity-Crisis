@@ -175,6 +175,9 @@ const ICONS = {
            data-flow-canvas-idx="${i}" role="button" tabindex="0"
            aria-label="Stage ${s.num} ${s.label}: ${s.title}"
            style="--accent:${s.accent}; --status:${statusColor}">
+          <rect class="fc-node__hit" x="${cx - nodeR - 14}" y="${cy - nodeR - 22}"
+                width="${(nodeR + 14) * 2}" height="${(nodeR + 22) * 2 + 36}"
+                fill="transparent" pointer-events="all"/>
           ${isFail ? `<circle class="fc-hotspot" cx="${cx}" cy="${cy - 56}" r="6" fill="${statusColor}">
               <animate attributeName="r" values="5;9;5" dur="2.4s" repeatCount="indefinite"/>
               <animate attributeName="opacity" values="1;.35;1" dur="2.4s" repeatCount="indefinite"/>
@@ -228,17 +231,21 @@ const ICONS = {
       </svg>
     `;
 
-    // Wire click + keyboard on canvas nodes.
+    // Wire click + keyboard on canvas nodes. Use Element.closest() inside the
+    // handler so clicks on inner children still resolve to the parent <g>.
     canvas.querySelectorAll('[data-flow-canvas-idx]').forEach((g) => {
-      g.addEventListener('click', () => {
+      g.addEventListener('click', (e) => {
+        const host = (e.target && e.target.closest) ? e.target.closest('[data-flow-canvas-idx]') : g;
+        const idx = Number((host || g).getAttribute('data-flow-canvas-idx'));
+        if (!Number.isFinite(idx)) return;
         userInteracted = true; stopAutoplay();
-        setActive(Number(g.dataset.flowCanvasIdx));
+        setActive(idx);
       });
       g.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           userInteracted = true; stopAutoplay();
-          setActive(Number(g.dataset.flowCanvasIdx));
+          setActive(Number(g.getAttribute('data-flow-canvas-idx')));
         } else if (e.key === 'ArrowRight') {
           e.preventDefault(); userInteracted = true; stopAutoplay();
           setActive((activeIdx + 1) % STAGES.length, true);
@@ -387,18 +394,11 @@ const ICONS = {
     }
   }
 
-  /* ---------- Autoplay (until user interacts) ---------- */
-  function startAutoplay() {
-    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    stopAutoplay();
-    autoTimer = window.setInterval(() => {
-      if (userInteracted) { stopAutoplay(); return; }
-      setActive((activeIdx + 1) % STAGES.length);
-    }, 5200);
-  }
-  function stopAutoplay() {
-    if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
-  }
+  /* Autoplay disabled — re-rendering the canvas every 5 s thrashed click
+   * targets (Playwright + real users would race the re-render). The pipeline
+   * already has running plasma pulses on the SVG edges for ambient motion. */
+  function startAutoplay() { /* intentionally a no-op */ }
+  function stopAutoplay()  { if (autoTimer) { clearInterval(autoTimer); autoTimer = null; } }
 
   /* ---------- Boot when section enters viewport ---------- */
   renderCanvas();

@@ -697,8 +697,15 @@ input[type="range"]::-moz-range-thumb {
   background: radial-gradient(circle at 50% 50%, #0b0d10 0%, #050608 70%);
   color: var(--plasma);
   transition: opacity 480ms var(--ease, cubic-bezier(0.16,1,0.3,1)), visibility 480ms;
+  /* Safety: if no JS runs at all, the splash auto-fades after 3.5 s.
+     Keeps the page usable even on a totally broken bundle / disabled JS. */
+  animation: dtom-boot-autohide 3.5s forwards;
 }
 .dtom-boot[data-state="done"] { opacity: 0; visibility: hidden; pointer-events: none; }
+@keyframes dtom-boot-autohide {
+  0%, 80% { opacity: 1; visibility: visible; pointer-events: auto; }
+  100%    { opacity: 0; visibility: hidden;  pointer-events: none; }
+}
 .dtom-boot__inner {
   display: flex; flex-direction: column; align-items: center; gap: 18px;
   padding: 32px 40px; min-width: 280px;
@@ -2633,9 +2640,15 @@ body.atom-open .atom-fab { opacity: 0; pointer-events: none; transform: translat
 .flow-canvas__label .pip { width: 8px; height: 8px; border-radius: 50%; background: var(--plasma); box-shadow: 0 0 10px var(--plasma); animation: pulseDot 2s ease-in-out infinite; }
 .flow-canvas__hint { color: var(--ink-faint); margin-left: 6px; letter-spacing: .14em; }
 .flow-canvas__svg { width: 100%; height: auto; display: block; }
-.fc-node { cursor: pointer; transition: transform .15s ease; outline: none; }
+/* SVG hit-testing: <g> elements only capture clicks where painted children
+ * exist. Ensure the whole stage area (including the gap between ring & label)
+ * is clickable — bounding-box pointer-events covers the full bbox. */
+.fc-node { cursor: pointer; transition: transform .15s ease; outline: none; pointer-events: bounding-box; }
+.fc-node * { pointer-events: none; }
+.fc-node .fc-node__hit { pointer-events: all !important; }
 .fc-node:hover .fc-node__ring { stroke-width: 2.4; filter: drop-shadow(0 0 18px var(--accent)); }
 .fc-node:focus-visible .fc-node__ring { stroke-width: 2.8; filter: drop-shadow(0 0 22px var(--accent)); }
+.fc-node--active .fc-node__ring { stroke-width: 3 !important; }
 .fc-edge--active line { stroke: var(--plasma); }
 
 [data-theme="light"] .flow-canvas {
@@ -2748,3 +2761,36 @@ body.atom-open .atom-fab { opacity: 0; pointer-events: none; transform: translat
 .flow-honesty-collapse__body { padding: var(--s-3) var(--s-4); display: grid; gap: 6px; }
 .flow-honesty-collapse__body p { margin: 0; color: var(--ink-2); font-size: var(--tx-sm); line-height: 1.5; }
 .flow-honesty-collapse__body b { color: var(--ink); }
+
+/* Decision-panel cards (replace previous bullet list with a clean card grid) */
+.cmd-decision-grid {
+  display: grid; gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media (max-width: 980px) { .cmd-decision-grid { grid-template-columns: 1fr; } }
+.cmd-decision-card {
+  position: relative;
+  padding: 12px 14px 12px 18px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--c) 35%, var(--border-bright));
+  background:
+    radial-gradient(20rem 12rem at 0% 0%, color-mix(in srgb, var(--c) 10%, transparent), transparent 60%),
+    color-mix(in srgb, var(--surface-3) 92%, transparent);
+  display: grid; gap: 4px;
+}
+.cmd-decision-card::before {
+  content: ""; position: absolute; left: 0; top: 8px; bottom: 8px; width: 3px;
+  background: var(--c); border-radius: 0 4px 4px 0;
+  filter: drop-shadow(0 0 6px var(--c));
+}
+.cmd-decision-card__tag {
+  font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--c);
+}
+.cmd-decision-card__body { color: var(--ink); font-size: var(--tx-sm); line-height: 1.45; }
+.cmd-decision-card__body b { color: #fff; }
+.cmd-decision-card--neg {
+  background:
+    radial-gradient(20rem 12rem at 0% 0%, color-mix(in srgb, var(--c) 12%, transparent), transparent 60%),
+    color-mix(in srgb, var(--c) 5%, var(--surface-3) 92%);
+}

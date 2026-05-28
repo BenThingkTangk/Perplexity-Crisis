@@ -25,6 +25,24 @@
   (function () {
     var doc = document;
 
+    /* ----- Boot splash dismissal (CRITICAL — must run even if bundle blocks).
+         The .dtom-boot splash is position:fixed; z-index:9999 with full-screen
+         pointer-events:auto. If app.js (bundled) doesn't run, the splash never
+         fades and silently swallows every click on the page. We dismiss it here
+         the moment DOM is interactive, then again at the latest at load+250ms. */
+    function dismissBoot() {
+      var b = doc.getElementById('dtom-boot');
+      if (b) b.setAttribute('data-state', 'done');
+    }
+    if (doc.readyState === 'loading') {
+      doc.addEventListener('DOMContentLoaded', function () { setTimeout(dismissBoot, 250); }, { once: true });
+    } else {
+      setTimeout(dismissBoot, 250);
+    }
+    window.addEventListener('load', function () { setTimeout(dismissBoot, 250); }, { once: true });
+    /* Hard safety net: no matter what, after 2 s the splash is gone. */
+    setTimeout(dismissBoot, 2000);
+
     /* ----- ATOM drawer: open/close via document delegation ----- */
     function openDrawer() {
       var d = doc.getElementById('atom-agent');
@@ -95,13 +113,41 @@
 
     /* ----- Crisis Flow: render a graphical SVG pipeline ----- */
     var STAGES = [
-      { num:'01', label:'User demand',       sub:'Comet · API · Web',           accent:'#5aa4f7', status:'Confirmed',     statusColor:'#00e6d3', hotspot:false },
-      { num:'02', label:'Front-door routing',sub:'Cloudflare · routing ???',    accent:'#f5984a', status:'Unconfirmed',   statusColor:'#f5b942', hotspot:true  },
-      { num:'03', label:'Cache decision',    sub:'exact-match vs semantic',     accent:'#00e6d3', status:'Next question', statusColor:'#5aa4f7', hotspot:true  },
-      { num:'04', label:'Auth / billing',    sub:'$50 charge → API outage',     accent:'#ef4444', status:'Confirmed',     statusColor:'#00e6d3', hotspot:true  },
-      { num:'05', label:'Inference placement',sub:'AWS · Foundry · CoreWeave',  accent:'#a855f7', status:'Confirmed',     statusColor:'#00e6d3', hotspot:false },
-      { num:'06', label:'User crisis',       sub:'refunds · reputation',        accent:'#f5b942', status:'Next question', statusColor:'#5aa4f7', hotspot:true  },
-      { num:'07', label:'Akamai fix',        sub:'Functions cutover · 1 SLA',   accent:'#00e6d3', status:'Confirmed',     statusColor:'#00e6d3', hotspot:false }
+      { num:'01', label:'User demand',         sub:'Comet · API · Web',           accent:'#5aa4f7', status:'Confirmed',     statusColor:'#00e6d3', hotspot:false,
+        title:'Distributed live-search demand',
+        what:'Comet, the Perplexity API, and Perplexity.ai users fire live-search and agentic prompts from Texas, Atlanta, Palo Alto, Montreal, Switzerland. Each request expects sub-second TTFT and a fresh, sourced answer.',
+        failure:'Regional concentration of inference + cross-cloud egress turns "near the user" into "near a hyperscaler region." TTFT and answer freshness diverge by geography.',
+        move:'Map TTFT and cache behavior by region before pitching. Anchor Akamai on the regions where pain is strongest.' },
+      { num:'02', label:'Front-door routing',  sub:'Cloudflare · routing ???',    accent:'#f5984a', status:'Unconfirmed',   statusColor:'#f5b942', hotspot:true,
+        title:'Cloudflare edge · routing logic unknown',
+        what:'Public subdomains (www, api, console, status, enterprise, shopping) resolve through Cloudflare. DNS, WAF, bot, static CDN cache are the well-understood layer.',
+        failure:'The AI routing logic above that is unconfirmed. Cloudflare Workers? Custom router? Ad-hoc? Plaud-call hypothesis: "haphazardly across the board."',
+        move:'Make the first Perplexity meeting answer this. Bring the Cloudflare-provides vs Akamai-wedge table so the conversation lands on placement, not perimeter.' },
+      { num:'03', label:'Cache decision',      sub:'exact-match vs semantic',     accent:'#00e6d3', status:'Next question', statusColor:'#5aa4f7', hotspot:true,
+        title:'Static cache works · AI cache does not (yet)',
+        what:'Static web shell, JS/CSS, status assets, and exact-repeat AI Gateway calls are cacheable. Cache Reserve / R2 helps when content is byte-identical.',
+        failure:'Real Perplexity prompts vary constantly. Exact-match caches give near-zero hit rate. Authenticated and org-specific answers need semantic / embedding-aware caching keyed by tenant + freshness.',
+        move:'Reliability first — don’t lead with semantic cache. Land the reliability win, then fast-follow with semantic cache as the cost / hit-rate lever.' },
+      { num:'04', label:'Auth / billing',      sub:'$50 charge → API outage',     accent:'#ef4444', status:'Confirmed',     statusColor:'#00e6d3', hotspot:true,
+        title:'Payment-state cascade is a single point of failure',
+        what:'Authenticated API access depends on payment-state webhooks succeeding. When billing stutters, downstream API calls fail open and integrations break.',
+        failure:'At 20:22:47 UTC and 20:23:12 UTC two $50 charges failed. API access broke. ATOM / AntimatterAI integrations cascaded into outage on a payment-state hiccup. (May 25 correction issued.)',
+        move:'Pitch a credential and payment-webhook circuit breaker with sub-500 ms policy swap. Single most concrete reliability story Akamai can tell on day one.' },
+      { num:'05', label:'Inference placement', sub:'AWS · Foundry · CoreWeave',   accent:'#a855f7', status:'Confirmed',     statusColor:'#00e6d3', hotspot:false,
+        title:'Three GPU clouds. No runtime above them.',
+        what:'AWS provides the backbone (P4de / P5 / HyperPod). Foundry ($750M, Jan 29 2026) added model access. CoreWeave (GB200 NVL72, Mar 4 2026) added dedicated inference clusters.',
+        failure:'No layer above the hyperscalers decides where a given request runs. Queue depth, regional load, cache hit probability, data locality are not unified policy inputs.',
+        move:'Akamai AI Grid as convergence fabric above AWS / Foundry / CoreWeave — queue-aware routing, edge / regional inference placement, one policy engine.' },
+      { num:'06', label:'User crisis',         sub:'refunds · reputation',        accent:'#f5b942', status:'Next question', statusColor:'#5aa4f7', hotspot:true,
+        title:'Refunds, credits, reputation, support drag',
+        what:'Slow answers, broken integrations, inconsistent regional behavior surface as user complaints, refund/credit issuance, and reputational signal in public channels.',
+        failure:'Discord complaints were flagged in the Plaud call. Reputation compounds independently of any single incident. (Discord connector not scanned; no Discord content reproduced here.)',
+        move:'Tie every Akamai metric back to incident compression + refund/credit reduction. Reliability is the wedge; reputation recovery is the dividend.' },
+      { num:'07', label:'Akamai fix',          sub:'Functions cutover · 1 SLA',   accent:'#00e6d3', status:'Confirmed',     statusColor:'#00e6d3', hotspot:false,
+        title:'Akamai Functions cutover · one SLA',
+        what:'Akamai AI Grid / Functions sits above AWS / Foundry / CoreWeave and beside Cloudflare. Routes by health, TTFT, cache-hit probability, cost/token, data locality, and billing/auth state.',
+        failure:'Doing nothing means each new provider is one more orchestration seam. The next billing cascade is when, not if — and it lands on customer surfaces.',
+        move:'POC: narrow but painful slice of real-time search at peak hours US/EU. Measure TTFT, egress, incident ownership, cache-hit. Reliability first. Semantic cache fast-follow. Add Neil & Lior; open via Johnny Love.' }
     ];
 
     function renderCrisisFlow(activeIdx) {
@@ -136,6 +182,12 @@
           + ' data-flow-canvas-idx="' + n + '" role="button" tabindex="0"'
           + ' aria-label="Stage ' + s.num + ' ' + s.label + '"'
           + ' style="--accent:' + s.accent + '; --status:' + s.statusColor + '">'
+          /* Invisible hit-zone rect: SVG <g> elements only receive clicks where
+           * painted children intersect. A full-bbox transparent rect makes the
+           * entire stage cell (ring + label + status pill area) clickable. */
+          + '<rect class="fc-node__hit" x="' + (cxn - nodeR - 14) + '" y="' + (cy - nodeR - 22) + '"'
+          + ' width="' + ((nodeR + 14) * 2) + '" height="' + ((nodeR + 22) * 2 + 36) + '"'
+          + ' fill="transparent" pointer-events="all"/>'
           + (s.hotspot ? '<circle class="fc-hotspot" cx="' + cxn + '" cy="' + (cy - 56) + '" r="6" fill="' + s.statusColor + '">'
               + '<animate attributeName="r" values="5;9;5" dur="2.4s" repeatCount="indefinite"/>'
               + '<animate attributeName="opacity" values="1;.35;1" dur="2.4s" repeatCount="indefinite"/>'
@@ -174,14 +226,48 @@
         + '</svg>';
     }
 
+    function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function renderFlowPanel(idx) {
+      var panel = doc.getElementById('flow-panel');
+      if (!panel) return;
+      var s = STAGES[idx];
+      panel.style.setProperty('--accent', s.accent);
+      panel.innerHTML =
+        '<div class="flow-panel__head">'
+        +   '<div class="flow-panel__num">' + s.num + ' / 07</div>'
+        +   '<div class="flow-panel__title-stack">'
+        +     '<div class="flow-panel__label">Stage ' + s.num + ' · ' + esc(s.label) + '</div>'
+        +     '<h3 class="flow-panel__title">' + esc(s.title) + '</h3>'
+        +   '</div>'
+        +   '<div class="flow-panel__status" style="--c:' + s.statusColor + '">'
+        +     '<span class="flow-panel__status-dot"></span>' + esc(s.status)
+        +   '</div>'
+        + '</div>'
+        + '<div class="flow-panel__grid">'
+        +   '<section class="flow-panel__cell"><div class="flow-panel__cell-label">What happens</div><p>' + esc(s.what) + '</p></section>'
+        +   '<section class="flow-panel__cell flow-panel__cell--fail"><div class="flow-panel__cell-label">Failure mode</div><p>' + esc(s.failure) + '</p></section>'
+        +   '<section class="flow-panel__cell flow-panel__cell--move"><div class="flow-panel__cell-label">Akamai move</div><p>' + esc(s.move) + '</p></section>'
+        + '</div>'
+        + '<div class="flow-panel__progress" aria-hidden="true">'
+        +   STAGES.map(function (_, i) {
+              return '<span class="' + (i === idx ? 'is-active' : (i < idx ? 'is-done' : '')) + '"></span>';
+            }).join('')
+        + '</div>';
+      // Re-trigger animation
+      panel.classList.remove('flow-panel--enter');
+      void panel.offsetWidth;
+      panel.classList.add('flow-panel--enter');
+    }
+
     var activeStage = 0;
     function setActiveStage(i) {
+      activeStage = ((i % STAGES.length) + STAGES.length) % STAGES.length;
       if (window.dtomCrisisFlow && typeof window.dtomCrisisFlow.open === 'function') {
-        window.dtomCrisisFlow.open(i);
+        window.dtomCrisisFlow.open(activeStage);
         return;
       }
-      activeStage = ((i % STAGES.length) + STAGES.length) % STAGES.length;
       renderCrisisFlow(activeStage);
+      renderFlowPanel(activeStage);
     }
 
     doc.addEventListener('click', function (e) {
@@ -201,6 +287,7 @@
     function bootFlow() {
       if (window.dtomCrisisFlow) return; // bundled module handled it
       renderCrisisFlow(activeStage);
+      renderFlowPanel(activeStage);
     }
     if (doc.readyState === 'loading') {
       doc.addEventListener('DOMContentLoaded', bootFlow, { once: true });
@@ -848,30 +935,30 @@
               </div>
               <div class="cmd-tabpanels">
                 <div class="cmd-tabpanel is-active" data-cmd-panel="cloudflare" role="tabpanel">
-                  <ul>
-                    <li><span class="cmd-bullet" style="--c:#f5984a"></span> DNS / proxy front door across <b>www, api, console, status, enterprise, shopping</b></li>
-                    <li><span class="cmd-bullet" style="--c:#f5984a"></span> Load balancing with steering, failover, geo, proximity, weights, health, session affinity</li>
-                    <li><span class="cmd-bullet" style="--c:#f5984a"></span> Static CDN cache · WAF · bot · API protection</li>
-                    <li><span class="cmd-bullet" style="--c:#f5b942"></span> AI Gateway (potential): retries, model fallback, rate limits, <b>exact-match cache</b></li>
-                    <li><span class="cmd-bullet" style="--c:#ef4444"></span> Does not own: placement · semantic cache · billing/auth failover · single SLA</li>
-                  </ul>
+                  <div class="cmd-decision-grid">
+                    <article class="cmd-decision-card" style="--c:#f5984a"><div class="cmd-decision-card__tag">Front door</div><div class="cmd-decision-card__body">DNS · proxy across <b>www, api, console, status, enterprise, shopping</b></div></article>
+                    <article class="cmd-decision-card" style="--c:#f5984a"><div class="cmd-decision-card__tag">Load balancing</div><div class="cmd-decision-card__body">Steering · failover · geo · proximity · weights · health · session affinity</div></article>
+                    <article class="cmd-decision-card" style="--c:#f5984a"><div class="cmd-decision-card__tag">Edge security</div><div class="cmd-decision-card__body">Static CDN cache · WAF · bot · API protection</div></article>
+                    <article class="cmd-decision-card" style="--c:#f5b942"><div class="cmd-decision-card__tag">AI Gateway (maybe)</div><div class="cmd-decision-card__body">Retries · model fallback · rate limits · <b>exact-match cache</b></div></article>
+                    <article class="cmd-decision-card cmd-decision-card--neg" style="--c:#ef4444"><div class="cmd-decision-card__tag">Does NOT own</div><div class="cmd-decision-card__body">Placement · semantic cache · billing/auth failover · single SLA</div></article>
+                  </div>
                 </div>
                 <div class="cmd-tabpanel" data-cmd-panel="akamai" role="tabpanel" hidden>
-                  <ul>
-                    <li><span class="cmd-bullet" style="--c:#00e6d3"></span> <b>Inference placement</b> · edge / regional / hyperscale by prompt class &amp; queue depth</li>
-                    <li><span class="cmd-bullet" style="--c:#00e6d3"></span> <b>Semantic cache</b> · intent + embedding + tenant + freshness, not byte-identical</li>
-                    <li><span class="cmd-bullet" style="--c:#00e6d3"></span> <b>Billing/auth failover</b> · sub-500ms policy swap · webhook circuit breaker</li>
-                    <li><span class="cmd-bullet" style="--c:#00e6d3"></span> <b>Cross-cloud egress minimization</b> · cost-per-token routing</li>
-                    <li><span class="cmd-bullet" style="--c:#00e6d3"></span> <b>One SLA report</b> · provider health + TTFT + cache + egress + incident owner</li>
-                  </ul>
+                  <div class="cmd-decision-grid">
+                    <article class="cmd-decision-card" style="--c:#00e6d3"><div class="cmd-decision-card__tag">Inference placement</div><div class="cmd-decision-card__body">Edge / regional / hyperscale by prompt class &amp; queue depth</div></article>
+                    <article class="cmd-decision-card" style="--c:#00e6d3"><div class="cmd-decision-card__tag">Semantic cache</div><div class="cmd-decision-card__body">Intent + embedding + tenant + freshness — not byte-identical</div></article>
+                    <article class="cmd-decision-card" style="--c:#00e6d3"><div class="cmd-decision-card__tag">Billing/auth failover</div><div class="cmd-decision-card__body">Sub-500 ms policy swap · webhook circuit breaker</div></article>
+                    <article class="cmd-decision-card" style="--c:#00e6d3"><div class="cmd-decision-card__tag">Egress minimization</div><div class="cmd-decision-card__body">Cross-cloud bytes · cost-per-token routing</div></article>
+                    <article class="cmd-decision-card" style="--c:#00e6d3"><div class="cmd-decision-card__tag">One SLA report</div><div class="cmd-decision-card__body">Provider health + TTFT + cache + egress + incident owner</div></article>
+                  </div>
                 </div>
                 <div class="cmd-tabpanel" data-cmd-panel="unknowns" role="tabpanel" hidden>
-                  <ul>
-                    <li><span class="cmd-bullet" style="--c:#f5b942"></span> Cloudflare Worker / custom router / ad-hoc — <b>not confirmed</b>. Plaud call hypothesis: "haphazard."</li>
-                    <li><span class="cmd-bullet" style="--c:#f5b942"></span> Semantic / embedding-aware cache today — <b>not confirmed</b>. Reliability first, semantic fast-follow.</li>
-                    <li><span class="cmd-bullet" style="--c:#5aa4f7"></span> Latest org-tier <b>routing analytics</b> promised for Ben's deeper pulse.</li>
-                    <li><span class="cmd-bullet" style="--c:#5aa4f7"></span> Discord complaint signal discussed in Plaud call — connector <b>not scanned</b>; no Discord content reproduced here.</li>
-                  </ul>
+                  <div class="cmd-decision-grid">
+                    <article class="cmd-decision-card" style="--c:#f5b942"><div class="cmd-decision-card__tag">Routing impl</div><div class="cmd-decision-card__body">Workers · custom · ad-hoc — <b>not confirmed</b>. Plaud hypothesis: "haphazard."</div></article>
+                    <article class="cmd-decision-card" style="--c:#f5b942"><div class="cmd-decision-card__tag">Semantic cache today</div><div class="cmd-decision-card__body">Embedding-aware cache — <b>not confirmed</b>. Reliability first, semantic fast-follow.</div></article>
+                    <article class="cmd-decision-card" style="--c:#5aa4f7"><div class="cmd-decision-card__tag">Routing analytics</div><div class="cmd-decision-card__body">Org-tier pulse promised for Ben's tier — bring to next meeting</div></article>
+                    <article class="cmd-decision-card" style="--c:#5aa4f7"><div class="cmd-decision-card__tag">Discord signal</div><div class="cmd-decision-card__body">Discussed in Plaud call · connector <b>not scanned</b>; no Discord content reproduced</div></article>
+                  </div>
                 </div>
               </div>
             </aside>
