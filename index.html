@@ -73,6 +73,7 @@
 
       <nav class="nav-links" id="primary-nav" aria-label="Primary">
         <a href="#thesis">Thesis</a>
+        <a href="#crisis-map">Crisis Map</a>
         <a href="#stack">Stack</a>
         <a href="#flywheel">Convergence</a>
         <a href="#pilot">Pilot</a>
@@ -362,6 +363,85 @@
               </ul>
             </div></div>
           </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== CRISIS MAP ============== -->
+    <section id="crisis-map" class="section section--crisis-map">
+      <div class="container container--wide">
+        <div class="section-label reveal">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20"/></svg>
+          Crisis map · Five failure modes
+        </div>
+        <h2 class="section-heading reveal" data-delay="1">Five failure modes. One convergence fix.</h2>
+        <p class="section-sub reveal" data-delay="2">
+          Extracted from live Akamai ↔ Perplexity correspondence, billing events, and infrastructure intelligence.
+        </p>
+
+        <div class="crisis-map-grid">
+          <!-- Donut stage -->
+          <div class="crisis-donut-stage glass reveal" id="crisis-donut-stage" data-delay="1" aria-label="Interactive crisis donut. Use arrow keys or numbers 1-5 to navigate." role="group">
+            <div class="scan-line" aria-hidden="true"></div>
+            <div class="crisis-donut-eyebrow">
+              <span class="pip"></span>
+              <span>FAILURE SURFACE // 100% MAPPED</span>
+            </div>
+            <svg class="crisis-donut" viewBox="0 0 240 240" aria-hidden="true">
+              <defs>
+                <filter id="cd-glow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="2.4" result="b"/>
+                  <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+              </defs>
+              <!-- background ring -->
+              <circle cx="120" cy="120" r="80" fill="none" stroke="rgba(255,255,255,.04)" stroke-width="28"/>
+              <!-- segments: r=80, circumference=502.6548 -->
+              <!-- 28% = 140.7, 24% = 120.6, 22% = 110.6, 15% = 75.4, 11% = 55.3 ; gap 2 -->
+              <g transform="rotate(-90 120 120)" filter="url(#cd-glow)">
+                <circle class="crisis-seg" data-seg="0" cx="120" cy="120" r="80" fill="none" stroke="#ef4444" stroke-width="28"
+                        stroke-dasharray="138.7 363.9" stroke-dashoffset="0"/>
+                <circle class="crisis-seg" data-seg="1" cx="120" cy="120" r="80" fill="none" stroke="#f5b942" stroke-width="28"
+                        stroke-dasharray="118.6 384.0" stroke-dashoffset="-140.7"/>
+                <circle class="crisis-seg" data-seg="2" cx="120" cy="120" r="80" fill="none" stroke="#00e6d3" stroke-width="28"
+                        stroke-dasharray="108.6 394.0" stroke-dashoffset="-261.3"/>
+                <circle class="crisis-seg" data-seg="3" cx="120" cy="120" r="80" fill="none" stroke="#5aa4f7" stroke-width="28"
+                        stroke-dasharray="73.4 429.2" stroke-dashoffset="-371.9"/>
+                <circle class="crisis-seg" data-seg="4" cx="120" cy="120" r="80" fill="none" stroke="#a855f7" stroke-width="28"
+                        stroke-dasharray="53.3 449.3" stroke-dashoffset="-447.3"/>
+              </g>
+              <!-- center label -->
+              <text x="120" y="114" text-anchor="middle" class="cd-center-num" font-family="Cabinet Grotesk" font-size="32" font-weight="800" fill="#eef2f6">5</text>
+              <text x="120" y="138" text-anchor="middle" class="cd-center-label" font-family="JetBrains Mono" font-size="9" letter-spacing="2" fill="#8a93a3">FAILURE MODES</text>
+              <text x="120" y="156" text-anchor="middle" class="cd-center-label" font-family="JetBrains Mono" font-size="9" letter-spacing="2" fill="#00e6d3">1 CONVERGENCE FIX</text>
+            </svg>
+
+            <!-- segment pills (clickable legend) -->
+            <div class="crisis-pills" role="tablist" aria-label="Failure mode selector">
+              <button type="button" class="crisis-pill" data-seg="0" style="--c:#ef4444"><span class="pip"></span><b>01</b> Billing Cascade <em>28%</em></button>
+              <button type="button" class="crisis-pill" data-seg="1" style="--c:#f5b942"><span class="pip"></span><b>02</b> Orchestration Chaos <em>24%</em></button>
+              <button type="button" class="crisis-pill" data-seg="2" style="--c:#00e6d3"><span class="pip"></span><b>03</b> Latency / TTFT <em>22%</em></button>
+              <button type="button" class="crisis-pill" data-seg="3" style="--c:#5aa4f7"><span class="pip"></span><b>04</b> Support Fragmentation <em>15%</em></button>
+              <button type="button" class="crisis-pill" data-seg="4" style="--c:#a855f7"><span class="pip"></span><b>05</b> Egress Cost Drag <em>11%</em></button>
+            </div>
+          </div>
+
+          <!-- Detail panel -->
+          <aside class="crisis-detail glass reveal" id="crisis-detail" data-delay="2" aria-live="polite">
+            <div class="crisis-detail-inner" id="crisis-detail-inner"></div>
+          </aside>
+        </div>
+
+        <!-- Architecture recommendation strip -->
+        <div class="crisis-recommendation reveal" data-delay="3">
+          <div class="cr-label"><span class="pip"></span> ARCHITECTURE RECOMMENDATION // VERBATIM</div>
+          <p class="cr-body">
+            Keep <b style="color:var(--aws)">AWS</b> for backbone and training, keep
+            <b style="color:var(--azure)">Foundry</b> for enterprise-grade inference contracts, keep
+            <b style="color:var(--coreweave)">CoreWeave</b> for dense GPU workloads —
+            and put <b style="color:var(--plasma)">Akamai AI Grid</b> as the convergence layer above all of them
+            that owns the user-facing runtime, the token economics, the latency guarantees, and the single SLA.
+          </p>
         </div>
       </div>
     </section>
@@ -679,7 +759,7 @@
   <div class="drawer-backdrop" data-evidence-close></div>
   <aside class="drawer" id="evidence-drawer" role="dialog" aria-label="Evidence dossier" aria-modal="true">
     <div class="drawer-header">
-      <h3>Evidence dossier · 6 sources</h3>
+      <h3>Evidence dossier · 11 sources</h3>
       <button class="drawer-close" type="button" data-evidence-close aria-label="Close evidence drawer">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
@@ -687,6 +767,8 @@
     <div class="drawer-body" id="drawer-list"></div>
   </aside>
 
+  <script src="./viz-state.js" defer></script>
   <script src="./app.js" defer></script>
+  <script src="./crisis-map.js" defer></script>
 </body>
 </html>

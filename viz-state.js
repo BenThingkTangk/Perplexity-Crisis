@@ -143,7 +143,7 @@ const vizState = new VizState({
   flywheel:  { activeNode: 0 },
   calculator: { qpm: 5000, edgeOffload: 40, peakMultiplier: 3, cacheHitRate: 18 },
   ui: { theme: 'dark', drawerOpen: false, navOpen: false },
-   { sources: [], crisisData: [], metrics: {} },
+  data: { sources: [], crisisData: [], metrics: {} },
 });
 
 // Expose globally

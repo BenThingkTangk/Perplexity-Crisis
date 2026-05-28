@@ -73,6 +73,41 @@
       title: 'Amazon wins court order to block Perplexity\'s Comet shopping agent',
       summary: 'Amazon won a preliminary injunction blocking Perplexity\'s Comet AI shopping agent from using its platform. Dispute centers on Comet accessing Amazon at user direction without Amazon authorization. Perplexity says it will continue fighting for users\' ability to choose any AI.',
       url: 'https://www.cnbc.com/2026/03/10/amazon-wins-court-order-to-block-perplexitys-ai-shopping-agent.html'
+    },
+    {
+      tag: 'Live evidence · Outlook',
+      date: 'May 18, 2026',
+      title: 'Two consecutive $50 payment failures from failed-payments@perplexity.ai',
+      summary: 'At 20:22:47 and 20:23:12 UTC, two $50.00 charges failed against the Perplexity billing endpoint, breaking API access and cascading into ATOM/AntimatterAI integration outages. Direct evidence for the Billing Cascade failure mode.',
+      url: 'mailto:failed-payments@perplexity.ai'
+    },
+    {
+      tag: 'Live evidence · Outlook',
+      date: 'May 25, 2026',
+      title: 'Perplexity billing correction — credits refunded, bonus credits granted',
+      summary: 'team@mail.perplexity.ai issued a billing correction email reinstating credit usage, refunding purchases during the impacted period, and granting bonus credits — confirming the May 18 failure was a billing system issue, not infrastructure scarcity.',
+      url: 'mailto:team@mail.perplexity.ai'
+    },
+    {
+      tag: 'Live evidence · Outlook',
+      date: 'May 22, 2026',
+      title: 'Perplexity Sub-processor Update — Polytomic Inc. added (effective June 8, 2026)',
+      summary: 'team@mail.perplexity.ai sub-processor notice announcing Polytomic Inc. as a new data sub-processor to move and update data between Perplexity\'s data warehouse and CRM systems. Direct signal of supply-chain expansion under the same orchestration regime.',
+      url: 'mailto:team@mail.perplexity.ai'
+    },
+    {
+      tag: 'Live evidence · Akamai',
+      date: 'May 20–27, 2026',
+      title: 'Akamai ↔ Perplexity opportunity threads — Welander, McKay, Pare, Holcombe',
+      summary: 'Sustained correspondence with Jouni Welander (jwelander@akamai.com) plus cc threads with Neil McKay, Matt Pare, and Robert Holcombe through the May 18–25 incident window. Akamai sync notes reference Perplexity\'s multi-cloud model and orchestration fragmentation as the primary opportunity vector.',
+      url: 'mailto:jwelander@akamai.com'
+    },
+    {
+      tag: 'Intake channel · Discord',
+      date: 'Live · pending connector auth',
+      title: 'Discord → GitHub bot wired at /api/discord-webhook',
+      summary: 'Discord intake path is deployed (api/discord-github-bot.js) and triggers on 🐛 🚨 ⚠️ 🔥 or !issue prefixes — auto-filing GitHub issues with author, channel, timestamp, and priority. Live Discord message extraction is gated on connector authentication; no Discord content is fabricated in this brief.',
+      url: '/api/discord-webhook'
     }
   ];
 
