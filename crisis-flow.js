@@ -179,6 +179,36 @@ const ICONS = {
     });
   }
 
+  /* ---------- Stage diagram ----------
+   * A tiny SVG visualization that shows the request state at this stage:
+   * a horizontal pipeline of seven nodes, with the active node lit.
+   */
+  function renderStageDiagram(idx) {
+    const cx = (i) => 50 + i * 64;
+    const dots = STAGES.map((st, i) => {
+      const active = i === idx;
+      const done = i < idx;
+      const color = active ? st.accent : (done ? 'rgba(0,230,211,.55)' : 'rgba(140,150,170,.32)');
+      return `
+        <g transform="translate(${cx(i)} 80)">
+          <circle r="${active ? 14 : 8}" fill="${active ? st.accent : 'transparent'}" stroke="${color}" stroke-width="${active ? 0 : 2}" ${active ? `filter="drop-shadow(0 0 12px ${st.accent})"` : ''}/>
+          <text y="36" text-anchor="middle" font-family="JetBrains Mono" font-size="10" letter-spacing="2" fill="${active ? st.accent : '#8a93a3'}">${st.num}</text>
+          <text y="52" text-anchor="middle" font-family="Satoshi" font-size="10" fill="${active ? '#eef2f6' : '#7a8497'}">${st.label}</text>
+        </g>`;
+    }).join('');
+    const lines = STAGES.slice(1).map((_, i) => `
+      <line x1="${cx(i) + 10}" y1="80" x2="${cx(i + 1) - 10}" y2="80"
+            stroke="${i < idx ? 'rgba(0,230,211,.55)' : 'rgba(140,150,170,.18)'}"
+            stroke-width="${i < idx ? 2 : 1.4}" stroke-dasharray="${i < idx ? '0' : '4 6'}"/>
+    `).join('');
+    return `
+      <svg class="flow-panel__diagram" viewBox="0 0 ${cx(STAGES.length - 1) + 50} 110" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        ${lines}
+        ${dots}
+      </svg>
+    `;
+  }
+
   /* ---------- Detail panel ---------- */
   function renderPanel() {
     const s = STAGES[activeIdx];
@@ -195,6 +225,8 @@ const ICONS = {
           <span class="flow-panel__status-dot"></span>${status.label}
         </div>
       </div>
+
+      ${renderStageDiagram(activeIdx)}
 
       <div class="flow-panel__grid">
         <section class="flow-panel__cell">
