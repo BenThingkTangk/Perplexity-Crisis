@@ -10,12 +10,14 @@
     "preview": "vite preview",
     "deploy": "vercel --prod",
     "bot": "node discord-github-bot.js",
-    "bot:dev": "nodemon discord-github-bot.js"
+    "bot:dev": "nodemon discord-github-bot.js",
+    "verify": "vite build && node verify-atom.js"
   },
   "dependencies": {
     "discord.js": "^14.15.3"
   },
   "devDependencies": {
+    "jsdom": "^24.1.0",
     "nodemon": "^3.1.0",
     "serve": "^14.2.3",
     "vite": "^5.4.10"
