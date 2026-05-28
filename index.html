@@ -15,40 +15,199 @@
 
   <link rel="stylesheet" href="./styles.css" />
 
-  <!-- Inline boot fallback: document-level delegation guarantees the ATOM
-       drawer opens from every [data-atom-open] launcher even if the bundled
-       atom-agent.js module fails to load. The full module replaces this
-       handler on boot. Kept tiny and dependency-free. -->
+  <!-- Inline boot fallback: a tiny dependency-free shell that guarantees the
+       ATOM drawer, Crisis Flow pipeline, decision-panel tabs, and details
+       summaries work even if the bundled /main.js never loads (CSP, COEP,
+       network, browser config — any reason). The full bundled module
+       replaces handlers on boot. All event handlers go through document-
+       level delegation so launchers added later still work. -->
   <script>
-    (function () {
-      function findOpenTarget(el) { return el && el.closest && el.closest('[data-atom-open]'); }
-      function findCloseTarget(el) { return el && el.closest && el.closest('[data-atom-close]'); }
-      document.addEventListener('click', function (e) {
-        var t = e.target;
-        if (!t || !t.closest) return;
-        var open  = findOpenTarget(t);
-        var close = findCloseTarget(t);
-        if (!open && !close) return;
-        var drawer = document.getElementById('atom-agent');
-        var backdrop = document.querySelector('.atom-backdrop');
-        if (!drawer || !backdrop) return;
-        // If the full module already booted, defer to it.
-        if (window.dtomAtomAgent) return;
-        e.preventDefault();
-        if (open) {
-          drawer.hidden = false;
-          void drawer.offsetWidth;
-          drawer.classList.add('open');
-          backdrop.classList.add('open');
-          document.body.classList.add('atom-open');
-        } else if (close) {
-          drawer.classList.remove('open');
-          backdrop.classList.remove('open');
-          document.body.classList.remove('atom-open');
-          setTimeout(function () { drawer.hidden = true; }, 240);
+  (function () {
+    var doc = document;
+
+    /* ----- ATOM drawer: open/close via document delegation ----- */
+    function openDrawer() {
+      var d = doc.getElementById('atom-agent');
+      var b = doc.querySelector('.atom-backdrop');
+      if (!d || !b) return;
+      d.hidden = false; void d.offsetWidth;
+      d.classList.add('open'); b.classList.add('open');
+      doc.body.classList.add('atom-open');
+    }
+    function closeDrawer() {
+      var d = doc.getElementById('atom-agent');
+      var b = doc.querySelector('.atom-backdrop');
+      if (!d || !b) return;
+      d.classList.remove('open'); b.classList.remove('open');
+      doc.body.classList.remove('atom-open');
+      setTimeout(function () { d.hidden = true; }, 240);
+    }
+    window.dtomBoot = { openDrawer: openDrawer, closeDrawer: closeDrawer };
+
+    doc.addEventListener('click', function (e) {
+      var t = e.target;
+      if (!t || !t.closest) return;
+
+      var open = t.closest('[data-atom-open]');
+      if (open) { e.preventDefault(); openDrawer(); return; }
+
+      var close = t.closest('[data-atom-close]');
+      if (close) { e.preventDefault(); closeDrawer(); return; }
+
+      /* Decision panel tabs in routing/cache dashboard */
+      var tab = t.closest('[data-cmd-tab]');
+      if (tab) {
+        var key = tab.getAttribute('data-cmd-tab');
+        var tabs = doc.querySelectorAll('[data-cmd-tab]');
+        for (var i = 0; i < tabs.length; i++) {
+          var on = tabs[i] === tab;
+          tabs[i].classList.toggle('is-active', on);
+          tabs[i].setAttribute('aria-selected', on ? 'true' : 'false');
         }
-      }, false);
-    })();
+        var panels = doc.querySelectorAll('[data-cmd-panel]');
+        for (var j = 0; j < panels.length; j++) {
+          var match = panels[j].getAttribute('data-cmd-panel') === key;
+          panels[j].classList.toggle('is-active', match);
+          panels[j].hidden = !match;
+        }
+        return;
+      }
+
+      /* ATOM mode tabs inside the drawer */
+      var mode = t.closest('.atom-tab[data-atom-mode]');
+      if (mode) {
+        var modes = doc.querySelectorAll('.atom-tab[data-atom-mode]');
+        for (var k = 0; k < modes.length; k++) {
+          var on2 = modes[k] === mode;
+          modes[k].classList.toggle('is-active', on2);
+          modes[k].setAttribute('aria-selected', on2 ? 'true' : 'false');
+        }
+        return;
+      }
+    }, false);
+
+    doc.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        var d = doc.getElementById('atom-agent');
+        if (d && d.classList.contains('open')) closeDrawer();
+      }
+    });
+
+    /* ----- Crisis Flow: render a graphical SVG pipeline ----- */
+    var STAGES = [
+      { num:'01', label:'User demand',       sub:'Comet · API · Web',           accent:'#5aa4f7', status:'Confirmed',     statusColor:'#00e6d3', hotspot:false },
+      { num:'02', label:'Front-door routing',sub:'Cloudflare · routing ???',    accent:'#f5984a', status:'Unconfirmed',   statusColor:'#f5b942', hotspot:true  },
+      { num:'03', label:'Cache decision',    sub:'exact-match vs semantic',     accent:'#00e6d3', status:'Next question', statusColor:'#5aa4f7', hotspot:true  },
+      { num:'04', label:'Auth / billing',    sub:'$50 charge → API outage',     accent:'#ef4444', status:'Confirmed',     statusColor:'#00e6d3', hotspot:true  },
+      { num:'05', label:'Inference placement',sub:'AWS · Foundry · CoreWeave',  accent:'#a855f7', status:'Confirmed',     statusColor:'#00e6d3', hotspot:false },
+      { num:'06', label:'User crisis',       sub:'refunds · reputation',        accent:'#f5b942', status:'Next question', statusColor:'#5aa4f7', hotspot:true  },
+      { num:'07', label:'Akamai fix',        sub:'Functions cutover · 1 SLA',   accent:'#00e6d3', status:'Confirmed',     statusColor:'#00e6d3', hotspot:false }
+    ];
+
+    function renderCrisisFlow(activeIdx) {
+      var canvas = doc.getElementById('flow-canvas');
+      if (!canvas) return;
+      var W = 1200, H = 380, padX = 80, cy = 200, nodeR = 38;
+      var step = (W - padX * 2) / (STAGES.length - 1);
+
+      var edges = '';
+      for (var i = 0; i < STAGES.length - 1; i++) {
+        var x1 = padX + step * i + nodeR;
+        var x2 = padX + step * (i + 1) - nodeR;
+        var done = i < activeIdx;
+        edges += '<g class="fc-edge ' + (done ? 'fc-edge--done' : '') + '">'
+          + '<line x1="' + x1 + '" y1="' + cy + '" x2="' + x2 + '" y2="' + cy + '"'
+          + ' stroke="' + (done ? '#00e6d3' : 'rgba(140,150,170,.28)') + '"'
+          + ' stroke-width="' + (done ? 2.6 : 1.6) + '"'
+          + ' stroke-dasharray="' + (done ? '0' : '6 6') + '"/>'
+          + (done ? '<circle class="fc-pulse" cx="' + x1 + '" cy="' + cy + '" r="3" fill="#00e6d3">'
+              + '<animate attributeName="cx" from="' + x1 + '" to="' + x2 + '" dur="1.6s" repeatCount="indefinite"/>'
+              + '<animate attributeName="opacity" values="0;1;0" dur="1.6s" repeatCount="indefinite"/>'
+              + '</circle>' : '')
+          + '</g>';
+      }
+
+      var nodes = '';
+      for (var n = 0; n < STAGES.length; n++) {
+        var s = STAGES[n];
+        var cxn = padX + step * n;
+        var active = n === activeIdx;
+        nodes += '<g class="fc-node ' + (active ? 'fc-node--active' : '') + '"'
+          + ' data-flow-canvas-idx="' + n + '" role="button" tabindex="0"'
+          + ' aria-label="Stage ' + s.num + ' ' + s.label + '"'
+          + ' style="--accent:' + s.accent + '; --status:' + s.statusColor + '">'
+          + (s.hotspot ? '<circle class="fc-hotspot" cx="' + cxn + '" cy="' + (cy - 56) + '" r="6" fill="' + s.statusColor + '">'
+              + '<animate attributeName="r" values="5;9;5" dur="2.4s" repeatCount="indefinite"/>'
+              + '<animate attributeName="opacity" values="1;.35;1" dur="2.4s" repeatCount="indefinite"/>'
+              + '</circle>' : '')
+          + '<circle class="fc-node__halo" cx="' + cxn + '" cy="' + cy + '" r="' + (nodeR + 14) + '" fill="none"'
+          + ' stroke="' + s.accent + '" stroke-opacity="' + (active ? .55 : .12) + '" stroke-width="' + (active ? 1.4 : 1) + '"'
+          + ' stroke-dasharray="' + (active ? '4 6' : '2 8') + '">'
+          + (active ? '<animateTransform attributeName="transform" type="rotate"'
+              + ' from="0 ' + cxn + ' ' + cy + '" to="360 ' + cxn + ' ' + cy + '" dur="14s" repeatCount="indefinite"/>' : '')
+          + '</circle>'
+          + '<circle class="fc-node__ring" cx="' + cxn + '" cy="' + cy + '" r="' + nodeR + '"'
+          + ' fill="' + (active ? 'rgba(8,12,18,.92)' : 'rgba(8,12,18,.7)') + '"'
+          + ' stroke="' + s.accent + '" stroke-width="' + (active ? 2.4 : 1.6) + '"'
+          + (active ? ' filter="drop-shadow(0 0 16px ' + s.accent + ')"' : '') + '/>'
+          + '<text x="' + cxn + '" y="' + (cy - 4) + '" text-anchor="middle"'
+          + ' font-family="JetBrains Mono" font-size="10" letter-spacing="2"'
+          + ' fill="' + (active ? s.accent : '#8a93a3') + '">' + s.num + '</text>'
+          + '<text x="' + cxn + '" y="' + (cy + 12) + '" text-anchor="middle"'
+          + ' font-family="Cabinet Grotesk" font-size="11" font-weight="800"'
+          + ' fill="' + (active ? '#eef2f6' : '#c4cdda') + '">' + s.label.toUpperCase() + '</text>'
+          + '<text x="' + cxn + '" y="' + (cy + 64) + '" text-anchor="middle"'
+          + ' font-family="Satoshi" font-size="11" fill="' + (active ? '#eef2f6' : '#7a8497') + '">' + s.sub + '</text>'
+          + '<g transform="translate(' + (cxn - 36) + ' ' + (cy + 78) + ')">'
+          + '<rect width="72" height="20" rx="10" fill="rgba(8,12,18,.85)" stroke="' + s.statusColor + '" stroke-opacity=".7"/>'
+          + '<text x="36" y="14" text-anchor="middle" font-family="JetBrains Mono" font-size="9" letter-spacing="1.4" fill="' + s.statusColor + '">' + s.status.toUpperCase() + '</text>'
+          + '</g>'
+          + '</g>';
+      }
+
+      canvas.innerHTML = '<div class="flow-canvas__label">'
+        + '<span class="pip"></span> SEVEN STAGE PIPELINE · USER DEMAND → AKAMAI FIX'
+        + '<span class="flow-canvas__hint">Click any node · arrow keys to navigate</span></div>'
+        + '<svg class="flow-canvas__svg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet">'
+        + '<text x="' + (W/2) + '" y="42" text-anchor="middle" font-family="JetBrains Mono" font-size="10" letter-spacing="3" fill="#5a6478">USER REGIONS · TX · ATL · PA · MONTREAL · CH  →  CLOUDFLARE FRONT DOOR  →  AKAMAI AI RUNTIME</text>'
+        + edges + nodes
+        + '</svg>';
+    }
+
+    var activeStage = 0;
+    function setActiveStage(i) {
+      if (window.dtomCrisisFlow && typeof window.dtomCrisisFlow.open === 'function') {
+        window.dtomCrisisFlow.open(i);
+        return;
+      }
+      activeStage = ((i % STAGES.length) + STAGES.length) % STAGES.length;
+      renderCrisisFlow(activeStage);
+    }
+
+    doc.addEventListener('click', function (e) {
+      var n = e.target.closest && e.target.closest('[data-flow-canvas-idx]');
+      if (n) setActiveStage(Number(n.getAttribute('data-flow-canvas-idx')));
+    }, false);
+    doc.addEventListener('keydown', function (e) {
+      var n = doc.activeElement && doc.activeElement.closest && doc.activeElement.closest('[data-flow-canvas-idx]');
+      if (!n) return;
+      if (e.key === 'ArrowRight') { e.preventDefault(); setActiveStage(activeStage + 1); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); setActiveStage(activeStage - 1); }
+      else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveStage(Number(n.getAttribute('data-flow-canvas-idx'))); }
+    });
+
+    /* Render canvas as soon as DOM is ready. Defers to the bundled module
+     * via window.dtomCrisisFlow if/when it boots. */
+    function bootFlow() {
+      if (window.dtomCrisisFlow) return; // bundled module handled it
+      renderCrisisFlow(activeStage);
+    }
+    if (doc.readyState === 'loading') {
+      doc.addEventListener('DOMContentLoaded', bootFlow, { once: true });
+    } else {
+      bootFlow();
+    }
+  })();
   </script>
 
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23050608'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%2300e6d3'/%3E%3Cellipse cx='16' cy='16' rx='10' ry='5' fill='none' stroke='%2300e6d3' stroke-width='1.4' opacity='.7'/%3E%3Cellipse cx='16' cy='16' rx='10' ry='5' fill='none' stroke='%2300e6d3' stroke-width='1.4' opacity='.4' transform='rotate(60 16 16)'/%3E%3Cellipse cx='16' cy='16' rx='10' ry='5' fill='none' stroke='%2300e6d3' stroke-width='1.4' opacity='.4' transform='rotate(-60 16 16)'/%3E%3C/svg%3E" />
