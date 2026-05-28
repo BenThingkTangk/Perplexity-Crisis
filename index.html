@@ -113,41 +113,41 @@
 
     /* ----- Crisis Flow: render a graphical SVG pipeline ----- */
     var STAGES = [
-      { num:'01', label:'User demand',         sub:'Comet · API · Web',           accent:'#5aa4f7', status:'Confirmed',     statusColor:'#00e6d3', hotspot:false,
-        title:'Distributed live-search demand',
-        what:'Comet, the Perplexity API, and Perplexity.ai users fire live-search and agentic prompts from Texas, Atlanta, Palo Alto, Montreal, Switzerland. Each request expects sub-second TTFT and a fresh, sourced answer.',
-        failure:'Regional concentration of inference + cross-cloud egress turns "near the user" into "near a hyperscaler region." TTFT and answer freshness diverge by geography.',
-        move:'Map TTFT and cache behavior by region before pitching. Anchor Akamai on the regions where pain is strongest.' },
-      { num:'02', label:'Front-door routing',  sub:'Cloudflare · routing ???',    accent:'#f5984a', status:'Unconfirmed',   statusColor:'#f5b942', hotspot:true,
-        title:'Cloudflare edge · routing logic unknown',
-        what:'Public subdomains (www, api, console, status, enterprise, shopping) resolve through Cloudflare. DNS, WAF, bot, static CDN cache are the well-understood layer.',
-        failure:'The AI routing logic above that is unconfirmed. Cloudflare Workers? Custom router? Ad-hoc? Plaud-call hypothesis: "haphazardly across the board."',
-        move:'Make the first Perplexity meeting answer this. Bring the Cloudflare-provides vs Akamai-wedge table so the conversation lands on placement, not perimeter.' },
-      { num:'03', label:'Cache decision',      sub:'exact-match vs semantic',     accent:'#00e6d3', status:'Next question', statusColor:'#5aa4f7', hotspot:true,
-        title:'Static cache works · AI cache does not (yet)',
-        what:'Static web shell, JS/CSS, status assets, and exact-repeat AI Gateway calls are cacheable. Cache Reserve / R2 helps when content is byte-identical.',
-        failure:'Real Perplexity prompts vary constantly. Exact-match caches give near-zero hit rate. Authenticated and org-specific answers need semantic / embedding-aware caching keyed by tenant + freshness.',
-        move:'Reliability first — don’t lead with semantic cache. Land the reliability win, then fast-follow with semantic cache as the cost / hit-rate lever.' },
-      { num:'04', label:'Auth / billing',      sub:'$50 charge → API outage',     accent:'#ef4444', status:'Confirmed',     statusColor:'#00e6d3', hotspot:true,
-        title:'Payment-state cascade is a single point of failure',
-        what:'Authenticated API access depends on payment-state webhooks succeeding. When billing stutters, downstream API calls fail open and integrations break.',
-        failure:'At 20:22:47 UTC and 20:23:12 UTC two $50 charges failed. API access broke. ATOM / AntimatterAI integrations cascaded into outage on a payment-state hiccup. (May 25 correction issued.)',
-        move:'Pitch a credential and payment-webhook circuit breaker with sub-500 ms policy swap. Single most concrete reliability story Akamai can tell on day one.' },
-      { num:'05', label:'Inference placement', sub:'AWS · Foundry · CoreWeave',   accent:'#a855f7', status:'Confirmed',     statusColor:'#00e6d3', hotspot:false,
-        title:'Three GPU clouds. No runtime above them.',
-        what:'AWS provides the backbone (P4de / P5 / HyperPod). Foundry ($750M, Jan 29 2026) added model access. CoreWeave (GB200 NVL72, Mar 4 2026) added dedicated inference clusters.',
-        failure:'No layer above the hyperscalers decides where a given request runs. Queue depth, regional load, cache hit probability, data locality are not unified policy inputs.',
-        move:'Akamai AI Grid as convergence fabric above AWS / Foundry / CoreWeave — queue-aware routing, edge / regional inference placement, one policy engine.' },
-      { num:'06', label:'User crisis',         sub:'refunds · reputation',        accent:'#f5b942', status:'Next question', statusColor:'#5aa4f7', hotspot:true,
-        title:'Refunds, credits, reputation, support drag',
-        what:'Slow answers, broken integrations, inconsistent regional behavior surface as user complaints, refund/credit issuance, and reputational signal in public channels.',
-        failure:'Discord complaints were flagged in the Plaud call. Reputation compounds independently of any single incident. (Discord connector not scanned; no Discord content reproduced here.)',
-        move:'Tie every Akamai metric back to incident compression + refund/credit reduction. Reliability is the wedge; reputation recovery is the dividend.' },
-      { num:'07', label:'Akamai fix',          sub:'Functions cutover · 1 SLA',   accent:'#00e6d3', status:'Confirmed',     statusColor:'#00e6d3', hotspot:false,
-        title:'Akamai Functions cutover · one SLA',
-        what:'Akamai AI Grid / Functions sits above AWS / Foundry / CoreWeave and beside Cloudflare. Routes by health, TTFT, cache-hit probability, cost/token, data locality, and billing/auth state.',
-        failure:'Doing nothing means each new provider is one more orchestration seam. The next billing cascade is when, not if — and it lands on customer surfaces.',
-        move:'POC: narrow but painful slice of real-time search at peak hours US/EU. Measure TTFT, egress, incident ownership, cache-hit. Reliability first. Semantic cache fast-follow. Add Neil & Lior; open via Johnny Love.' }
+      { num:'01', label:'User request origin', sub:'DNS · TTFT · session',     accent:'#5aa4f7', status:'Confirmed',     statusColor:'#a2a3e9', hotspot:false,
+        title:'Distributed live-search demand · multi-region',
+        what:'A user fires a live-search or agentic query from a distributed region. The request hits a DNS resolver and begins the first-mile traversal toward the inference backend.',
+        failure:'Geographic concentration of origin servers means distant users absorb first-mile latency before the request reaches inference. Agentic browsers compound this with sub-request chains.',
+        move:'Route the request to the nearest of 4,400+ Akamai PoPs and eliminate the geographic first-mile penalty before inference begins.' },
+      { num:'02', label:'DNS + front door',    sub:'CDN · WAF · LB',           accent:'#f5984a', status:'Unknown',       statusColor:'#f5b942', hotspot:true,
+        title:'Public-edge routing layer · implementation unconfirmed',
+        what:'The request resolves to an ingress — CDN edge, WAF, or load balancer. The exact front-door implementation in front of api.perplexity.ai is not publicly confirmed.',
+        failure:'Single-CDN dependency means a front-door incident propagates to every downstream stage. WAF false positives can drop legitimate API calls. Front-door routing logic is opaque from the outside.',
+        move:'App & API Protector provides WAF + bot management + DDoS at Akamai\'s edge. Ion provides dynamic acceleration with 100% availability SLA. Akamai owns the front door and eliminates single-CDN dependency.' },
+      { num:'03', label:'Cache decision',      sub:'exact-match vs semantic',  accent:'#00e6d3', status:'Likely',        statusColor:'#5aa4f7', hotspot:true,
+        title:'Front-door cache · exact-match only, no semantic coverage',
+        what:'The front-door layer checks whether the request can be served from cache. Public CDN AI Gateway products provide exact-match cache only — identical request bodies hit, semantically equivalent prompts miss.',
+        failure:'Near-zero cache hit rate on search/agentic queries because prompts vary constantly. Cache-miss storms during spikes amplify origin load. Stale cache responses degrade answer freshness.',
+        move:'Akamai AI Grid targets semantic caching at the edge — embedding-indexed lookup serves semantically equivalent queries from cache, dramatically increasing effective hit rate (roadmap capability).' },
+      { num:'04', label:'Auth / billing entitlement', sub:'401 / 402 cascade', accent:'#ef4444', status:'Confirmed',     statusColor:'#a2a3e9', hotspot:true,
+        title:'Credit-based entitlement is in the critical path',
+        what:'The inference request must pass Bearer-token authentication and a credit-entitlement check. Credit exhaustion or billing-system failure produces 401/402 responses that immediately block the API call.',
+        failure:'Credit exhaustion gates API access for every downstream integration — no graceful degradation. Billing-system outage blocks authenticated requests even for funded accounts. Retry chain takes 25–120s to surface a user-visible error.',
+        move:'EdgeWorkers circuit breaker at the edge: detect repeated 401/402, activate a sub-500ms policy swap (route to fallback, serve cached responses, return graceful error), restore traffic when billing recovers.' },
+      { num:'05', label:'Inference placement', sub:'AWS · Foundry · CoreWeave', accent:'#a855f7', status:'Confirmed',    statusColor:'#a2a3e9', hotspot:false,
+        title:'Three independent compute planes · no unified runtime',
+        what:'Public deal history confirms three independent compute planes: AWS (primary), CoreWeave (GB200 NVL72 dedicated clusters), and Microsoft Foundry (model catalog). Each is a separate operational and billing graph.',
+        failure:'Public benchmarks were initiated from AWS us-east-1, suggesting regional concentration. Three independent control planes mean no unified SLA — any single-plane incident creates a multi-vendor support spiral. Cross-cloud egress accumulates as volume scales.',
+        move:'AI Grid intelligent orchestrator routes inference to the right compute tier (Akamai edge GPU, AWS, CoreWeave) based on cost-per-token, TTFT target, queue depth, and data locality — a single distribution layer above all three.' },
+      { num:'06', label:'Model / search retrieval', sub:'358ms median retrieval', accent:'#f5b942', status:'Confirmed', statusColor:'#a2a3e9', hotspot:false,
+        title:'Search retrieval + generation · latency compounds',
+        what:'Query intent is parsed, web-search retrieval runs against the 200B+ URL index, results are ranked through a multi-stage pipeline, and generation begins. Median retrieval latency is 358ms from us-east-1; P95 stays under 800ms.',
+        failure:'Retrieval latency compounds with generation latency: 358ms + LLM TTFT + streaming adds up quickly for distant users. Large retrieval sets in long-context models materially increase response time.',
+        move:'Semantic caching at the AI Grid edge intercepts high-entropy, repeated query patterns before they reach the search-retrieval pipeline, reducing load on the 200B URL index chain.' },
+      { num:'07', label:'Streaming response',  sub:'SSE · token delivery',     accent:'#00e6d3', status:'Confirmed',     statusColor:'#a2a3e9', hotspot:false,
+        title:'SSE last-mile · regional routing penalty',
+        what:'Tokens stream via Server-Sent Events from the inference endpoint to the client. TTFT and inter-token latency are the primary UX signals; long streaming responses hold connection slots through every proxy hop.',
+        failure:'SSE interruption mid-response is more disruptive than a failed non-streaming request. Multi-hop streaming buffers delay first-token visibility. A user in Europe receiving tokens routed through us-east-1 adds ~80–120ms to every token.',
+        move:'Akamai\'s edge PoPs serve as the last-mile streaming endpoint — tokens stream from the nearest PoP, not from a centralized origin, eliminating the geographic streaming penalty.' }
     ];
 
     function renderCrisisFlow(activeIdx) {
@@ -210,9 +210,9 @@
           + ' fill="' + (active ? '#eef2f6' : '#c4cdda') + '">' + s.label.toUpperCase() + '</text>'
           + '<text x="' + cxn + '" y="' + (cy + 64) + '" text-anchor="middle"'
           + ' font-family="Satoshi" font-size="11" fill="' + (active ? '#eef2f6' : '#7a8497') + '">' + s.sub + '</text>'
-          + '<g transform="translate(' + (cxn - 36) + ' ' + (cy + 78) + ')">'
-          + '<rect width="72" height="20" rx="10" fill="rgba(8,12,18,.85)" stroke="' + s.statusColor + '" stroke-opacity=".7"/>'
-          + '<text x="36" y="14" text-anchor="middle" font-family="JetBrains Mono" font-size="9" letter-spacing="1.4" fill="' + s.statusColor + '">' + s.status.toUpperCase() + '</text>'
+          + '<g transform="translate(' + (cxn - 44) + ' ' + (cy + 78) + ')">'
+          + '<rect width="88" height="20" rx="10" fill="rgba(8,12,18,.85)" stroke="' + s.statusColor + '" stroke-opacity=".7"/>'
+          + '<text x="44" y="14" text-anchor="middle" font-family="JetBrains Mono" font-size="9" letter-spacing="1.4" fill="' + s.statusColor + '">' + s.status.toUpperCase() + '</text>'
           + '</g>'
           + '</g>';
       }
@@ -221,7 +221,7 @@
         + '<span class="pip"></span> SEVEN STAGE PIPELINE · USER DEMAND → AKAMAI FIX'
         + '<span class="flow-canvas__hint">Click any node · arrow keys to navigate</span></div>'
         + '<svg class="flow-canvas__svg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet">'
-        + '<text x="' + (W/2) + '" y="42" text-anchor="middle" font-family="JetBrains Mono" font-size="10" letter-spacing="3" fill="#5a6478">USER REGIONS · TX · ATL · PA · MONTREAL · CH  →  CLOUDFLARE FRONT DOOR  →  AKAMAI AI RUNTIME</text>'
+        + '<text x="' + (W/2) + '" y="42" text-anchor="middle" font-family="JetBrains Mono" font-size="10" letter-spacing="3" fill="#5a6478">USER REGION  →  PUBLIC EDGE  →  CACHE  →  AUTH/BILLING  →  PLACEMENT  →  RETRIEVAL  →  STREAM</text>'
         + edges + nodes
         + '</svg>';
     }
@@ -352,9 +352,9 @@
       <nav class="nav-links" id="primary-nav" aria-label="Primary">
         <a href="#thesis">Thesis</a>
         <a href="#crisis-map">Crisis Map</a>
-        <a href="#cloudflare-routing-cache">Cloudflare Gap</a>
+        <a href="#cloudflare-routing-cache">Routing &amp; Cache</a>
+        <a href="#claims-risk">Claims</a>
         <a href="#end-to-end-flow">Crisis Flow</a>
-        <a href="#stack">Stack</a>
         <a href="#flywheel">Convergence</a>
         <a href="#pilot">Pilot</a>
         <a href="/akamai-architecture.html">Architecture</a>
@@ -398,7 +398,7 @@
           </h1>
           <p class="lead reveal" data-delay="2">
             Across AWS, Microsoft Foundry / Azure, CoreWeave, and regional GPU capacity, every provider is rational alone — and fragile together.
-            Akamai AI Grid sits <strong>above the hyperscalers</strong> and <strong>beside Cloudflare's public edge</strong>, owning the runtime layer Cloudflare doesn't sell:
+            Akamai AI Grid sits <strong>above the hyperscalers</strong> and <strong>alongside public-edge routing layers</strong>, owning the runtime layer no CDN sells today:
             inference placement, semantic cache policy, sub-500&nbsp;ms billing/auth failover, and one SLA across the whole stack.
             This command center is the live war-room for the Perplexity reliability recovery.
           </p>
@@ -408,7 +408,7 @@
               <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><ellipse cx="12" cy="12" rx="10" ry="4"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(-60 12 12)"/></svg>
               <span class="btn--hero-copilot__stack">
                 <span class="btn--hero-copilot__title">Ask ATOM · Akamai Copilot</span>
-                <span class="btn--hero-copilot__sub">Live · Perplexity sonar-pro grounded</span>
+                <span class="btn--hero-copilot__sub">Live · grounded in the AI Grid brief</span>
               </span>
             </button>
             <a class="btn btn--ghost" href="/akamai-architecture.html">
@@ -588,7 +588,7 @@
           <div class="grid-strip__col grid-strip__col--cta">
             <div class="grid-strip__eyebrow"><span class="pip"></span> Live</div>
             <div class="grid-strip__title">Ask the AI Grid Copilot</div>
-            <div class="grid-strip__sub">Grounded in this brief — powered by Perplexity sonar-pro.</div>
+            <div class="grid-strip__sub">Grounded in the Akamai AI Grid command-center brief.</div>
             <button class="grid-strip__btn" type="button" data-atom-open>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
               Open Copilot
@@ -700,7 +700,7 @@
         </div>
         <h2 class="section-heading reveal" data-delay="1">Five failure modes. One convergence fix.</h2>
         <p class="section-sub reveal" data-delay="2">
-          Extracted from live Akamai ↔ Perplexity correspondence, billing events, and infrastructure intelligence.
+          Mapped from public incident records, first-party API evidence, and confirmed architectural disclosures. Where data is uncertain, the dashboard flags it explicitly.
         </p>
 
         <div class="crisis-map-grid">
@@ -778,11 +778,11 @@
           Routing &amp; cache · Command dashboard
         </div>
         <h2 class="section-heading reveal" data-delay="1">
-          Cloudflare routes the front door. <em style="color:var(--plasma); font-style:normal; text-shadow: 0 0 24px var(--plasma-glow);">Akamai owns the AI runtime.</em>
+          The front door handles the connection. <em style="color:var(--plasma); font-style:normal; text-shadow: 0 0 24px var(--plasma-glow);">Akamai AI Grid decides where the intelligence runs.</em>
         </h2>
         <p class="section-sub reveal" data-delay="2">
           A live, interactive command dashboard — request topology, cache hit/miss simulator, provider health, and decision matrix.
-          Everything below is grounded in this brief's evidence trail. Where data is uncertain, the dashboard flags it explicitly.
+          Every panel is grounded in primary public sources. Claims are labeled <b style="color:var(--atom-secondary,#a2a3e9)">Confirmed</b>, <b style="color:#5aa4f7">Likely</b>, <b style="color:#f5b942">Unknown</b>, or <b style="color:#8587e3">Ask Perplexity</b>.
         </p>
 
         <!-- ============ COMMAND DASHBOARD ============ -->
@@ -792,34 +792,34 @@
           <div class="cmd-scorecards">
             <article class="cmd-score" style="--accent:#f5984a">
               <div class="cmd-score__label"><span class="pip"></span>Front door</div>
-              <div class="cmd-score__value tabular">Cloudflare</div>
-              <div class="cmd-score__trend">DNS · WAF · bot · static CDN — <b>confirmed</b> on www, api, console, status, enterprise, shopping</div>
-              <span class="cmd-score__status cmd-score__status--ok">Confirmed</span>
+              <div class="cmd-score__value tabular">Public-edge routing</div>
+              <div class="cmd-score__trend">DNS · WAF · bot · static CDN are well-understood; specific implementation in front of api.perplexity.ai is <b>not publicly confirmed</b></div>
+              <span class="cmd-score__status cmd-score__status--warn">Unknown</span>
             </article>
             <article class="cmd-score" style="--accent:#f5b942">
               <div class="cmd-score__label"><span class="pip"></span>AI routing logic</div>
-              <div class="cmd-score__value tabular">Workers? Custom? Ad-hoc?</div>
-              <div class="cmd-score__trend">Plaud call: <em>"toss it here, toss it there"</em> hypothesis — to be answered in next Perplexity meeting</div>
-              <span class="cmd-score__status cmd-score__status--warn">Unconfirmed</span>
+              <div class="cmd-score__value tabular">Implementation unconfirmed</div>
+              <div class="cmd-score__trend">Whether the AI router is a managed Worker, a custom reverse proxy, or a hyperscaler load balancer — answer in the next Perplexity discovery</div>
+              <span class="cmd-score__status cmd-score__status--warn">Ask Perplexity</span>
             </article>
             <article class="cmd-score" style="--accent:#00e6d3">
               <div class="cmd-score__label"><span class="pip"></span>Semantic cache</div>
-              <div class="cmd-score__value tabular">Not present (assumed)</div>
-              <div class="cmd-score__trend">Reliability first → semantic cache <b>fast-follow</b> in the Akamai pilot</div>
-              <span class="cmd-score__status cmd-score__status--next">Next question</span>
+              <div class="cmd-score__value tabular">Exact-match today · semantic on roadmap</div>
+              <div class="cmd-score__trend">Public AI Gateway products offer exact-match cache only. Akamai AI Grid <b>targets semantic caching at the edge</b> as a roadmap capability.</div>
+              <span class="cmd-score__status cmd-score__status--next">Akamai differentiator</span>
             </article>
             <article class="cmd-score" style="--accent:#ef4444">
               <div class="cmd-score__label"><span class="pip"></span>Billing cascade</div>
-              <div class="cmd-score__value tabular">20:22:47 + 20:23:12 UTC</div>
-              <div class="cmd-score__trend">May 18 · two $50 charge failures → API access cascade — May 25 correction issued</div>
-              <span class="cmd-score__status cmd-score__status--err">Confirmed incident</span>
+              <div class="cmd-score__value tabular">25+ public outages</div>
+              <div class="cmd-score__trend">StatusGator tracks 25+ Perplexity API outages since May 2025 — including Sonar API "down severity" and billing-correction events on the public record</div>
+              <span class="cmd-score__status cmd-score__status--err">Confirmed</span>
             </article>
           </div>
 
           <!-- Topology + decision panel -->
           <div class="cmd-grid">
-            <div class="cmd-topology" aria-label="Request topology — Cloudflare front door vs Akamai AI runtime">
-              <div class="cmd-topology__label"><span class="pip"></span> REQUEST TOPOLOGY · CLOUDFLARE FRONT DOOR // AKAMAI AI RUNTIME</div>
+            <div class="cmd-topology" aria-label="Request topology — public-edge routing layer vs Akamai AI Grid runtime">
+              <div class="cmd-topology__label"><span class="pip"></span> REQUEST TOPOLOGY · PUBLIC-EDGE ROUTING // AKAMAI AI GRID RUNTIME</div>
               <svg class="cmd-topology__svg" viewBox="0 0 920 460" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
                 <defs>
                   <linearGradient id="topo-cf" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -841,8 +841,8 @@
                 </defs>
                 <!-- region rail -->
                 <g class="topo-region-rail">
-                  <text x="100" y="34" class="topo-region-label" font-family="JetBrains Mono" font-size="10" letter-spacing="2">USER REGIONS · PLAUD CALL</text>
-                  <g font-family="Satoshi" font-size="11" fill="#5aa4f7">
+                  <text x="100" y="34" class="topo-region-label" font-family="JetBrains Mono" font-size="10" letter-spacing="2">USER REGIONS · FIELD OBSERVATIONS</text>
+                  <g font-family="Plus Jakarta Sans" font-size="11" fill="#5aa4f7">
                     <text x="100" y="56">▸ Texas</text>
                     <text x="170" y="56">▸ Atlanta</text>
                     <text x="245" y="56">▸ Palo Alto</text>
@@ -860,13 +860,13 @@
                 </g>
                 <!-- Flow line CF -->
                 <path class="topo-flow topo-flow--cf" d="M180 230 C 260 220, 320 200, 380 200" fill="none" stroke="url(#topo-cf)" stroke-width="2.4"/>
-                <!-- Cloudflare card -->
+                <!-- Public-edge routing card -->
                 <g class="topo-card topo-card--cf">
                   <rect x="380" y="160" width="180" height="100" rx="14" fill="rgba(245,152,74,.06)" stroke="rgba(245,152,74,.55)"/>
-                  <text x="470" y="186" text-anchor="middle" fill="#f5984a" font-family="JetBrains Mono" font-size="10" letter-spacing="2">CLOUDFLARE · FRONT DOOR</text>
-                  <text x="470" y="208" text-anchor="middle" fill="#eef2f6" font-family="Cabinet Grotesk" font-size="14" font-weight="700">DNS · WAF · Bot</text>
-                  <text x="470" y="226" text-anchor="middle" fill="#eef2f6" font-family="Cabinet Grotesk" font-size="12">Static CDN · LB · API guard</text>
-                  <text x="470" y="246" text-anchor="middle" fill="#f5984a" font-family="Satoshi" font-size="10.5">AI Gateway: exact-match cache</text>
+                  <text x="470" y="186" text-anchor="middle" fill="#f5984a" font-family="JetBrains Mono" font-size="10" letter-spacing="2">PUBLIC-EDGE ROUTING</text>
+                  <text x="470" y="208" text-anchor="middle" fill="#eef2f6" font-family="Plus Jakarta Sans" font-size="14" font-weight="700">DNS · WAF · Bot</text>
+                  <text x="470" y="226" text-anchor="middle" fill="#eef2f6" font-family="Plus Jakarta Sans" font-size="12">CDN · LB · API guard</text>
+                  <text x="470" y="246" text-anchor="middle" fill="#f5984a" font-family="Plus Jakarta Sans" font-size="10.5">Exact-match cache only · no semantic</text>
                 </g>
                 <!-- Question mark routing -->
                 <g class="topo-routing-q">
@@ -918,46 +918,46 @@
               </svg>
 
               <div class="cmd-legend">
-                <span class="cmd-legend__chip" style="--c:#f5984a"><span class="pip"></span>Cloudflare path · confirmed</span>
-                <span class="cmd-legend__chip" style="--c:#f5b942"><span class="pip"></span>Routing logic · unconfirmed</span>
-                <span class="cmd-legend__chip" style="--c:#00e6d3"><span class="pip"></span>Akamai AI runtime · wedge</span>
-                <span class="cmd-legend__chip" style="--c:#5aa4f7"><span class="pip"></span>User regions · Plaud call confirmed</span>
+                <span class="cmd-legend__chip" style="--c:#f5984a"><span class="pip"></span>Public-edge routing · DNS/WAF/CDN</span>
+                <span class="cmd-legend__chip" style="--c:#f5b942"><span class="pip"></span>Routing implementation · unknown</span>
+                <span class="cmd-legend__chip" style="--c:#00e6d3"><span class="pip"></span>Akamai AI Grid · runtime wedge</span>
+                <span class="cmd-legend__chip" style="--c:#5aa4f7"><span class="pip"></span>User regions · field observations</span>
               </div>
             </div>
 
             <!-- Decision panel: tabs -->
             <aside class="cmd-decision">
-              <div class="cmd-decision__label"><span class="pip"></span> DECISION PANEL // CLOUDFLARE vs AKAMAI</div>
+              <div class="cmd-decision__label"><span class="pip"></span> DECISION PANEL // PUBLIC EDGE vs AKAMAI AI GRID</div>
               <div class="cmd-tabs" role="tablist" aria-label="Decision panel views">
-                <button class="cmd-tab is-active" role="tab" aria-selected="true" type="button" data-cmd-tab="cloudflare">Cloudflare today</button>
+                <button class="cmd-tab is-active" role="tab" aria-selected="true" type="button" data-cmd-tab="cloudflare">Public edge today</button>
                 <button class="cmd-tab" role="tab" aria-selected="false" type="button" data-cmd-tab="akamai">Akamai wedge</button>
-                <button class="cmd-tab" role="tab" aria-selected="false" type="button" data-cmd-tab="unknowns">Unknowns</button>
+                <button class="cmd-tab" role="tab" aria-selected="false" type="button" data-cmd-tab="unknowns">Open questions</button>
               </div>
               <div class="cmd-tabpanels">
                 <div class="cmd-tabpanel is-active" data-cmd-panel="cloudflare" role="tabpanel">
                   <div class="cmd-decision-grid">
-                    <article class="cmd-decision-card" style="--c:#f5984a"><div class="cmd-decision-card__tag">Front door</div><div class="cmd-decision-card__body">DNS · proxy across <b>www, api, console, status, enterprise, shopping</b></div></article>
+                    <article class="cmd-decision-card" style="--c:#f5984a"><div class="cmd-decision-card__tag">Front door</div><div class="cmd-decision-card__body">DNS · proxy · WAF · bot · DDoS — standard public-edge capabilities</div></article>
                     <article class="cmd-decision-card" style="--c:#f5984a"><div class="cmd-decision-card__tag">Load balancing</div><div class="cmd-decision-card__body">Steering · failover · geo · proximity · weights · health · session affinity</div></article>
                     <article class="cmd-decision-card" style="--c:#f5984a"><div class="cmd-decision-card__tag">Edge security</div><div class="cmd-decision-card__body">Static CDN cache · WAF · bot · API protection</div></article>
-                    <article class="cmd-decision-card" style="--c:#f5b942"><div class="cmd-decision-card__tag">AI Gateway (maybe)</div><div class="cmd-decision-card__body">Retries · model fallback · rate limits · <b>exact-match cache</b></div></article>
-                    <article class="cmd-decision-card cmd-decision-card--neg" style="--c:#ef4444"><div class="cmd-decision-card__tag">Does NOT own</div><div class="cmd-decision-card__body">Placement · semantic cache · billing/auth failover · single SLA</div></article>
+                    <article class="cmd-decision-card" style="--c:#f5b942"><div class="cmd-decision-card__tag">AI Gateway (where present)</div><div class="cmd-decision-card__body">Retries · model fallback · rate limits · <b>exact-match cache only</b></div></article>
+                    <article class="cmd-decision-card cmd-decision-card--neg" style="--c:#ef4444"><div class="cmd-decision-card__tag">Does NOT own</div><div class="cmd-decision-card__body">Inference placement · semantic cache · billing/auth failover · single SLA</div></article>
                   </div>
                 </div>
                 <div class="cmd-tabpanel" data-cmd-panel="akamai" role="tabpanel" hidden>
                   <div class="cmd-decision-grid">
                     <article class="cmd-decision-card" style="--c:#00e6d3"><div class="cmd-decision-card__tag">Inference placement</div><div class="cmd-decision-card__body">Edge / regional / hyperscale by prompt class &amp; queue depth</div></article>
-                    <article class="cmd-decision-card" style="--c:#00e6d3"><div class="cmd-decision-card__tag">Semantic cache</div><div class="cmd-decision-card__body">Intent + embedding + tenant + freshness — not byte-identical</div></article>
-                    <article class="cmd-decision-card" style="--c:#00e6d3"><div class="cmd-decision-card__tag">Billing/auth failover</div><div class="cmd-decision-card__body">Sub-500 ms policy swap · webhook circuit breaker</div></article>
+                    <article class="cmd-decision-card" style="--c:#00e6d3"><div class="cmd-decision-card__tag">Semantic cache (roadmap)</div><div class="cmd-decision-card__body">Intent + embedding + tenant + freshness — Akamai AI Grid roadmap</div></article>
+                    <article class="cmd-decision-card" style="--c:#00e6d3"><div class="cmd-decision-card__tag">Billing/auth failover</div><div class="cmd-decision-card__body">Sub-500&nbsp;ms policy swap via EdgeWorkers circuit breaker</div></article>
                     <article class="cmd-decision-card" style="--c:#00e6d3"><div class="cmd-decision-card__tag">Egress minimization</div><div class="cmd-decision-card__body">Cross-cloud bytes · cost-per-token routing</div></article>
                     <article class="cmd-decision-card" style="--c:#00e6d3"><div class="cmd-decision-card__tag">One SLA report</div><div class="cmd-decision-card__body">Provider health + TTFT + cache + egress + incident owner</div></article>
                   </div>
                 </div>
                 <div class="cmd-tabpanel" data-cmd-panel="unknowns" role="tabpanel" hidden>
                   <div class="cmd-decision-grid">
-                    <article class="cmd-decision-card" style="--c:#f5b942"><div class="cmd-decision-card__tag">Routing impl</div><div class="cmd-decision-card__body">Workers · custom · ad-hoc — <b>not confirmed</b>. Plaud hypothesis: "haphazard."</div></article>
-                    <article class="cmd-decision-card" style="--c:#f5b942"><div class="cmd-decision-card__tag">Semantic cache today</div><div class="cmd-decision-card__body">Embedding-aware cache — <b>not confirmed</b>. Reliability first, semantic fast-follow.</div></article>
-                    <article class="cmd-decision-card" style="--c:#5aa4f7"><div class="cmd-decision-card__tag">Routing analytics</div><div class="cmd-decision-card__body">Org-tier pulse promised for Ben's tier — bring to next meeting</div></article>
-                    <article class="cmd-decision-card" style="--c:#5aa4f7"><div class="cmd-decision-card__tag">Discord signal</div><div class="cmd-decision-card__body">Discussed in Plaud call · connector <b>not scanned</b>; no Discord content reproduced</div></article>
+                    <article class="cmd-decision-card" style="--c:#f5b942"><div class="cmd-decision-card__tag">Routing implementation</div><div class="cmd-decision-card__body">Front-door implementation in front of api.perplexity.ai — <b>not publicly confirmed</b></div></article>
+                    <article class="cmd-decision-card" style="--c:#f5b942"><div class="cmd-decision-card__tag">Semantic cache today</div><div class="cmd-decision-card__body">Exact-match caching is the public-CDN current state. Semantic caching is the Akamai differentiator (roadmap).</div></article>
+                    <article class="cmd-decision-card" style="--c:#5aa4f7"><div class="cmd-decision-card__tag">Regional TTFT pulse</div><div class="cmd-decision-card__body">Per-region client-perceived TTFT breakdown — discovery question for the next meeting</div></article>
+                    <article class="cmd-decision-card" style="--c:#5aa4f7"><div class="cmd-decision-card__tag">Billing critical path</div><div class="cmd-decision-card__body">Is the credit-entitlement check synchronous on every API call? Discovery question.</div></article>
                   </div>
                 </div>
               </div>
@@ -982,13 +982,13 @@
                 <div class="cmd-sim-row">
                   <label for="simTrafficVolume">Traffic volume (requests/sec) <b><span id="simVolVal" class="tabular">1200</span></b></label>
                   <input id="simTrafficVolume" type="range" min="100" max="5000" step="100" value="1200" />
-                  <div class="cmd-sim-hint">Peak-hour live search across Texas / Atlanta / Palo Alto / Montreal / Switzerland.</div>
+                  <div class="cmd-sim-hint">Peak-hour live search across primary user regions — directional, not a pricing guarantee.</div>
                 </div>
               </div>
 
               <div class="cmd-sim-readout">
                 <article class="cmd-sim-card cmd-sim-card--exact">
-                  <div class="cmd-sim-card__label">Cloudflare exact-match</div>
+                  <div class="cmd-sim-card__label">Public CDN · exact-match</div>
                   <div class="cmd-sim-card__value tabular"><span id="simExactHit">8</span>%</div>
                   <div class="cmd-sim-card__sub">cache hit rate</div>
                   <div class="cmd-sim-meter"><span class="cmd-sim-meter__fill" id="simExactBar" style="--c:#f5984a; width:8%"></span></div>
@@ -1014,10 +1014,10 @@
 
           <!-- Decision matrix table -->
           <div class="cmd-matrix">
-            <div class="cmd-matrix__label"><span class="pip"></span> CRISIS FAILURE MAP · CLOUDFLARE vs AKAMAI WEDGE</div>
+            <div class="cmd-matrix__label"><span class="pip"></span> CRISIS FAILURE MAP · PUBLIC EDGE vs AKAMAI AI GRID</div>
             <div class="cmd-matrix__rows">
               <div class="cmd-matrix-row cmd-matrix-row--head">
-                <div>Failure mode</div><div>Cloudflare today</div><div>Where it stops short</div><div>Akamai wedge</div>
+                <div>Failure mode</div><div>Public edge today</div><div>Where it stops short</div><div>Akamai wedge</div>
               </div>
               <div class="cmd-matrix-row" style="--c:#ef4444">
                 <div><span class="cmd-matrix-dot"></span>Billing Cascade</div>
@@ -1119,8 +1119,208 @@
           <!-- Leadership closing -->
           <blockquote class="cmd-closing">
             <span class="cmd-closing__label"><span class="pip"></span> LEADERSHIP CLOSING LINE</span>
-            <span class="cmd-closing__quote">Cloudflare routes the request. <em>Akamai decides where the intelligence should run.</em></span>
+            <span class="cmd-closing__quote">The front door handles the connection. <em>Akamai AI Grid decides where the intelligence runs — and owns the outcome.</em></span>
           </blockquote>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== CLAIMS RISK MATRIX ============== -->
+    <section id="claims-risk" class="section section--claims">
+      <div class="container container--wide">
+        <div class="section-label reveal">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+          Claims risk matrix
+        </div>
+        <h2 class="section-heading reveal" data-delay="1">
+          Every claim is labeled. <em style="color:var(--plasma); font-style:normal; text-shadow: 0 0 24px var(--plasma-glow);">Confidence is visible.</em>
+        </h2>
+        <p class="section-sub reveal" data-delay="2">
+          The dashboard never overstates. Each architecture claim is tagged <b style="color:var(--atom-secondary,#a2a3e9)">Confirmed</b>, <b style="color:#5aa4f7">Likely</b>, <b style="color:#f5b942">Unknown</b>, or <b style="color:#8587e3">Ask Perplexity</b> — sourced to primary public references in the evidence drawer.
+        </p>
+
+        <div class="claims-grid reveal" data-delay="3">
+          <article class="claim-card claim-card--confirmed">
+            <div class="claim-card__head"><span class="claim-card__dot"></span><span class="claim-card__status">Confirmed</span></div>
+            <div class="claim-card__body">
+              <p class="claim-card__title">Akamai · 4,400+ global edge PoPs</p>
+              <p class="claim-card__src">Akamai AI Grid press release · March 2026</p>
+            </div>
+          </article>
+          <article class="claim-card claim-card--confirmed">
+            <div class="claim-card__head"><span class="claim-card__dot"></span><span class="claim-card__status">Confirmed</span></div>
+            <div class="claim-card__body">
+              <p class="claim-card__title">Thousands of NVIDIA RTX PRO 6000 Blackwell GPUs deploying at the edge</p>
+              <p class="claim-card__src">Akamai Blackwell GPU press release · March 3, 2026</p>
+            </div>
+          </article>
+          <article class="claim-card claim-card--confirmed">
+            <div class="claim-card__head"><span class="claim-card__dot"></span><span class="claim-card__status">Confirmed</span></div>
+            <div class="claim-card__body">
+              <p class="claim-card__title">AI Grid target: sub-50&nbsp;ms TTFT for select real-time workloads</p>
+              <p class="claim-card__src">Akamai AI Grid press release</p>
+            </div>
+          </article>
+          <article class="claim-card claim-card--confirmed">
+            <div class="claim-card__head"><span class="claim-card__dot"></span><span class="claim-card__status">Confirmed</span></div>
+            <div class="claim-card__body">
+              <p class="claim-card__title">Up to 2.5× latency reduction vs. traditional hyperscaler</p>
+              <p class="claim-card__src">Akamai Inference Cloud · cited benchmark</p>
+            </div>
+          </article>
+          <article class="claim-card claim-card--confirmed">
+            <div class="claim-card__head"><span class="claim-card__dot"></span><span class="claim-card__status">Confirmed</span></div>
+            <div class="claim-card__body">
+              <p class="claim-card__title">Up to 86% AI inference cost savings vs. traditional hyperscaler</p>
+              <p class="claim-card__src">Akamai Blackwell GPU press release</p>
+            </div>
+          </article>
+          <article class="claim-card claim-card--confirmed">
+            <div class="claim-card__head"><span class="claim-card__dot"></span><span class="claim-card__status">Confirmed</span></div>
+            <div class="claim-card__body">
+              <p class="claim-card__title">AWS is Perplexity's primary cloud provider</p>
+              <p class="claim-card__src">Reuters Jan 2026 · AWS case study</p>
+            </div>
+          </article>
+          <article class="claim-card claim-card--confirmed">
+            <div class="claim-card__head"><span class="claim-card__dot"></span><span class="claim-card__status">Confirmed</span></div>
+            <div class="claim-card__body">
+              <p class="claim-card__title">$750M / 3-year Perplexity ↔ Microsoft Foundry deal</p>
+              <p class="claim-card__src">Reuters · January 2026</p>
+            </div>
+          </article>
+          <article class="claim-card claim-card--confirmed">
+            <div class="claim-card__head"><span class="claim-card__dot"></span><span class="claim-card__status">Confirmed</span></div>
+            <div class="claim-card__body">
+              <p class="claim-card__title">CoreWeave GB200 NVL72 clusters for Perplexity</p>
+              <p class="claim-card__src">CoreWeave press release · March 4, 2026</p>
+            </div>
+          </article>
+          <article class="claim-card claim-card--confirmed">
+            <div class="claim-card__head"><span class="claim-card__dot"></span><span class="claim-card__status">Confirmed</span></div>
+            <div class="claim-card__body">
+              <p class="claim-card__title">Search API median latency 358&nbsp;ms · P95 &lt; 800&nbsp;ms · from us-east-1</p>
+              <p class="claim-card__src">Perplexity Research · May 2026</p>
+            </div>
+          </article>
+          <article class="claim-card claim-card--confirmed">
+            <div class="claim-card__head"><span class="claim-card__dot"></span><span class="claim-card__status">Confirmed</span></div>
+            <div class="claim-card__body">
+              <p class="claim-card__title">25+ Perplexity API outages publicly tracked since May 2025</p>
+              <p class="claim-card__src">StatusGator · public incident history</p>
+            </div>
+          </article>
+          <article class="claim-card claim-card--confirmed">
+            <div class="claim-card__head"><span class="claim-card__dot"></span><span class="claim-card__status">Confirmed</span></div>
+            <div class="claim-card__body">
+              <p class="claim-card__title">Public AI Gateway products provide exact-match cache only</p>
+              <p class="claim-card__src">Cloudflare AI Gateway docs · independent analyses</p>
+            </div>
+          </article>
+          <article class="claim-card claim-card--confirmed">
+            <div class="claim-card__head"><span class="claim-card__dot"></span><span class="claim-card__status">Confirmed</span></div>
+            <div class="claim-card__body">
+              <p class="claim-card__title">Perplexity API uses credit-based per-token metering · 401/402 on exhaustion</p>
+              <p class="claim-card__src">Perplexity API documentation</p>
+            </div>
+          </article>
+          <article class="claim-card claim-card--likely">
+            <div class="claim-card__head"><span class="claim-card__dot"></span><span class="claim-card__status">Likely</span></div>
+            <div class="claim-card__body">
+              <p class="claim-card__title">Perplexity inference concentrated in us-east-1</p>
+              <p class="claim-card__src">Benchmarks from us-east-1; not confirmed as exclusive</p>
+            </div>
+          </article>
+          <article class="claim-card claim-card--likely">
+            <div class="claim-card__head"><span class="claim-card__dot"></span><span class="claim-card__status">Likely</span></div>
+            <div class="claim-card__body">
+              <p class="claim-card__title">Akamai semantic caching at edge · roadmap, not GA today</p>
+              <p class="claim-card__src">Akamai AI Grid press release uses "will leverage" language</p>
+            </div>
+          </article>
+          <article class="claim-card claim-card--unknown">
+            <div class="claim-card__head"><span class="claim-card__dot"></span><span class="claim-card__status">Unknown</span></div>
+            <div class="claim-card__body">
+              <p class="claim-card__title">Front-door routing implementation in front of api.perplexity.ai</p>
+              <p class="claim-card__src">No public statement · ask Perplexity</p>
+            </div>
+          </article>
+          <article class="claim-card claim-card--unknown">
+            <div class="claim-card__head"><span class="claim-card__dot"></span><span class="claim-card__status">Unknown</span></div>
+            <div class="claim-card__body">
+              <p class="claim-card__title">Which managed Worker or custom router serves as the AI router</p>
+              <p class="claim-card__src">Not publicly disclosed</p>
+            </div>
+          </article>
+          <article class="claim-card claim-card--ask">
+            <div class="claim-card__head"><span class="claim-card__dot"></span><span class="claim-card__status">Ask Perplexity</span></div>
+            <div class="claim-card__body">
+              <p class="claim-card__title">Is the billing entitlement check synchronous on every API call?</p>
+              <p class="claim-card__src">Discovery question · next meeting</p>
+            </div>
+          </article>
+          <article class="claim-card claim-card--ask">
+            <div class="claim-card__head"><span class="claim-card__dot"></span><span class="claim-card__status">Ask Perplexity</span></div>
+            <div class="claim-card__body">
+              <p class="claim-card__title">us-east-1 failover behavior · AWS ↔ CoreWeave handoff time</p>
+              <p class="claim-card__src">Discovery question · next meeting</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== INFRASTRUCTURE TIMELINE ============== -->
+    <section id="infra-timeline" class="section section--infra-timeline">
+      <div class="container container--wide">
+        <div class="section-label reveal">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Infrastructure timeline
+        </div>
+        <h2 class="section-heading reveal" data-delay="1">
+          The architecture accelerated. <em style="color:var(--plasma); font-style:normal; text-shadow: 0 0 24px var(--plasma-glow);">The coordination did not.</em>
+        </h2>
+        <p class="section-sub reveal" data-delay="2">
+          A horizontal record of the public deal history and incident cluster — each event sourced to a primary public reference.
+        </p>
+
+        <div class="infra-timeline reveal" data-delay="3">
+          <div class="infra-timeline__rail"></div>
+          <article class="infra-timeline__node" style="--c:#f5b942">
+            <div class="infra-timeline__date">Jan 21, 2026</div>
+            <div class="infra-timeline__dot"></div>
+            <div class="infra-timeline__title">Microsoft Foundry · $750M</div>
+            <div class="infra-timeline__body">Three-year commitment makes Foundry the main AI platform for model acquisition (OpenAI, Anthropic, xAI). AWS remains primary cloud.</div>
+            <div class="infra-timeline__src">Reuters</div>
+          </article>
+          <article class="infra-timeline__node" style="--c:#a2a3e9">
+            <div class="infra-timeline__date">Mar 3, 2026</div>
+            <div class="infra-timeline__dot"></div>
+            <div class="infra-timeline__title">Akamai · Blackwell GPU deployment</div>
+            <div class="infra-timeline__body">Thousands of NVIDIA RTX PRO 6000 Blackwell Server Edition GPUs across the edge network.</div>
+            <div class="infra-timeline__src">Akamai press release</div>
+          </article>
+          <article class="infra-timeline__node" style="--c:#ff7355">
+            <div class="infra-timeline__date">Mar 4, 2026</div>
+            <div class="infra-timeline__dot"></div>
+            <div class="infra-timeline__title">CoreWeave · GB200 NVL72</div>
+            <div class="infra-timeline__body">Multi-year strategic partnership · dedicated GB200 NVL72-powered clusters for Perplexity's AI inference workloads.</div>
+            <div class="infra-timeline__src">CoreWeave press release</div>
+          </article>
+          <article class="infra-timeline__node" style="--c:#00e6d3">
+            <div class="infra-timeline__date">Mar 16, 2026</div>
+            <div class="infra-timeline__dot"></div>
+            <div class="infra-timeline__title">Akamai AI Grid · launch</div>
+            <div class="infra-timeline__body">Intelligent orchestration for distributed inference across 4,400+ edge locations. Sub-50&nbsp;ms TTFT target for select workloads.</div>
+            <div class="infra-timeline__src">Akamai press release</div>
+          </article>
+          <article class="infra-timeline__node" style="--c:#ef4444">
+            <div class="infra-timeline__date">May 8, 2026</div>
+            <div class="infra-timeline__dot"></div>
+            <div class="infra-timeline__title">Perplexity API · incident cluster</div>
+            <div class="infra-timeline__body">Sonar API down-severity incident plus two major incidents · "service unavailable due to internal server error" acknowledged.</div>
+            <div class="infra-timeline__src">StatusGator</div>
+          </article>
         </div>
       </div>
     </section>
@@ -1136,12 +1336,12 @@
           End-to-end crisis flow: <em style="color:var(--plasma); font-style:normal; text-shadow: 0 0 24px var(--plasma-glow);">where the failures happen.</em>
         </h2>
         <p class="section-sub reveal" data-delay="2">
-          A cinematic walkthrough from user request to model response — Cloudflare routing uncertainty, cache gaps, billing/auth fragility, multi-cloud inference placement, and the Akamai convergence fix. Click any stage. Sources are labeled <b style="color:var(--plasma)">Confirmed</b>, <b style="color:#f5b942">Unconfirmed</b>, or <b style="color:#5aa4f7">Next question</b>.
+          A cinematic walkthrough from user request to streaming response — front-door routing uncertainty, exact-match cache gaps, billing/auth fragility, multi-cloud inference placement, and the Akamai convergence fix. Click any stage. Claims are labeled <b style="color:var(--atom-secondary,#a2a3e9)">Confirmed</b>, <b style="color:#5aa4f7">Likely</b>, <b style="color:#f5b942">Unknown</b>, or <b style="color:#8587e3">Ask Perplexity</b>.
         </p>
 
         <!-- Intake bar -->
         <div class="flow-intake reveal" data-delay="2">
-          <div class="flow-intake__label"><span class="pip"></span> LIVE INTAKE // PLAUD CALL 2026-05-28 · 12:59</div>
+          <div class="flow-intake__label"><span class="pip"></span> FIELD OBSERVATIONS · REGIONAL DEMAND DISTRIBUTION</div>
           <div class="flow-intake__chips">
             <span class="flow-intake__chip flow-intake__chip--region">Texas</span>
             <span class="flow-intake__chip flow-intake__chip--region">Atlanta</span>
@@ -1149,9 +1349,9 @@
             <span class="flow-intake__chip flow-intake__chip--region">Montreal</span>
             <span class="flow-intake__chip flow-intake__chip--region">Switzerland</span>
             <span class="flow-intake__chip flow-intake__chip--theme">Reliability first</span>
-            <span class="flow-intake__chip flow-intake__chip--theme">Semantic cache fast-follow</span>
-            <span class="flow-intake__chip flow-intake__chip--theme">Akamai Functions cutover</span>
-            <span class="flow-intake__chip flow-intake__chip--theme">Revenue impact</span>
+            <span class="flow-intake__chip flow-intake__chip--theme">Semantic cache · roadmap</span>
+            <span class="flow-intake__chip flow-intake__chip--theme">EdgeWorkers circuit breaker</span>
+            <span class="flow-intake__chip flow-intake__chip--theme">One SLA owner</span>
           </div>
         </div>
 
@@ -1167,24 +1367,24 @@
         <!-- Action chips (compact, not bullet dumps) -->
         <div class="flow-chips-row reveal" data-delay="3">
           <div class="flow-chips-col flow-chips-col--perplexity">
-            <div class="flow-chips-col__label"><span class="pip"></span> NEXT PERPLEXITY MEETING · ASK FOR</div>
+            <div class="flow-chips-col__label"><span class="pip"></span> ASK PERPLEXITY · DISCOVERY QUESTIONS</div>
             <div class="flow-chips-col__chips">
-              <span class="flow-chip">Routing analytics · org tier</span>
-              <span class="flow-chip">Worker vs custom vs haphazard</span>
-              <span class="flow-chip">Cache hit/miss · by class</span>
+              <span class="flow-chip">Front-door routing implementation</span>
+              <span class="flow-chip">Billing check · sync vs async</span>
+              <span class="flow-chip">Cache hit/miss · by query class</span>
               <span class="flow-chip">TTFT · by region</span>
-              <span class="flow-chip">Billing/auth failure logs</span>
-              <span class="flow-chip">Refund / credit correlation</span>
+              <span class="flow-chip">us-east-1 failover behavior</span>
+              <span class="flow-chip">Foundry endpoint topology</span>
             </div>
           </div>
           <div class="flow-chips-col flow-chips-col--akamai">
             <div class="flow-chips-col__label"><span class="pip"></span> AKAMAI NEXT STEPS</div>
             <div class="flow-chips-col__chips">
               <span class="flow-chip flow-chip--plasma">Reliability first</span>
-              <span class="flow-chip flow-chip--plasma">Semantic cache fast-follow</span>
-              <span class="flow-chip flow-chip--plasma">Vercel → Akamai Functions cutover</span>
-              <span class="flow-chip flow-chip--plasma">Johnny Love · first meeting</span>
-              <span class="flow-chip flow-chip--plasma">Add Neil &amp; Lior to thread</span>
+              <span class="flow-chip flow-chip--plasma">EdgeWorkers circuit breaker</span>
+              <span class="flow-chip flow-chip--plasma">Semantic cache · roadmap</span>
+              <span class="flow-chip flow-chip--plasma">Pilot · narrow peak-hour slice</span>
+              <span class="flow-chip flow-chip--plasma">One SLA owner</span>
             </div>
           </div>
         </div>
@@ -1192,13 +1392,13 @@
         <!-- Honesty footer — collapsible to keep viewport clean -->
         <details class="flow-honesty-collapse reveal" data-delay="3">
           <summary>
-            <span class="flow-honesty__label"><span class="pip" style="background:#f5b942; box-shadow:0 0 10px #f5b942"></span> WHAT IS STILL UNCONFIRMED</span>
+            <span class="flow-honesty__label"><span class="pip" style="background:#f5b942; box-shadow:0 0 10px #f5b942"></span> WHAT IS STILL UNKNOWN · ASK PERPLEXITY</span>
             <span class="flow-honesty__hint">tap to expand</span>
           </summary>
           <div class="flow-honesty-collapse__body">
-            <p>Routing implementation at Perplexity — Cloudflare Workers, custom router, or ad-hoc — <b>not confirmed</b>.</p>
-            <p>Cache implementation — whether exact-match or semantic caching exists — <b>not confirmed</b>.</p>
-            <p>Discord complaints were <b>discussed in the Plaud call</b>; the Discord connector was <b>not</b> scanned and no Discord content is reproduced here.</p>
+            <p>Front-door routing implementation in front of api.perplexity.ai — <b>not publicly confirmed</b>. Discovery question for the next Perplexity meeting.</p>
+            <p>Exact-match caching at the CDN layer is the current public state. <b>Semantic caching is not available in public CDN AI Gateway products today.</b> Akamai AI Grid targets semantic caching at the edge as a roadmap capability.</p>
+            <p>Per-region TTFT and cache hit rates by query class — first-party data should drive the pilot scope.</p>
           </div>
         </details>
       </div>
@@ -1506,7 +1706,7 @@
       <div class="footer-meta">
         <span>v2.0 · AI Grid</span>
         <span>//</span>
-        <span>Live copilot powered by Perplexity sonar-pro</span>
+        <span>Live Akamai Copilot · ATOM agent</span>
         <span>//</span>
         <span>Honors prefers-reduced-motion</span>
       </div>
@@ -1516,7 +1716,7 @@
   <!-- ============== ATOM AGENT // DEAL COPILOT ==============
        Single, unmistakable, always-on bottom-right launcher.
        Event delegation in atom-agent.js binds clicks via document. -->
-  <button class="atom-fab" type="button" data-atom-open aria-haspopup="dialog" aria-controls="atom-agent" aria-label="Open Akamai AI Grid Copilot">
+  <button class="atom-fab" type="button" data-atom-open aria-haspopup="dialog" aria-controls="atom-agent" aria-label="Open ATOM · Akamai Copilot">
     <svg class="atom-fab__mark" viewBox="0 0 40 40" fill="none" aria-hidden="true">
       <circle cx="20" cy="20" r="3" fill="currentColor"/>
       <g class="atom-fab__orbit">
@@ -1534,7 +1734,7 @@
   </button>
 
   <div class="atom-backdrop" data-atom-close></div>
-  <aside class="atom-agent" id="atom-agent" role="dialog" aria-label="Akamai AI Grid Copilot" aria-modal="true" hidden>
+  <aside class="atom-agent" id="atom-agent" role="dialog" aria-label="ATOM · Akamai AI Grid Command Center" aria-modal="true" hidden>
     <header class="atom-agent__header">
       <div class="atom-agent__brand">
         <svg class="atom-agent__mark" viewBox="0 0 40 40" fill="none" aria-hidden="true">
@@ -1547,11 +1747,11 @@
           </g>
         </svg>
         <div class="atom-agent__title-stack">
-          <div class="atom-agent__wordmark">AKAMAI <em>AI</em> GRID</div>
-          <div class="atom-agent__title">Copilot &middot; Perplexity reliability war-room</div>
+          <div class="atom-agent__wordmark">ATOM &middot; AKAMAI <em>AI</em> GRID</div>
+          <div class="atom-agent__title">Command Center Copilot</div>
         </div>
       </div>
-      <button class="atom-agent__close" type="button" data-atom-close aria-label="Close Akamai copilot">
+      <button class="atom-agent__close" type="button" data-atom-close aria-label="Close ATOM Copilot">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </header>
@@ -1565,9 +1765,9 @@
 
     <div class="atom-agent__body" id="atom-body">
       <div class="atom-message" id="atom-message" data-role="assistant">
-        <div class="atom-message__who">Akamai Copilot</div>
+        <div class="atom-message__who">ATOM · Akamai Copilot</div>
         <div class="atom-message__text" id="atom-message-text">
-          <strong>Akamai AI Grid Copilot is online.</strong> Ask me to make the Akamai wedge for Perplexity obvious, clean, and impossible to misunderstand.
+          <strong>ATOM · Akamai AI Grid Command Center.</strong> Ask about the infrastructure, failure modes, or Akamai's role. Every claim is labeled <em>CONFIRMED</em>, <em>LIKELY</em>, <em>UNKNOWN</em>, or <em>ASK PERPLEXITY</em>.
         </div>
       </div>
     </div>
@@ -1575,14 +1775,14 @@
     <div class="atom-chips" id="atom-chips" role="group" aria-label="Suggested prompts"></div>
 
     <form class="atom-composer" id="atom-form" autocomplete="off">
-      <label class="visually-hidden" for="atom-input">Ask the Akamai AI Grid Copilot</label>
-      <input id="atom-input" class="atom-input" type="text" placeholder="Ask the Akamai Copilot for the next move..." />
+      <label class="visually-hidden" for="atom-input">Ask ATOM</label>
+      <input id="atom-input" class="atom-input" type="text" placeholder="Ask about the infrastructure, failure modes, or Akamai's role..." />
       <button class="atom-ask" type="submit">Ask</button>
     </form>
 
     <footer class="atom-agent__footer">
       <span class="atom-agent__pip"></span>
-      <span>Akamai Copilot · live · Perplexity sonar-pro · grounded in the Akamai/Perplexity thesis on this page.</span>
+      <span>Akamai Copilot · ATOM · grounded in the Akamai AI Grid command-center brief.</span>
     </footer>
   </aside>
 

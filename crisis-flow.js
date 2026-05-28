@@ -1,115 +1,130 @@
 /*
- * ΔTOM // END-TO-END CRISIS FLOW
- * Cinematic, clickable walkthrough from user request to Akamai convergence.
- * Source: Plaud call 2026-05-28 12:59 + this brief's evidence trail.
- * Status labels: Confirmed / Unconfirmed / Next question.
+ * Akamai AI Grid // END-TO-END FAILURE FLOW
+ * Cinematic, clickable seven-stage walkthrough from user request to streaming response.
+ * Source: public incident records, first-party API evidence, confirmed architectural disclosures.
+ * Claim labels: Confirmed / Likely / Unknown / Ask Perplexity.
  */
 
 const STAGES = [
   {
-    id: 'demand',
+    id: 'origin',
     num: '01',
-    label: 'User demand',
-    title: 'Distributed live-search demand',
+    label: 'User request origin',
+    title: 'Distributed live-search demand · multi-region',
     icon: 'users',
     accent: '#5aa4f7',
-    sub: 'Comet · API · Perplexity web',
-    what: 'Comet, the Perplexity API, and Perplexity.ai users fire live-search and agentic prompts from distributed regions — Texas, Atlanta, Palo Alto, Montreal, Switzerland. Each request expects sub-second time-to-first-token and a fresh, sourced answer.',
-    failure: 'Regional concentration of inference + cross-cloud egress turns "near the user" into "near a hyperscaler region." TTFT and answer freshness diverge by geography.',
-    evidence: 'Plaud call 2026-05-28 — users explicitly identified across TX, ATL, PA, Montreal, CH; regional pulse promised by Perplexity for Ben\'s org tier.',
-    move: 'Map TTFT and cache behavior by region before pitching. Anchor the Akamai value on the regions where the user pain is strongest.',
+    sub: 'DNS · TTFT · session',
+    what: 'A user fires a live-search or agentic query from a distributed region. The request hits a DNS resolver and begins the first-mile traversal toward the inference backend.',
+    failure: 'Geographic concentration of origin servers means distant users absorb the first-mile latency before the request ever reaches inference. Agentic browsers compound this with sub-request chains that each accumulate latency.',
+    metric: 'DNS resolution time by region · client-perceived TTFT · session establishment time',
+    move: 'Route the request to the nearest of 4,400+ Akamai PoPs and eliminate the geographic first-mile penalty before inference begins.',
+    discovery: 'Which regions show the worst client-perceived TTFT in the last 30 days?',
     status: 'confirmed',
+    statusLabel: 'Confirmed',
   },
   {
     id: 'frontdoor',
     num: '02',
-    label: 'Front-door routing',
-    title: 'Cloudflare edge · routing logic unknown',
+    label: 'DNS + front door',
+    title: 'Public-edge routing layer · implementation unconfirmed',
     icon: 'shield',
     accent: '#f5984a',
-    sub: 'DNS · WAF · LB · ???',
-    what: 'Public subdomains (www, api, console, status, enterprise, shopping) resolve through Cloudflare reverse-proxy. DNS, WAF, bot management, and static CDN cache are the well-understood layer.',
-    failure: '<b>The AI routing logic above that is unconfirmed.</b> Cloudflare Workers? Custom router? Ad-hoc? Today we don\'t know — and "haphazard toss-it-here, toss-it-there" is a live hypothesis from the call.',
-    evidence: '"Do you know how they\'re doing that routing today? Is that happening at Cloudflare? Are they using like Workers for that? Did they build their own? … or is it like guessing haphazardly, toss it here, toss it there." — Plaud 2026-05-28',
-    move: 'Make the first Perplexity meeting answer this exact question. Bring the table of Cloudflare-provides vs Akamai-wedge so the conversation lands on placement, not perimeter.',
-    status: 'unconfirmed',
+    sub: 'CDN · WAF · LB',
+    what: 'The request resolves to an ingress — CDN edge, WAF, or load balancer. The exact front-door implementation in front of api.perplexity.ai is not publicly confirmed.',
+    failure: 'Single-CDN dependency means a front-door incident propagates to every downstream stage. WAF false positives under anomalous traffic can drop legitimate API calls. Front-door routing logic is opaque from the outside.',
+    metric: 'HTTPS connection establishment latency by region · TLS handshake time · DNS TTL',
+    move: 'App &amp; API Protector provides WAF + bot management + DDoS mitigation at Akamai\'s edge. Ion provides dynamic acceleration with 100% availability SLA. Akamai owns the front door and eliminates single-CDN dependency.',
+    discovery: 'Which CDN and WAF sit in front of api.perplexity.ai today? Is the routing layer a managed Worker, a custom reverse proxy, or a hyperscaler load balancer?',
+    status: 'unknown',
+    statusLabel: 'Unknown',
   },
   {
     id: 'cache',
     num: '03',
     label: 'Cache decision',
-    title: 'Static cache works · AI cache does not (yet)',
+    title: 'Front-door cache · exact-match only, no semantic coverage',
     icon: 'database',
     accent: '#00e6d3',
     sub: 'exact-match vs semantic',
-    what: 'Static web shell, JS/CSS, status assets, and exact-repeat AI Gateway calls are cacheable. Cache Reserve / R2 helps when the content is byte-identical.',
-    failure: 'Real Perplexity prompts vary constantly. Exact-match caches give near-zero hit rate. Authenticated and org-specific answers must isolate by tenant, model, freshness, source policy. <b>Whether any semantic / embedding-aware cache exists today is unconfirmed.</b>',
-    evidence: '"If you can ascertain if there\'s any kind of caching going on there as well … Caching and semantic caching were on the list too. We\'ll get a better deep dive of that as well." — Plaud 2026-05-28',
-    move: 'Reliability first — do not lead with semantic cache. Land the reliability win, then fast-follow with semantic cache as the cost / hit-rate lever.',
-    status: 'next',
+    what: 'The front-door layer checks whether the request can be served from cache. Public CDN AI Gateway products provide exact-match cache only — identical request bodies hit cache, anything semantically equivalent misses.',
+    failure: 'Near-zero cache hit rate on search/agentic queries because prompts vary constantly. Cache-miss storms during traffic spikes amplify origin load. Stale cache responses on time-sensitive queries degrade answer freshness.',
+    metric: 'Cache hit rate by query class · origin RPS during traffic spikes · answer-freshness signal',
+    move: 'Akamai AI Grid targets semantic caching at the edge — embedding-indexed lookup serves semantically equivalent queries from cache, dramatically increasing effective hit rate for common patterns.',
+    discovery: 'What is the current cache hit rate at the front door for AI inference requests, broken down by query class?',
+    status: 'likely',
+    statusLabel: 'Likely',
   },
   {
     id: 'auth',
     num: '04',
-    label: 'Auth / billing',
-    title: 'Payment-state cascade is a single point of failure',
+    label: 'Auth / billing entitlement',
+    title: 'Credit-based entitlement is in the critical path',
     icon: 'key',
     accent: '#ef4444',
-    sub: '$50 charge → API outage',
-    what: 'Authenticated API access depends on payment-state webhooks succeeding. When the billing endpoint stutters, downstream API calls fail open and integrations break.',
-    failure: 'At <b>20:22:47 UTC</b> and <b>20:23:12 UTC</b> two $50.00 charges failed against the Perplexity billing endpoint. API access broke. The ATOM / AntimatterAI integrations cascaded into outage on a payment-state hiccup.',
-    evidence: 'First-party billing-cascade timestamps (this brief, evidence dossier). Plaud call: "this has a direct revenue impact" — refunds, credits, and reputational damage compound.',
-    move: 'Pitch a <b>credential and payment-webhook circuit breaker with sub-500ms policy swap</b>. This is the single most concrete reliability story Akamai can tell on day one.',
+    sub: '401 / 402 cascade',
+    what: 'The inference request must pass Bearer-token authentication and a credit-entitlement check. Credit exhaustion or billing-system failure produces 401/402 responses that immediately block the API call.',
+    failure: 'Credit exhaustion gates API access for every downstream integration — no graceful degradation. Billing-system outage blocks authenticated requests even for funded accounts. The retry chain takes 25–120 seconds to propagate a user-visible error.',
+    metric: '401/402 rate per minute · retry-chain depth · time-to-user-visible-error · refund/credit-issuance frequency',
+    move: 'EdgeWorkers implements a circuit breaker at the edge: detect repeated 401/402, activate a sub-500&nbsp;ms policy swap (route to fallback, serve cached responses, return graceful error), and restore traffic when billing recovers.',
+    discovery: 'Is the billing entitlement check in the critical path of every API request, or asynchronous? What is the recovery time between credit failure and automatic retry eligibility?',
     status: 'confirmed',
+    statusLabel: 'Confirmed',
   },
   {
     id: 'inference',
     num: '05',
     label: 'Inference placement',
-    title: 'Three GPU clouds. No runtime above them.',
+    title: 'Three independent compute planes · no unified runtime',
     icon: 'cpu',
     accent: '#a855f7',
     sub: 'AWS · Foundry · CoreWeave',
-    what: 'AWS provides the backbone (P4de / P5 / HyperPod). Microsoft Foundry ($750M, Jan 29 2026) added model access. CoreWeave (GB200 NVL72, Mar 4 2026) added dedicated inference clusters.',
-    failure: 'No layer above the hyperscalers decides <em>where</em> a given request should run. Queue depth, regional load, cache hit probability, and data locality are not unified policy inputs.',
-    evidence: 'Public deal history; this brief\'s architecture and crisis-map sections. Plaud: routing decisions are "haphazardly across the board" today.',
-    move: '<b>Akamai AI Grid as convergence fabric</b> above AWS / Foundry / CoreWeave — queue-aware routing, edge / regional inference placement, one policy engine.',
+    what: 'The authenticated request reaches an inference orchestration layer. Public deal history confirms three independent compute planes: AWS (primary), CoreWeave (GB200 NVL72 dedicated clusters), and Microsoft Foundry (model catalog). Each is a separate operational and billing graph.',
+    failure: 'Public benchmarks were initiated from AWS us-east-1, suggesting regional concentration of the search-retrieval path. Three independent control planes mean no unified SLA — any single-plane incident creates a multi-vendor support spiral. Cross-cloud egress accumulates as volume scales.',
+    metric: 'Regional inference latency · plane-level error rates · cross-cloud egress GB · multi-vendor incident MTTR',
+    move: 'AI Grid intelligent orchestrator routes inference to the right compute tier (Akamai edge GPU, AWS, CoreWeave) based on cost-per-token, TTFT target, queue depth, and data locality — a single distribution layer above all three providers.',
+    discovery: 'Is inference load-balanced across CoreWeave and AWS, or is AWS primary with CoreWeave as dedicated capacity? What is the failover time on a us-east-1 event?',
     status: 'confirmed',
+    statusLabel: 'Confirmed',
   },
   {
-    id: 'crisis',
+    id: 'model',
     num: '06',
-    label: 'User-visible crisis',
-    title: 'Refunds, credits, reputation, support drag',
+    label: 'Model / search retrieval',
+    title: 'Search retrieval + generation · latency compounds',
     icon: 'alert',
     accent: '#f5b942',
-    sub: 'revenue + reputation',
-    what: 'Slow answers, broken integrations, and inconsistent regional behavior surface as user complaints, refund / credit issuance, and reputational signal in public channels.',
-    failure: 'Persistent Discord complaints were flagged as a major signal in the Plaud call. Reputation compounds independently of any single incident.',
-    evidence: '<b>Discord complaints were discussed in the Plaud call</b> as a reputational signal — the Discord connector was <b>not</b> scanned and no Discord content is reproduced here. Revenue impact was explicitly acknowledged: "this has a direct revenue impact."',
-    move: 'Tie every Akamai metric back to <b>incident compression + refund/credit reduction</b>. Reliability is the wedge; reputation recovery is the dividend.',
-    status: 'next',
+    sub: '358ms median retrieval',
+    what: 'The model executes: query intent is parsed, web-search retrieval runs against the 200B+ URL index, results are ranked through a multi-stage pipeline, and generation begins. Median retrieval latency is 358&nbsp;ms from us-east-1; P95 stays under 800&nbsp;ms.',
+    failure: 'Retrieval latency compounds with generation latency: 358&nbsp;ms + LLM TTFT + streaming adds up quickly for distant users. Index freshness can degrade if crawlers are blocked at scale. Large retrieval sets in long-context models materially increase response time.',
+    metric: 'Retrieval P50 / P95 · generation TTFT · context size vs response time · crawl-coverage signal',
+    move: 'Semantic caching at the AI Grid edge intercepts high-entropy, repeated query patterns before they reach the search-retrieval pipeline, reducing load on the 200B URL index chain.',
+    discovery: 'How does retrieval P95 vary by region today, and where would the AI Grid pilot show the strongest TTFT delta?',
+    status: 'confirmed',
+    statusLabel: 'Confirmed',
   },
   {
-    id: 'fix',
+    id: 'stream',
     num: '07',
-    label: 'Akamai fix',
-    title: 'Akamai Functions cutover · one SLA',
+    label: 'Streaming response',
+    title: 'SSE last-mile · regional routing penalty',
     icon: 'check',
     accent: '#00e6d3',
-    sub: 'reliability now · semantic cache next',
-    what: 'Akamai AI Grid / Functions sits above AWS / Foundry / CoreWeave and beside Cloudflare. It routes by health, TTFT, cache-hit probability, cost/token, data locality, and billing/auth state. One SLA owner spans runtime + providers.',
-    failure: 'Doing nothing means each new provider is one more orchestration seam. The next billing cascade is a question of when, not if — and it lands on customer-visible surfaces.',
-    evidence: '"I would say just repoint your LLM to use Akamai functions instead of Vercel, and you can go much faster." / "That\'s one of the cutover I have to do." — Plaud 2026-05-28',
-    move: 'POC scope: a narrow but painful slice of real-time search demand at peak hours US/EU. Measure TTFT, egress, incident ownership, cache-hit. Reliability first. Semantic cache fast-follow. Add Neil &amp; Lior to the engagement team. Open the path via Johnny Love.',
+    sub: 'SSE · token delivery',
+    what: 'Tokens stream via Server-Sent Events from the inference endpoint to the client. TTFT and inter-token latency are the primary UX signals; long streaming responses hold connection slots through every proxy hop.',
+    failure: 'SSE stream interruption mid-response is more disruptive than a failed non-streaming request. Streaming through multiple proxy hops accumulates buffering that delays first-token visibility. A user in Europe receiving tokens routed through us-east-1 adds ~80–120&nbsp;ms to every token delivery.',
+    metric: 'TTFT by region · inter-token latency · SSE disconnect rate · stream-hold duration at the gateway',
+    move: 'Akamai\'s edge PoPs serve as the last-mile streaming endpoint — tokens stream from the nearest PoP, not from a centralized us-east-1 origin, eliminating the geographic streaming penalty.',
+    discovery: 'What is the international vs domestic TTFT delta on streaming responses today?',
     status: 'confirmed',
+    statusLabel: 'Confirmed',
   },
 ];
 
 const STATUS_META = {
-  confirmed:   { label: 'Confirmed',     color: 'var(--plasma)' },
-  unconfirmed: { label: 'Unconfirmed',   color: '#f5b942' },
-  next:        { label: 'Next question', color: '#5aa4f7' },
+  confirmed:   { label: 'Confirmed',     color: '#a2a3e9' },
+  likely:      { label: 'Likely',        color: '#5aa4f7' },
+  unknown:     { label: 'Unknown',       color: '#f5b942' },
+  next:        { label: 'Ask Perplexity', color: '#8587e3' },
 };
 
 const ICONS = {
@@ -129,7 +144,6 @@ const ICONS = {
   if (!rail || !panel) return;
 
   let activeIdx = 0;
-  let autoTimer = null;
   let userInteracted = false;
 
   /* ---------- Hero pipeline canvas (real graphical pipeline) ---------- */
@@ -143,32 +157,30 @@ const ICONS = {
     const cy = 200;
     const nodeR = 38;
 
-    // Connectors first (so nodes paint over them).
     const connectors = STAGES.slice(1).map((_, i) => {
       const x1 = padX + step * i + nodeR;
       const x2 = padX + step * (i + 1) - nodeR;
       const done = i < activeIdx;
-      const active = i === activeIdx - 1; // segment leading INTO the active node
-      const color = done ? 'var(--plasma)' : 'rgba(140,150,170,.28)';
+      const active = i === activeIdx - 1;
+      const color = done ? 'var(--atom-secondary, #a2a3e9)' : 'rgba(140,150,170,.28)';
       const width = done ? 2.6 : 1.6;
       return `
         <g class="fc-edge ${done ? 'fc-edge--done' : ''} ${active ? 'fc-edge--active' : ''}">
           <line x1="${x1}" y1="${cy}" x2="${x2}" y2="${cy}"
                 stroke="${color}" stroke-width="${width}"
                 stroke-dasharray="${done ? '0' : '6 6'}"/>
-          ${done ? `<circle class="fc-pulse" cx="${x1}" cy="${cy}" r="3" fill="var(--plasma)">
+          ${done ? `<circle class="fc-pulse" cx="${x1}" cy="${cy}" r="3" fill="var(--atom-secondary, #a2a3e9)">
               <animate attributeName="cx" from="${x1}" to="${x2}" dur="1.6s" repeatCount="indefinite"/>
               <animate attributeName="opacity" values="0;1;0" dur="1.6s" repeatCount="indefinite"/>
             </circle>` : ''}
         </g>`;
     }).join('');
 
-    // Nodes — circular with status ring + hotspot pulse + label + sub.
     const nodes = STAGES.map((s, i) => {
       const cx = padX + step * i;
       const active = i === activeIdx;
       const done = i < activeIdx;
-      const isFail = ['unconfirmed', 'next'].includes(s.status) || s.id === 'auth' || s.id === 'crisis';
+      const isFail = ['unknown', 'next', 'likely'].includes(s.status) || s.id === 'auth';
       const statusColor = STATUS_META[s.status].color;
       return `
         <g class="fc-node ${active ? 'fc-node--active' : ''} ${done ? 'fc-node--done' : ''}"
@@ -196,13 +208,13 @@ const ICONS = {
                 font-family="JetBrains Mono" font-size="10" letter-spacing="2"
                 fill="${active ? s.accent : '#8a93a3'}">${s.num}</text>
           <text x="${cx}" y="${cy + 12}" text-anchor="middle"
-                font-family="Cabinet Grotesk" font-size="11" font-weight="800"
+                font-family="Plus Jakarta Sans" font-size="11" font-weight="800"
                 fill="${active ? '#eef2f6' : '#c4cdda'}">${s.label.toUpperCase()}</text>
           <text x="${cx}" y="${cy + 64}" text-anchor="middle"
-                font-family="Satoshi" font-size="11" fill="${active ? '#eef2f6' : '#7a8497'}">${s.sub}</text>
-          <g transform="translate(${cx - 36} ${cy + 78})">
-            <rect width="72" height="20" rx="10" fill="rgba(8,12,18,.85)" stroke="${statusColor}" stroke-opacity=".7"/>
-            <text x="36" y="14" text-anchor="middle"
+                font-family="Plus Jakarta Sans" font-size="11" fill="${active ? '#eef2f6' : '#7a8497'}">${s.sub}</text>
+          <g transform="translate(${cx - 44} ${cy + 78})">
+            <rect width="88" height="20" rx="10" fill="rgba(8,12,18,.85)" stroke="${statusColor}" stroke-opacity=".7"/>
+            <text x="44" y="14" text-anchor="middle"
                   font-family="JetBrains Mono" font-size="9" letter-spacing="1.4"
                   fill="${statusColor}">${STATUS_META[s.status].label.toUpperCase()}</text>
           </g>
@@ -211,46 +223,44 @@ const ICONS = {
 
     canvas.innerHTML = `
       <div class="flow-canvas__label">
-        <span class="pip"></span> SEVEN STAGE PIPELINE · USER DEMAND → AKAMAI FIX
+        <span class="pip"></span> SEVEN STAGE PIPELINE · USER REQUEST → STREAMING RESPONSE
         <span class="flow-canvas__hint">Click any node · arrow keys to navigate</span>
       </div>
       <svg class="flow-canvas__svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" aria-hidden="false">
         <defs>
           <radialGradient id="fc-bg" cx="50%" cy="50%">
-            <stop offset="0%" stop-color="rgba(0,230,211,.08)"/>
-            <stop offset="100%" stop-color="rgba(0,230,211,0)"/>
+            <stop offset="0%" stop-color="rgba(133,135,227,.08)"/>
+            <stop offset="100%" stop-color="rgba(133,135,227,0)"/>
           </radialGradient>
         </defs>
         <rect x="0" y="0" width="${W}" height="${H}" fill="url(#fc-bg)" />
         <text x="${W/2}" y="42" text-anchor="middle"
               font-family="JetBrains Mono" font-size="10" letter-spacing="3" fill="#5a6478">
-          USER REGIONS · TX · ATL · PA · MONTREAL · CH  →  CLOUDFLARE FRONT DOOR  →  AKAMAI AI RUNTIME
+          USER REGION  →  PUBLIC EDGE  →  CACHE  →  AUTH/BILLING  →  PLACEMENT  →  RETRIEVAL  →  STREAM
         </text>
         ${connectors}
         ${nodes}
       </svg>
     `;
 
-    // Wire click + keyboard on canvas nodes. Use Element.closest() inside the
-    // handler so clicks on inner children still resolve to the parent <g>.
     canvas.querySelectorAll('[data-flow-canvas-idx]').forEach((g) => {
       g.addEventListener('click', (e) => {
         const host = (e.target && e.target.closest) ? e.target.closest('[data-flow-canvas-idx]') : g;
         const idx = Number((host || g).getAttribute('data-flow-canvas-idx'));
         if (!Number.isFinite(idx)) return;
-        userInteracted = true; stopAutoplay();
+        userInteracted = true;
         setActive(idx);
       });
       g.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          userInteracted = true; stopAutoplay();
+          userInteracted = true;
           setActive(Number(g.getAttribute('data-flow-canvas-idx')));
         } else if (e.key === 'ArrowRight') {
-          e.preventDefault(); userInteracted = true; stopAutoplay();
+          e.preventDefault(); userInteracted = true;
           setActive((activeIdx + 1) % STAGES.length, true);
         } else if (e.key === 'ArrowLeft') {
-          e.preventDefault(); userInteracted = true; stopAutoplay();
+          e.preventDefault(); userInteracted = true;
           setActive((activeIdx - 1 + STAGES.length) % STAGES.length, true);
         }
       });
@@ -277,19 +287,16 @@ const ICONS = {
     rail.querySelectorAll('[data-flow-idx]').forEach((btn) => {
       btn.addEventListener('click', () => {
         userInteracted = true;
-        stopAutoplay();
         setActive(Number(btn.dataset.flowIdx));
       });
       btn.addEventListener('keydown', (e) => {
         if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
           e.preventDefault();
           userInteracted = true;
-          stopAutoplay();
           setActive((activeIdx + 1) % STAGES.length, true);
         } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
           e.preventDefault();
           userInteracted = true;
-          stopAutoplay();
           setActive((activeIdx - 1 + STAGES.length) % STAGES.length, true);
         }
       });
@@ -305,26 +312,22 @@ const ICONS = {
     });
   }
 
-  /* ---------- Stage diagram ----------
-   * A tiny SVG visualization that shows the request state at this stage:
-   * a horizontal pipeline of seven nodes, with the active node lit.
-   */
   function renderStageDiagram(idx) {
     const cx = (i) => 50 + i * 64;
     const dots = STAGES.map((st, i) => {
       const active = i === idx;
       const done = i < idx;
-      const color = active ? st.accent : (done ? 'rgba(0,230,211,.55)' : 'rgba(140,150,170,.32)');
+      const color = active ? st.accent : (done ? 'rgba(162,163,233,.55)' : 'rgba(140,150,170,.32)');
       return `
         <g transform="translate(${cx(i)} 80)">
           <circle r="${active ? 14 : 8}" fill="${active ? st.accent : 'transparent'}" stroke="${color}" stroke-width="${active ? 0 : 2}" ${active ? `filter="drop-shadow(0 0 12px ${st.accent})"` : ''}/>
           <text y="36" text-anchor="middle" font-family="JetBrains Mono" font-size="10" letter-spacing="2" fill="${active ? st.accent : '#8a93a3'}">${st.num}</text>
-          <text y="52" text-anchor="middle" font-family="Satoshi" font-size="10" fill="${active ? '#eef2f6' : '#7a8497'}">${st.label}</text>
+          <text y="52" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="10" fill="${active ? '#eef2f6' : '#7a8497'}">${st.label}</text>
         </g>`;
     }).join('');
     const lines = STAGES.slice(1).map((_, i) => `
       <line x1="${cx(i) + 10}" y1="80" x2="${cx(i + 1) - 10}" y2="80"
-            stroke="${i < idx ? 'rgba(0,230,211,.55)' : 'rgba(140,150,170,.18)'}"
+            stroke="${i < idx ? 'rgba(162,163,233,.55)' : 'rgba(140,150,170,.18)'}"
             stroke-width="${i < idx ? 2 : 1.4}" stroke-dasharray="${i < idx ? '0' : '4 6'}"/>
     `).join('');
     return `
@@ -364,12 +367,16 @@ const ICONS = {
           <p>${s.failure}</p>
         </section>
         <section class="flow-panel__cell">
-          <div class="flow-panel__cell-label">Evidence</div>
-          <blockquote>${s.evidence}</blockquote>
+          <div class="flow-panel__cell-label">Metric to watch</div>
+          <p>${s.metric}</p>
         </section>
         <section class="flow-panel__cell flow-panel__cell--move">
-          <div class="flow-panel__cell-label">Akamai move</div>
+          <div class="flow-panel__cell-label">What Akamai fixes</div>
           <p>${s.move}</p>
+        </section>
+        <section class="flow-panel__cell flow-panel__cell--ask">
+          <div class="flow-panel__cell-label">Discovery question</div>
+          <blockquote>${s.discovery}</blockquote>
         </section>
       </div>
 
@@ -377,7 +384,6 @@ const ICONS = {
         ${STAGES.map((_, i) => `<span class="${i === activeIdx ? 'is-active' : (i < activeIdx ? 'is-done' : '')}"></span>`).join('')}
       </div>
     `;
-    // Re-trigger the cinematic fade
     panel.classList.remove('flow-panel--enter');
     void panel.offsetWidth;
     panel.classList.add('flow-panel--enter');
@@ -394,32 +400,11 @@ const ICONS = {
     }
   }
 
-  /* Autoplay disabled — re-rendering the canvas every 5 s thrashed click
-   * targets (Playwright + real users would race the re-render). The pipeline
-   * already has running plasma pulses on the SVG edges for ambient motion. */
-  function startAutoplay() { /* intentionally a no-op */ }
-  function stopAutoplay()  { if (autoTimer) { clearInterval(autoTimer); autoTimer = null; } }
-
-  /* ---------- Boot when section enters viewport ---------- */
   renderCanvas();
   renderRail();
   renderPanel();
 
-  const section = document.getElementById('end-to-end-flow');
-  if (section && 'IntersectionObserver' in window) {
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting && !userInteracted) {
-          startAutoplay();
-        } else {
-          stopAutoplay();
-        }
-      });
-    }, { threshold: 0.35 });
-    io.observe(section);
-  }
-
-  // Expose a tiny hook so the ATOM copilot can deep-link into a stage.
+  // Expose a hook so ATOM copilot can deep-link into a stage.
   window.dtomCrisisFlow = {
     open: (idxOrId) => {
       let i = 0;
@@ -430,7 +415,6 @@ const ICONS = {
         i = idxOrId;
       }
       userInteracted = true;
-      stopAutoplay();
       setActive(i);
       const section = document.getElementById('end-to-end-flow');
       if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });

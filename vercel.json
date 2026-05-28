@@ -48,6 +48,10 @@
     "api/atom-agent.js": {
       "maxDuration": 30,
       "memory": 512
+    },
+    "api/ask-atom.js": {
+      "maxDuration": 30,
+      "memory": 512
     }
   }
 }

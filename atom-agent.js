@@ -1,13 +1,14 @@
 /*
- * ΔTOM // ATOM AGENT - DEAL COPILOT
- * Local deterministic copilot grounded in the Perplexity / Akamai thesis
- * on this page. No external calls. Four modes: simple, cto, cfo, sales.
+ * Akamai AI Grid // ATOM Copilot
+ * Local deterministic copilot grounded in the AI Grid command-center brief.
+ * Four modes: simple, cto, cfo, sales. Streams from /api/ask-atom when key
+ * is configured; falls back to deterministic responses otherwise.
  */
 
 const MODES = {
   simple: {
     label: 'Simple',
-    greeting: '<strong>Akamai AI Grid Copilot is online.</strong> Ask me to make the Akamai wedge for Perplexity obvious, clean, and impossible to misunderstand.',
+    greeting: '<strong>ATOM · Akamai AI Grid Command Center.</strong> Ask me to make the Akamai wedge for Perplexity obvious, clean, and impossible to misunderstand.',
     chips: [
       'Walk me through the end-to-end failure flow',
       'Explain this like I have 30 seconds',
@@ -22,7 +23,7 @@ const MODES = {
       'Walk me through the end-to-end failure flow',
       'Where does Perplexity actually break?',
       'What does the convergence layer own?',
-      'Semantic cache vs Cloudflare AI Gateway?',
+      'Semantic cache vs public AI Gateway?',
     ],
   },
   cfo: {
@@ -37,12 +38,12 @@ const MODES = {
   },
   sales: {
     label: 'Sales',
-    greeting: 'Sales mode online. The wedge: keep Cloudflare, win the AI runtime. Here are the moves that close.',
+    greeting: 'Sales mode online. The wedge: keep the public edge, win the AI runtime. Here are the moves that close.',
     chips: [
       'Walk me through the end-to-end failure flow',
       'Pitch in one sentence',
       'How to open with the CTO',
-      'Objection: "Cloudflare already does this"',
+      'Objection: "the public edge already does this"',
     ],
   },
 };
@@ -51,13 +52,13 @@ const MODES = {
 const WALKTHROUGH_HTML = `
   <p><strong>End-to-end failure flow</strong> — seven stages, click any of them in the <a href="#end-to-end-flow" data-atom-link="flow">Crisis Flow</a> section to drill in:</p>
   <ul>
-    <li><strong>01 User demand</strong> — Texas, Atlanta, Palo Alto, Montreal, Switzerland (<em>confirmed</em>)</li>
-    <li><strong>02 Front-door routing</strong> — Cloudflare visible, AI routing logic (Workers / custom / haphazard) <em>unconfirmed</em></li>
-    <li><strong>03 Cache decision</strong> — static works, semantic cache <em>not confirmed</em></li>
-    <li><strong>04 Auth / billing</strong> — 20:22:47 + 20:23:12 UTC charge failures cascaded to API outage (<em>confirmed</em>)</li>
-    <li><strong>05 Inference placement</strong> — AWS + Foundry + CoreWeave, no runtime above them (<em>confirmed</em>)</li>
-    <li><strong>06 User-visible crisis</strong> — refunds, credits, reputation; Discord complaints discussed in Plaud call, <em>not connector-scanned</em></li>
-    <li><strong>07 Akamai fix</strong> — Akamai Functions cutover, reliability first, semantic cache fast-follow</li>
+    <li><strong>01 User request origin</strong> — distributed live-search demand, first-mile TTFT before inference (<em>Confirmed</em>)</li>
+    <li><strong>02 DNS + front door</strong> — public-edge routing layer; exact implementation in front of api.perplexity.ai <em>Unknown</em></li>
+    <li><strong>03 Cache decision</strong> — exact-match only at public CDN; semantic caching is the Akamai roadmap differentiator (<em>Likely</em>)</li>
+    <li><strong>04 Auth / billing entitlement</strong> — credit-based metering in the critical path; 401/402 cascade is public record (<em>Confirmed</em>)</li>
+    <li><strong>05 Inference placement</strong> — AWS + Foundry + CoreWeave, three independent control planes (<em>Confirmed</em>)</li>
+    <li><strong>06 Model / search retrieval</strong> — 358&nbsp;ms median retrieval from us-east-1, P95 &lt; 800&nbsp;ms (<em>Confirmed</em>)</li>
+    <li><strong>07 Streaming response</strong> — SSE last-mile, edge PoPs eliminate the geographic streaming penalty (<em>Confirmed</em>)</li>
   </ul>
   <p><a href="#end-to-end-flow" data-atom-link="flow">Open the Crisis Flow walkthrough →</a></p>
 `;
@@ -71,23 +72,23 @@ const RESPONSES = {
   simple: [
     WALKTHROUGH_MATCH,
     { match: /30\s*seconds|tl;?dr|short|brief|explain/i, html: `
-      <p><strong>30-second version.</strong> Perplexity wired itself to AWS + Microsoft Foundry + CoreWeave in under five weeks. The architecture is fast — the coordination model isn't. When billing, GPUs, or providers wobble, the user feels it as a slow or broken answer.</p>
-      <p>Cloudflare protects the front door. <strong>Akamai becomes the runtime layer above the hyperscalers</strong> — it decides where inference runs, fails over billing/auth in under 500ms, and gives Perplexity one SLA owner across the whole stack.</p>` },
+      <p><strong>30-second version.</strong> Perplexity wired itself to AWS + Microsoft Foundry + CoreWeave inside a year. The architecture is fast — the coordination model isn't. When billing, GPUs, or providers wobble, the user feels it as a slow or broken answer.</p>
+      <p>The public edge handles the connection. <strong>Akamai AI Grid is the runtime layer above the hyperscalers</strong> — it decides where inference runs, fails over billing/auth in under 500&nbsp;ms, and gives Perplexity one SLA owner across the whole stack. [CONFIRMED for Akamai capabilities · LIKELY for inference concentration]</p>` },
     { match: /crisis|plain english|what.+wrong/i, html: `
       <p><strong>The crisis in plain English.</strong> Perplexity has world-class AI factories (AWS, Foundry, CoreWeave) but no single user-facing operator above them.</p>
       <ul>
-        <li>A $50 billing charge fails → API access cascades</li>
-        <li>Three GPU clouds, none of them decides <em>where</em> a request actually runs</li>
-        <li>Cloudflare guards the perimeter but cannot pick placement, cache semantically, or own multi-cloud SLA</li>
+        <li>Credit-based billing is in the critical path; 401/402 cascades to API outage [CONFIRMED]</li>
+        <li>Three GPU clouds, none of them decides <em>where</em> a request runs [CONFIRMED]</li>
+        <li>Public AI Gateway products cache exact-match only — semantic caching is not available [CONFIRMED NO]</li>
       </ul>
       <p>That gap is the entire Akamai opening.</p>` },
     { match: /akamai|why.+matter|why.+here/i, html: `
-      <p><strong>Why Akamai.</strong> 4,400+ edge POPs and an existing security surface — but more importantly, the position is right: <em>above</em> the GPU clouds, <em>beside</em> Cloudflare, <em>inside</em> the user path.</p>
-      <p>Akamai owns request placement, semantic cache policy, failover state, and SLA reporting. The hyperscalers keep doing what they do best.</p>` },
+      <p><strong>Why Akamai.</strong> 4,400+ edge PoPs and thousands of NVIDIA RTX PRO 6000 Blackwell GPUs deployed across the edge [CONFIRMED]. The position is right: <em>above</em> the GPU clouds, <em>alongside</em> the public edge, <em>inside</em> the user path.</p>
+      <p>Akamai owns request placement, semantic cache policy (roadmap), failover state, and SLA reporting. The hyperscalers keep doing what they do best.</p>` },
     { match: /remember|takeaway|leave with/i, html: `
       <p><strong>What to remember.</strong></p>
       <ul>
-        <li>Don't say "replace Cloudflare." Say <strong>convergence layer above the hyperscalers</strong>.</li>
+        <li>Don't replace the front door. Add the <strong>runtime layer above the hyperscalers</strong>.</li>
         <li>The crisis lives in <em>orchestration</em>, not in compute or CDN.</li>
         <li>Pilot framing: narrow slice (peak-hour US/EU search), measure TTFT, egress, incident ownership.</li>
       </ul>` },
@@ -98,10 +99,10 @@ const RESPONSES = {
     { match: /break|fail|where.+breaks?/i, html: `
       <p><strong>Where it actually breaks.</strong></p>
       <ul>
-        <li><strong>Billing Cascade.</strong> Two $50 charges failed at 20:22:47 and 20:23:12 UTC → API access broke → ATOM/AntimatterAI integrations went dark. Auth and payment state aren't behind a circuit breaker.</li>
-        <li><strong>Orchestration Chaos.</strong> AWS + Foundry + CoreWeave, no policy engine above them.</li>
-        <li><strong>TTFT Spikes.</strong> Edge proximity is a CDN concern. Placement — <em>where</em> the inference runs — is a runtime concern. Cloudflare answers the first, not the second.</li>
-        <li><strong>Support Fragmentation.</strong> Five vendor tickets per real incident.</li>
+        <li><strong>Billing Cascade.</strong> Credit-based per-token metering produces 401/402 on exhaustion or billing-system failure. StatusGator tracks 25+ public Perplexity API outages since May 2025 [CONFIRMED].</li>
+        <li><strong>Orchestration Chaos.</strong> AWS + Foundry + CoreWeave, no policy engine above them [CONFIRMED].</li>
+        <li><strong>TTFT Spikes.</strong> Edge proximity is a CDN concern. Placement — <em>where</em> the inference runs — is a runtime concern.</li>
+        <li><strong>Support Fragmentation.</strong> Three independent SLA boundaries per real incident.</li>
         <li><strong>Egress Drag.</strong> Cross-cloud bytes priced like a tax on novelty.</li>
       </ul>` },
     { match: /convergence|own|layer|what.+do/i, html: `
@@ -109,20 +110,20 @@ const RESPONSES = {
       <ul>
         <li>Request placement (edge / regional / hyperscale)</li>
         <li>Provider health + queue-aware routing</li>
-        <li>Billing &amp; auth-state failover (sub-500ms policy swap)</li>
-        <li>Semantic / embedding-aware cache policy</li>
+        <li>Billing &amp; auth-state failover (sub-500&nbsp;ms policy swap via EdgeWorkers)</li>
+        <li>Semantic / embedding-aware cache policy (Akamai AI Grid roadmap)</li>
         <li>Cross-cloud egress minimization</li>
         <li>One SLA report across runtime + providers</li>
       </ul>
-      <p>It sits <strong>above</strong> AWS / Foundry / CoreWeave, <strong>beside</strong> Cloudflare's public edge — not instead of either.</p>` },
+      <p>It sits <strong>above</strong> AWS / Foundry / CoreWeave, <strong>alongside</strong> the public edge — not instead of either.</p>` },
     { match: /ttft|latency|first[- ]token/i, html: `
-      <p><strong>How TTFT improves.</strong> Cloudflare cuts network distance. Akamai decides whether the request belongs at the edge POP, in a regional inference cluster, or at the hyperscaler — based on prompt class, queue depth, cache hit probability, and data locality. That's a runtime decision, not a routing decision.</p>` },
+      <p><strong>How TTFT improves.</strong> The public edge cuts network distance. Akamai decides whether the request belongs at the edge PoP, in a regional inference cluster, or at the hyperscaler — based on prompt class, queue depth, cache hit probability, and data locality. That's a runtime decision, not a routing decision.</p>` },
     { match: /semantic|cache|ai gateway|gateway/i, html: `
-      <p><strong>Semantic cache vs AI Gateway cache.</strong></p>
+      <p><strong>Semantic cache vs public AI Gateway cache.</strong></p>
       <ul>
-        <li>AI Gateway default cache hashes provider + endpoint + model + auth + full body → effectively exact-match.</li>
-        <li>Real Perplexity traffic varies constantly — exact-match hit rate is low.</li>
-        <li>Semantic cache keys on intent + embedding + tenant + freshness — hit rates climb without breaking authenticated isolation.</li>
+        <li>Public AI Gateway products provide <strong>exact-match cache only</strong> — confirmed by docs and independent analysis [CONFIRMED].</li>
+        <li>Real AI search traffic varies constantly — exact-match hit rate is low by definition.</li>
+        <li>Akamai AI Grid <strong>targets semantic caching at the edge</strong> as a roadmap capability — keys on intent + embedding + tenant + freshness.</li>
       </ul>` },
   ],
 
@@ -133,11 +134,11 @@ const RESPONSES = {
       <ul>
         <li><strong>Cross-cloud egress</strong> on every retry, every failover, every model fallback — priced per GB across AWS, Foundry, CoreWeave.</li>
         <li><strong>Cache miss tax.</strong> Exact-match caching gives near-zero hit rate on novel prompts; every miss is a full token round-trip.</li>
-        <li><strong>Incident labor.</strong> Five vendor tickets per real incident — engineering hours, not infrastructure.</li>
-        <li><strong>Billing-cascade revenue loss.</strong> 20:22-20:23 UTC outage took down ATOM/AntimatterAI integrations on a payment-state hiccup.</li>
+        <li><strong>Incident labor.</strong> Three independent SLA boundaries per real incident — engineering hours, not infrastructure.</li>
+        <li><strong>Billing-cascade revenue loss.</strong> Confirmed billing-system events have triggered credit refunds and bonus-credit issuance.</li>
       </ul>` },
     { match: /nothing|do nothing|status quo/i, html: `
-      <p><strong>Cost of doing nothing.</strong> Token economics, egress, and incident labor compound monthly. Each new GPU provider adds an orchestration seam, not capacity. The next billing-cascade incident is a question of when, not if — and it lands on customer-visible surfaces.</p>` },
+      <p><strong>Cost of doing nothing.</strong> Token economics, egress, and incident labor compound monthly. Each new GPU provider adds an orchestration seam, not capacity. The next billing-cascade incident is when, not if — and it lands on customer-visible surfaces.</p>` },
     { match: /roi|pilot|return|invest/i, html: `
       <p><strong>Pilot ROI framing.</strong></p>
       <ul>
@@ -146,15 +147,15 @@ const RESPONSES = {
         <li>Win condition: incident compression + edge-served share materially up vs. baseline.</li>
         <li>Cost: incremental against existing AWS / Foundry / CoreWeave spend — not on top of them.</li>
       </ul>` },
-    { match: /cloudflare|overlap|incremental/i, html: `
-      <p><strong>Cloudflare overlap.</strong> Minimal where it matters. Cloudflare keeps DNS, WAF, bot, public CDN cache, exact-match AI Gateway. Akamai adds the layer Cloudflare doesn't sell: inference placement, semantic cache, billing/auth failover, single-SLA. The spend lines aren't competing — they're stacked.</p>` },
+    { match: /overlap|incremental|public edge|cdn/i, html: `
+      <p><strong>Public-edge overlap.</strong> Minimal where it matters. The public edge keeps DNS, WAF, bot, public CDN cache, exact-match AI Gateway. Akamai adds the layer no CDN sells today: inference placement, semantic cache (roadmap), billing/auth failover, single-SLA. The spend lines aren't competing — they're stacked.</p>` },
   ],
 
   sales: [
     WALKTHROUGH_MATCH,
     { match: /pitch|one sentence|elevator/i, html: `
       <p><strong>One-sentence pitch.</strong></p>
-      <p>"Cloudflare routes the request. <strong>Akamai decides where the intelligence should run.</strong>"</p>` },
+      <p>"The front door handles the connection. <strong>Akamai AI Grid decides where the intelligence runs — and owns the outcome.</strong>"</p>` },
     { match: /open.+cto|cto/i, html: `
       <p><strong>Opening with the CTO.</strong></p>
       <ul>
@@ -169,23 +170,23 @@ const RESPONSES = {
         <li>Position Akamai as incremental against existing GPU spend, not on top of it.</li>
         <li>Anchor pilot to a narrow, measurable slice.</li>
       </ul>` },
-    { match: /objection|already does|cloudflare.+do/i, html: `
-      <p><strong>Objection: "Cloudflare already does this."</strong></p>
-      <p>Acknowledge first — Cloudflare keeps the front door fast and protected. Then pivot:</p>
+    { match: /objection|already does|public.+edge.+do|cdn.+do/i, html: `
+      <p><strong>Objection: "the public edge already does this."</strong></p>
+      <p>Acknowledge first — the public edge keeps the front door fast and protected. Then pivot:</p>
       <ul>
-        <li>Cloudflare's AI Gateway caches exact matches. Perplexity traffic is rarely exact.</li>
-        <li>Cloudflare load-balances pools. It does not pick whether inference belongs at the edge, regional, or hyperscale.</li>
-        <li>Cloudflare cannot fail over billing/auth state across providers in under 500ms.</li>
+        <li>Public AI Gateway products cache exact matches. AI search traffic is rarely exact.</li>
+        <li>The public edge load-balances pools. It does not pick whether inference belongs at the edge, regional, or hyperscale.</li>
+        <li>The public edge cannot fail over billing/auth state across providers in under 500&nbsp;ms.</li>
       </ul>
-      <p>Close with: <strong>Cloudflare is the public shield. Akamai is the AI convergence fabric.</strong></p>` },
+      <p>Close with: <strong>The front door handles the connection. Akamai is the AI convergence fabric.</strong></p>` },
   ],
 };
 
 const FALLBACK = {
-  simple: `<p>Ask me to <strong>explain the crisis</strong>, <strong>why Akamai</strong>, or <strong>what to remember</strong>. I will keep it boardroom-clean.</p>`,
+  simple: `<p>Ask me to <strong>explain the crisis</strong>, <strong>why Akamai</strong>, or <strong>what to remember</strong>. I keep claims labeled CONFIRMED / LIKELY / UNKNOWN / ASK PERPLEXITY.</p>`,
   cto: `<p>Ask about <strong>where it breaks</strong>, <strong>what the convergence layer owns</strong>, <strong>TTFT</strong>, or <strong>semantic cache</strong>. I'll keep it runtime-shaped, not CDN-shaped.</p>`,
-  cfo: `<p>Ask about <strong>where the money leaks</strong>, <strong>the cost of doing nothing</strong>, <strong>pilot ROI</strong>, or <strong>Cloudflare overlap</strong>. I'll answer in dollars and incidents.</p>`,
-  sales: `<p>Ask for the <strong>one-sentence pitch</strong>, how to <strong>open with the CTO</strong> or <strong>CFO</strong>, or how to handle the <strong>"Cloudflare already does this"</strong> objection.</p>`,
+  cfo: `<p>Ask about <strong>where the money leaks</strong>, <strong>the cost of doing nothing</strong>, <strong>pilot ROI</strong>, or <strong>public-edge overlap</strong>. I'll answer in dollars and incidents.</p>`,
+  sales: `<p>Ask for the <strong>one-sentence pitch</strong>, how to <strong>open with the CTO</strong> or <strong>CFO</strong>, or how to handle the <strong>"the public edge already does this"</strong> objection.</p>`,
 };
 
 /* Bootstraps the ATOM agent. Uses document-level event delegation so clicks
@@ -245,7 +246,7 @@ function bootAtomAgent() {
     msg.className = 'atom-message';
     msg.dataset.role = role;
     msg.innerHTML = `
-      <div class="atom-message__who">${role === 'user' ? 'You' : 'Akamai Copilot'}</div>
+      <div class="atom-message__who">${role === 'user' ? 'You' : 'ATOM · Akamai Copilot'}</div>
       <div class="atom-message__text">${html}</div>
     `;
     body.appendChild(msg);
@@ -299,24 +300,32 @@ function bootAtomAgent() {
     input.value = '';
     input.disabled = true;
 
-    const thinking = appendMessage('assistant', '<p style="color: var(--ink-muted);"><span class="atom-typing"><i></i><i></i><i></i></span> Akamai AI Grid is thinking…</p>');
+    const thinking = appendMessage('assistant', '<p style="color: var(--ink-muted);"><span class="atom-typing"><i></i><i></i><i></i></span> ATOM is analyzing…</p>');
     const textEl = thinking.querySelector('.atom-message__text');
 
     // Always have a deterministic answer ready — we'll only show it on failure.
     const deterministic = pickResponse(currentMode, prompt);
 
-    try {
-      const res = await fetch('/api/atom-agent', {
+    // Try /api/ask-atom first, fall back to /api/atom-agent for compatibility.
+    async function callEndpoint(path) {
+      const r = await fetch(path, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt, mode: currentMode }),
       });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const data = await res.json();
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    }
+
+    try {
+      let data;
+      try { data = await callEndpoint('/api/ask-atom'); }
+      catch (_) { data = await callEndpoint('/api/atom-agent'); }
       const live = (data && typeof data.html === 'string' && data.html.trim()) ? data.html : deterministic;
-      const badge = data && data.source === 'perplexity'
-        ? '<div class="atom-badge atom-badge--live"><span class="pip"></span>Live · sonar-pro</div>'
-        : '<div class="atom-badge atom-badge--offline"><span class="pip"></span>Brief mode · offline copilot</div>';
+      const isLive = data && (data.source === 'atom' || data.source === 'perplexity' || data.grounded);
+      const badge = isLive
+        ? '<div class="atom-badge atom-badge--live"><span class="pip"></span>ATOM · live</div>'
+        : '<div class="atom-badge atom-badge--offline"><span class="pip"></span>ATOM · brief mode</div>';
       const citationsHtml = Array.isArray(data && data.citations) && data.citations.length
         ? '<div class="atom-citations"><div class="atom-citations__label">Sources</div><ol>' +
             data.citations.slice(0, 6).map((c) => {

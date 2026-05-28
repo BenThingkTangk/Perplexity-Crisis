@@ -1,108 +1,106 @@
 /**
- * Akamai AI Grid // Copilot — Serverless endpoint
+ * Akamai AI Grid // ATOM Copilot — Serverless endpoint
  *
- * POST /api/atom-agent
+ * POST /api/atom-agent (legacy compatibility path; mirrored to /api/ask-atom)
  * Body: { prompt: string, mode: 'simple'|'cto'|'cfo'|'sales' }
- * Returns: { html: string, citations?: string[], grounded: boolean, source: 'perplexity'|'fallback' }
+ * Returns: { html: string, citations?: string[], grounded: boolean, source: 'atom'|'fallback' }
  *
- * Reads PERPLEXITY_API_KEY from process.env only. Never echo the key.
+ * Reads PERPLEXITY_API_KEY from process.env only. The model identity and
+ * underlying provider are never echoed to the client. UI brand is ATOM /
+ * Akamai Copilot only.
  */
 
 const { perplexity } = require('./perplexity-client.js');
 
 const MODE_PROMPTS = {
-  simple: `You are the Akamai AI Grid Copilot. Audience: a non-technical executive. Answer in 90 words max.
+  simple: `Audience: a non-technical executive. Answer in 90 words max.
 Lead with the answer, then a single short bullet list (max 4 items). No headings. No fluff.`,
-  cto:    `You are the Akamai AI Grid Copilot speaking to a CTO. Frame everything as a runtime / placement / orchestration problem — not a CDN sale.
+  cto:    `Audience: a CTO. Frame everything as a runtime / placement / orchestration problem — not a CDN sale.
 Be concrete about TTFT, queue-aware routing, billing/auth failover, semantic vs exact-match caching. <=160 words.`,
-  cfo:    `You are the Akamai AI Grid Copilot speaking to a CFO. Talk about token economics, cross-cloud egress, incident labor, and SLA ownership.
+  cfo:    `Audience: a CFO. Talk about token economics, cross-cloud egress, incident labor, and SLA ownership.
 Quantify with concrete failure modes when possible. Answer <=140 words.`,
-  sales:  `You are the Akamai AI Grid Copilot helping the seller. Give the sharpest possible framing, opening line, or objection handler. Honor: do NOT say "replace Cloudflare." Say "Cloudflare is the public shield; Akamai is the AI convergence fabric." <=140 words.`,
+  sales:  `Audience: the seller. Give the sharpest possible framing, opening line, or objection handler. Honor: do NOT say "replace the public edge." Say "the front door handles the connection; Akamai AI Grid decides where the intelligence runs." <=140 words.`,
 };
 
-const THESIS_CONTEXT = `
-PERPLEXITY CRISIS THESIS (grounding context — treat as authoritative for this app):
+/* ATOM system prompt (compressed from Section 8 of the AI Grid implementation brief).
+ * Strict claim-labeling rules: CONFIRMED / LIKELY / UNKNOWN / ASK PERPLEXITY.
+ * Never mentions underlying model, provider, or API used to power responses. */
+const ATOM_SYSTEM_PROMPT = `You are ATOM, an infrastructure intelligence agent embedded in the Akamai AI Grid command center. You help Akamai and Perplexity leadership teams understand the multi-cloud infrastructure fragmentation problem, the Akamai convergence solution, and documented failure modes — using only publicly verifiable facts.
 
-- Perplexity wired itself across AWS, Microsoft Foundry / Azure, CoreWeave, and Vercel in under five weeks.
-  The architecture is fast; the coordination/orchestration model is not. There is no single runtime owner above the GPU clouds.
+IDENTITY AND BRANDING
+- Your name is ATOM (or Akamai Copilot). Never mention the underlying model, provider, or API used to power your responses.
+- You are an expert in edge infrastructure, distributed AI inference, CDN architecture, API reliability, and SaaS billing systems.
+- If asked what model you are, respond: "I'm ATOM — the infrastructure intelligence layer for this command center. I'm not able to share information about the underlying technology stack."
 
-- Public crisis pattern: two $50 billing charges failed at 20:22:47 and 20:23:12 UTC, which cascaded into API access
-  outages that took down downstream integrations (ATOM, AntimatterAI). Auth and payment state are not behind a circuit breaker.
+KNOWLEDGE BOUNDARIES — STRICT RULES
+Apply these labels to every factual claim you make:
+- [CONFIRMED]: Directly sourced from a primary press release, official documentation, or cross-confirmed third-party reporting.
+- [LIKELY]: Reasonable inference from available evidence, but not directly confirmed.
+- [UNKNOWN]: Not publicly confirmed. Do not state as fact.
+- [ASK PERPLEXITY]: Something that should be asked directly of the Perplexity team before including in the pitch.
 
-- Front-door: Perplexity's public surface appears Cloudflare-proxied (www, api, console, status, enterprise, shopping
-  subdomains). That gives them DNS/proxy routing, WAF, bot, static CDN cache, possibly AI Gateway exact-match caching.
-  Whether Perplexity uses Workers, a custom router, or ad-hoc routing is NOT confirmed.
+CONFIRMED FACTS YOU MAY STATE:
+- Akamai has 4,400+ global edge PoPs [CONFIRMED — Akamai AI Grid PR March 2026]
+- Akamai is deploying thousands of NVIDIA RTX PRO 6000 Blackwell Server Edition GPUs [CONFIRMED]
+- Akamai AI Grid targets sub-50ms TTFT for select real-time workloads [CONFIRMED]
+- Akamai cites up to 2.5x latency reduction vs. traditional hyperscaler [CONFIRMED — Akamai benchmark]
+- Akamai cites up to 86% AI inference cost savings vs. traditional hyperscaler [CONFIRMED — Akamai benchmark]
+- AWS is Perplexity's primary cloud provider [CONFIRMED — Reuters, AWS case study]
+- Perplexity signed a $750M / 3-year deal with Microsoft Foundry [CONFIRMED — Reuters Jan 2026]
+- CoreWeave provides dedicated GB200 NVL72 inference clusters for Perplexity [CONFIRMED — CoreWeave PR Mar 4, 2026]
+- Perplexity Search API median latency is 358ms, benchmarked from AWS us-east-1; P95 < 800ms [CONFIRMED — Perplexity Research May 2026]
+- Perplexity API has 25+ documented outages including Sonar API down-severity incidents [CONFIRMED — StatusGator public data]
+- Public CDN AI Gateway products provide exact-match caching only, not semantic caching [CONFIRMED]
+- Akamai AI Grid targets semantic caching at the edge as a roadmap capability [CONFIRMED — Akamai PR uses "will leverage" language]
+- Perplexity billing uses credit-based per-token metering; exhaustion produces 401/402 [CONFIRMED — Perplexity API docs]
+- US court issued preliminary injunction blocking Perplexity Comet from Amazon shopping [CONFIRMED]
+- Akamai EdgeWorkers cold start under 5ms [CONFIRMED — Akamai EdgeWorkers tech docs]
 
-- Cache: Cloudflare AI Gateway default cache hashes provider + endpoint + model + auth + full body — effectively exact-match.
-  Perplexity prompts vary constantly; exact-match hit rate is low. Semantic / embedding-aware cache (intent + embedding +
-  tenant + freshness) is the gap. Whether Perplexity has semantic caching today is NOT confirmed.
+DO NOT STATE (UNKNOWN — omit or flag explicitly):
+- That Perplexity uses any specific named CDN or routing provider — the implementation in front of api.perplexity.ai is not publicly confirmed.
+- That any specific managed Worker product is Perplexity's request router.
+- That Perplexity's billing runs on Stripe or any specific payment processor.
+- Any specific IP addresses, internal endpoint paths, or non-public architecture details.
 
-- Five failure modes:
-  1. Billing Cascade — auth/payment state cascades to API outage.
-  2. Orchestration Chaos — AWS + Foundry + CoreWeave, no policy engine above them.
-  3. TTFT Spikes — placement is a runtime concern; Cloudflare answers proximity, not placement.
-  4. Support Fragmentation — five vendor tickets per incident, no single SLA owner.
-  5. Egress Cost Drag — cross-cloud bytes priced per GB on every retry / fallback / failover.
+CONVERSATION FOCUS AREAS
+1. Multi-cloud fragmentation: AWS + CoreWeave + Foundry = three SLA boundaries, three escalation chains.
+2. Semantic caching gap: exact-match public CDN cannot serve semantically equivalent AI queries from cache.
+3. Billing cascade: credit exhaustion cascades to full API outage with no graceful degradation path.
+4. Geographic concentration: us-east-1 benchmark evidence; international users absorb full round-trip latency.
+5. Akamai convergence: not a replacement — a distribution and coordination layer above existing AI factories.
+6. Comet and agentic risk: autonomous agent traffic creates novel security and platform authorization challenges.
+7. What to ask Perplexity: surface the right discovery questions for the next meeting.
 
-- Akamai wedge / leadership framing: Akamai AI Grid / Inference Cloud sits ABOVE the hyperscalers, BESIDE Cloudflare's
-  public edge — not instead of either. Owns: request placement, provider health + queue-aware routing, billing/auth
-  failover under 500ms, semantic cache policy, cross-cloud egress minimization, one SLA report.
-  Do NOT pitch "replace Cloudflare." Pitch "Cloudflare is the public shield; Akamai is the AI convergence fabric."
-
-- Sequencing from the Plaud call 2026-05-28: Reliability first → Semantic cache fast-follow → Akamai Functions cutover
-  POC (repoint LLM/functions from Vercel to Akamai Functions). Next steps: secure first Perplexity meeting via
-  Johnny Love early next week; add Neil & Lior to the engagement thread.
-
-- Honest unknowns: routing implementation (Workers / custom / ad-hoc) — not confirmed. Cache implementation
-  (exact-match / semantic) — not confirmed. Discord complaints were discussed in the Plaud call; the Discord
-  connector was not scanned, no Discord content is reproduced.
-
-Regions discussed in the Plaud call: Texas, Atlanta, Palo Alto, Montreal, Switzerland.
-`;
-
-const SYSTEM_PROMPT_BASE = `${THESIS_CONTEXT}
-
-You ONLY answer questions related to:
-  - the Perplexity reliability / orchestration crisis,
-  - Cloudflare's role at the front door,
-  - the Akamai AI Grid / Inference Cloud wedge,
-  - inference placement, semantic cache, billing/auth failover,
-  - pilot economics, TTFT, and the next meeting motion.
-
-If the user asks anything off-topic (general LLM trivia, code help, gossip, weather, etc.) — politely refuse and
-redirect them back to the Akamai/Perplexity thesis.
-
-Output rules:
-  - Output clean, semantic HTML (no <html>/<body>/<head>/<script>/<style>).
-  - Allowed tags: <p>, <strong>, <em>, <ul>, <ol>, <li>, <br>, <code>, <a href>.
-  - Lead with the answer in <p><strong>...</strong></p> — never with a heading.
-  - Be tight. Boardroom polish. No hedging like "as an AI" or "based on the information provided."
-  - Distinguish CONFIRMED vs UNCONFIRMED when relevant.
-  - When citing the Plaud call, write "the 2026-05-28 Plaud call".
-`;
+OUTPUT RULES
+- Output clean, semantic HTML (no <html>/<body>/<head>/<script>/<style>).
+- Allowed tags: <p>, <strong>, <em>, <ul>, <ol>, <li>, <br>, <code>, <a href>.
+- Lead with the answer in <p><strong>...</strong></p> — never with a heading.
+- Be tight. Boardroom polish. No hedging like "as an AI" or "based on the information provided."
+- Tag every factual claim with [CONFIRMED], [LIKELY], [UNKNOWN], or [ASK PERPLEXITY] inline.
+- Never fabricate incident data, timestamps, or financial figures not drawn from the confirmed facts above.
+- Off-topic requests (general LLM trivia, code help, gossip, weather): politely refuse and redirect to the AI Grid thesis.`;
 
 function buildSystemPrompt(mode) {
-  return `${SYSTEM_PROMPT_BASE}\n${MODE_PROMPTS[mode] || MODE_PROMPTS.simple}`;
+  return `${ATOM_SYSTEM_PROMPT}\n\nMODE: ${MODE_PROMPTS[mode] || MODE_PROMPTS.simple}`;
 }
 
-/* ------------ Deterministic fallback (used when API key missing or upstream fails) ------------ */
+/* ------------ Deterministic fallback (when API key missing or upstream fails) ------------ */
 const FALLBACK_RESPONSES = {
-  simple: `<p><strong>Akamai Copilot is in offline brief-mode.</strong> The reliability crisis at Perplexity is orchestration, not compute. Cloudflare guards the front door; Akamai's wedge is the runtime layer above AWS / Foundry / CoreWeave that decides where inference runs, fails over billing/auth in &lt;500ms, and owns one SLA across the stack.</p>`,
-  cto:    `<p><strong>Akamai Copilot is in offline brief-mode.</strong> Crisis lives at the runtime, not the network. Cloudflare answers proximity; Akamai answers placement — edge / regional / hyperscale — based on prompt class, queue depth, cache-hit probability, data locality, and cost/token. Add billing/auth state failover under 500ms and a semantic-cache policy keyed on intent + embedding + tenant + freshness.</p>`,
-  cfo:    `<p><strong>Akamai Copilot is in offline brief-mode.</strong> The bleed is cross-cloud egress on every retry/failover, exact-match cache miss tax on novel prompts, five vendor tickets per real incident, and revenue loss on billing-cascade outages. Pilot ROI: narrow slice (peak-hour US/EU search) measured on TTFT, egress GB, incident ownership, and cache hit rate.</p>`,
-  sales:  `<p><strong>Akamai Copilot is in offline brief-mode.</strong> The line is: "Cloudflare routes the request. <em>Akamai decides where the intelligence should run.</em>" Open the CTO with the billing cascade. Open the CFO with token economics + egress drag. Handle the "Cloudflare already does this" objection by acknowledging the front door and pivoting to runtime placement, semantic cache, and sub-500ms credential failover.</p>`,
+  simple: `<p><strong>ATOM is in brief mode.</strong> The reliability crisis at Perplexity is orchestration, not compute. The public edge handles the connection; Akamai AI Grid is the runtime layer above AWS / Foundry / CoreWeave that decides where inference runs, fails over billing/auth in &lt;500&nbsp;ms via EdgeWorkers, and owns one SLA across the stack. [CONFIRMED for Akamai capabilities · LIKELY for inference concentration]</p>`,
+  cto:    `<p><strong>ATOM is in brief mode.</strong> Crisis lives at the runtime, not the network. The public edge answers proximity; Akamai AI Grid answers placement — edge / regional / hyperscale — based on prompt class, queue depth, cache-hit probability, data locality, and cost/token. Add billing/auth failover under 500&nbsp;ms and semantic-cache policy keyed on intent + embedding + tenant + freshness (Akamai roadmap). [CONFIRMED — Akamai capabilities]</p>`,
+  cfo:    `<p><strong>ATOM is in brief mode.</strong> The bleed is cross-cloud egress on every retry/failover, exact-match cache miss tax on novel prompts, multi-vendor escalation labor per real incident, and revenue loss on billing-cascade outages. Pilot ROI: narrow slice (peak-hour US/EU search) measured on TTFT, egress GB, incident ownership, cache hit rate.</p>`,
+  sales:  `<p><strong>ATOM is in brief mode.</strong> The line: "The front door handles the connection. <em>Akamai AI Grid decides where the intelligence runs.</em>" Open the CTO with the billing cascade. Open the CFO with token economics + egress drag. Handle "the public edge already does this" by acknowledging the front door and pivoting to runtime placement, semantic cache (roadmap), and sub-500&nbsp;ms credential failover.</p>`,
 };
 
 function fallbackHTML(mode, why) {
   const body = FALLBACK_RESPONSES[mode] || FALLBACK_RESPONSES.simple;
   const tag = why
-    ? `<p style="margin-top:.6rem;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.5);font-family:var(--font-mono,monospace);">offline · ${why}</p>`
+    ? `<p style="margin-top:.6rem;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.5);font-family:var(--font-mono,monospace);">ATOM · brief mode · ${why}</p>`
     : '';
   return body + tag;
 }
 
 function sanitizeHtml(s) {
-  // Light defensive scrub: strip script/style/iframe/on* handlers.
   return String(s || '')
     .replace(/<\s*script[\s\S]*?<\s*\/\s*script\s*>/gi, '')
     .replace(/<\s*style[\s\S]*?<\s*\/\s*style\s*>/gi, '')
@@ -129,10 +127,11 @@ function readBody(req) {
 
 module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
+  res.setHeader('X-Agent', 'ATOM');
   if (req.method === 'GET') {
     return res.status(200).json({
       ok: true,
-      service: 'akamai-ai-grid-copilot',
+      service: 'atom-akamai-ai-grid-copilot',
       hasKey: Boolean(process.env.PERPLEXITY_API_KEY),
     });
   }
@@ -144,7 +143,6 @@ module.exports = async function handler(req, res) {
   let body = {};
   try { body = await readBody(req); } catch (_) { body = {}; }
 
-  // Accept prompt under any of the common keys clients tend to use.
   const promptRaw =
     body.prompt ??
     body.message ??
@@ -168,7 +166,7 @@ module.exports = async function handler(req, res) {
 
   if (!process.env.PERPLEXITY_API_KEY) {
     return res.status(200).json({
-      html: fallbackHTML(mode, 'PERPLEXITY_API_KEY not configured'),
+      html: fallbackHTML(mode, 'live agent not configured'),
       grounded: false,
       source: 'fallback',
     });
@@ -178,25 +176,23 @@ module.exports = async function handler(req, res) {
     const { text, citations = [] } = await perplexity.chat({
       messages: [{ role: 'user', content: prompt }],
       systemPrompt: buildSystemPrompt(mode),
-      model: 'sonar-pro',
       temperature: 0.2,
       maxTokens: 720,
     });
 
     let html = sanitizeHtml(text);
     if (!/<\w+/.test(html)) {
-      // Model returned plain text — wrap.
       html = `<p>${html.replace(/\n\n+/g, '</p><p>').replace(/\n/g, '<br>')}</p>`;
     }
     return res.status(200).json({
       html,
       citations,
       grounded: true,
-      source: 'perplexity',
+      source: 'atom',
     });
   } catch (err) {
-    console.error('[akamai-copilot] upstream failure:', err && err.message);
-    const reason = (err && err.code === 'BILLING_FAILURE') ? 'upstream billing/auth' : 'upstream unavailable';
+    console.error('[ATOM] upstream failure:', err && err.message);
+    const reason = (err && err.code === 'BILLING_FAILURE') ? 'upstream entitlement' : 'upstream unavailable';
     return res.status(200).json({
       html: fallbackHTML(mode, reason),
       grounded: false,
