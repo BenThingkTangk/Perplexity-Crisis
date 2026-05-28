@@ -75,6 +75,7 @@
         <a href="#thesis">Thesis</a>
         <a href="#crisis-map">Crisis Map</a>
         <a href="#cloudflare-routing-cache">Cloudflare Gap</a>
+        <a href="#end-to-end-flow">Crisis Flow</a>
         <a href="#stack">Stack</a>
         <a href="#flywheel">Convergence</a>
         <a href="#pilot">Pilot</a>
@@ -676,6 +677,80 @@
       </div>
     </section>
 
+    <!-- ============== END-TO-END CRISIS FLOW (GenUI) ============== -->
+    <section id="end-to-end-flow" class="section section--flow">
+      <div class="container container--wide">
+        <div class="section-label reveal">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Crisis flow · Live walkthrough
+        </div>
+        <h2 class="section-heading reveal" data-delay="1">
+          End-to-end crisis flow: <em style="color:var(--plasma); font-style:normal; text-shadow: 0 0 24px var(--plasma-glow);">where the failures happen.</em>
+        </h2>
+        <p class="section-sub reveal" data-delay="2">
+          A cinematic walkthrough from user request to model response — Cloudflare routing uncertainty, cache gaps, billing/auth fragility, multi-cloud inference placement, and the Akamai convergence fix. Click any stage. Sources are labeled <b style="color:var(--plasma)">Confirmed</b>, <b style="color:#f5b942">Unconfirmed</b>, or <b style="color:#5aa4f7">Next question</b>.
+        </p>
+
+        <!-- Intake bar -->
+        <div class="flow-intake reveal" data-delay="2">
+          <div class="flow-intake__label"><span class="pip"></span> LIVE INTAKE // PLAUD CALL 2026-05-28 · 12:59</div>
+          <div class="flow-intake__chips">
+            <span class="flow-intake__chip flow-intake__chip--region">Texas</span>
+            <span class="flow-intake__chip flow-intake__chip--region">Atlanta</span>
+            <span class="flow-intake__chip flow-intake__chip--region">Palo Alto</span>
+            <span class="flow-intake__chip flow-intake__chip--region">Montreal</span>
+            <span class="flow-intake__chip flow-intake__chip--region">Switzerland</span>
+            <span class="flow-intake__chip flow-intake__chip--theme">Reliability first</span>
+            <span class="flow-intake__chip flow-intake__chip--theme">Semantic cache fast-follow</span>
+            <span class="flow-intake__chip flow-intake__chip--theme">Akamai Functions cutover</span>
+            <span class="flow-intake__chip flow-intake__chip--theme">Revenue impact</span>
+          </div>
+        </div>
+
+        <!-- Stage rail -->
+        <div class="flow-rail reveal" data-delay="3" role="tablist" aria-label="Crisis flow stages" id="flow-rail"></div>
+
+        <!-- Cinematic detail panel -->
+        <div class="flow-panel reveal" data-delay="3" id="flow-panel" aria-live="polite"></div>
+
+        <!-- Action panel -->
+        <div class="flow-actions reveal" data-delay="3">
+          <article class="flow-action flow-action--perplexity">
+            <div class="flow-action__label"><span class="pip"></span> NEXT PERPLEXITY MEETING · ASK FOR</div>
+            <ul>
+              <li>Latest org-tier <b>routing analytics</b> (Ben's tier — deeper pulse promised)</li>
+              <li><b>Cloudflare Worker / routing policy</b> — is it Workers, custom, or haphazard?</li>
+              <li><b>Cache hit / miss</b> by traffic class (static vs API vs AI inference)</li>
+              <li><b>TTFT by region &amp; provider</b> — Texas, Atlanta, Palo Alto, Montreal, Switzerland</li>
+              <li><b>Billing / auth failure logs</b> + ATOM integration outage correlation</li>
+              <li><b>Refund / credit correlation</b> against the Discord complaint signal</li>
+            </ul>
+          </article>
+          <article class="flow-action flow-action--akamai">
+            <div class="flow-action__label"><span class="pip"></span> AKAMAI NEXT STEPS</div>
+            <ul>
+              <li><b>Reliability first</b> — pitch is performance and incident compression, not CDN</li>
+              <li><b>Semantic cache fast-follow</b> — after reliability lands</li>
+              <li><b>Akamai Functions cutover POC</b> — repoint LLM/functions from Vercel to Akamai Functions</li>
+              <li>Secure first <b>Perplexity meeting</b> early next week — Johnny Love path</li>
+              <li>Add <b>Neil &amp; Lior</b> to the JSOC / HVT engagement team thread</li>
+              <li>Visualize routing / caching / Cloudflare flows in this brief (this section)</li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Honesty footer -->
+        <div class="flow-honesty reveal" data-delay="3">
+          <div class="flow-honesty__label"><span class="pip" style="background:#f5b942; box-shadow:0 0 10px #f5b942"></span> WHAT IS STILL UNCONFIRMED</div>
+          <ul>
+            <li>Routing implementation at Perplexity — Cloudflare Workers, custom router, or ad-hoc — <b>not confirmed</b>.</li>
+            <li>Cache implementation — whether exact-match or semantic caching exists — <b>not confirmed</b>.</li>
+            <li>Discord complaints were <b>discussed in the Plaud call</b>; the Discord connector was <b>not</b> scanned and no Discord content is reproduced here.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
     <!-- ============== STACK / TIMELINE ============== -->
     <section id="stack" class="section">
       <div class="container container--wide">
@@ -1071,6 +1146,7 @@
   <script type="module" src="./viz-state.js"></script>
   <script type="module" src="./app.js"></script>
   <script type="module" src="./crisis-map.js"></script>
+  <script type="module" src="./crisis-flow.js"></script>
   <script type="module" src="./atom-agent.js"></script>
 </body>
 </html>

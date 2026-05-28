@@ -9,19 +9,19 @@ const MODES = {
     label: 'Simple',
     greeting: 'Simple mode online. Ask me to make the Akamai thesis obvious, clean, and impossible to misunderstand.',
     chips: [
+      'Walk me through the end-to-end failure flow',
       'Explain this like I have 30 seconds',
       'What is the crisis in plain English?',
       'Why does Akamai matter here?',
-      'What should I remember after reading this?',
     ],
   },
   cto: {
     label: 'CTO',
     greeting: 'CTO mode online. I will frame this as a runtime, placement, and orchestration problem — not a CDN sale.',
     chips: [
+      'Walk me through the end-to-end failure flow',
       'Where does Perplexity actually break?',
       'What does the convergence layer own?',
-      'How does Akamai change TTFT?',
       'Semantic cache vs Cloudflare AI Gateway?',
     ],
   },
@@ -29,29 +29,47 @@ const MODES = {
     label: 'CFO',
     greeting: 'CFO mode online. Token economics, egress drag, and SLA ownership — all in one cost-of-incidents story.',
     chips: [
+      'Walk me through the end-to-end failure flow',
       'Where is the budget bleeding?',
       'What does this cost if we do nothing?',
       'ROI for an Akamai convergence pilot',
-      'Cloudflare overlap vs incremental spend',
     ],
   },
   sales: {
     label: 'Sales',
     greeting: 'Sales mode online. The wedge: keep Cloudflare, win the AI runtime. Here are the moves that close.',
     chips: [
+      'Walk me through the end-to-end failure flow',
       'Pitch in one sentence',
       'How to open with the CTO',
-      'How to open with the CFO',
       'Objection: "Cloudflare already does this"',
     ],
   },
 };
 
+/* Shared response that any mode can render — deep-links to #end-to-end-flow */
+const WALKTHROUGH_HTML = `
+  <p><strong>End-to-end failure flow</strong> — seven stages, click any of them in the <a href="#end-to-end-flow" data-atom-link="flow">Crisis Flow</a> section to drill in:</p>
+  <ul>
+    <li><strong>01 User demand</strong> — Texas, Atlanta, Palo Alto, Montreal, Switzerland (<em>confirmed</em>)</li>
+    <li><strong>02 Front-door routing</strong> — Cloudflare visible, AI routing logic (Workers / custom / haphazard) <em>unconfirmed</em></li>
+    <li><strong>03 Cache decision</strong> — static works, semantic cache <em>not confirmed</em></li>
+    <li><strong>04 Auth / billing</strong> — 20:22:47 + 20:23:12 UTC charge failures cascaded to API outage (<em>confirmed</em>)</li>
+    <li><strong>05 Inference placement</strong> — AWS + Foundry + CoreWeave, no runtime above them (<em>confirmed</em>)</li>
+    <li><strong>06 User-visible crisis</strong> — refunds, credits, reputation; Discord complaints discussed in Plaud call, <em>not connector-scanned</em></li>
+    <li><strong>07 Akamai fix</strong> — Akamai Functions cutover, reliability first, semantic cache fast-follow</li>
+  </ul>
+  <p><a href="#end-to-end-flow" data-atom-link="flow">Open the Crisis Flow walkthrough →</a></p>
+`;
+
 /* ---------- Deterministic response library ---------- */
 /* Keyed by mode + intent. Matching is keyword-based on the user's input.   */
 
+const WALKTHROUGH_MATCH = { match: /walk.+through|end[- ]to[- ]end|failure flow|flow.*fail|crisis flow|stages?/i, html: WALKTHROUGH_HTML };
+
 const RESPONSES = {
   simple: [
+    WALKTHROUGH_MATCH,
     { match: /30\s*seconds|tl;?dr|short|brief|explain/i, html: `
       <p><strong>30-second version.</strong> Perplexity wired itself to AWS + Microsoft Foundry + CoreWeave in under five weeks. The architecture is fast — the coordination model isn't. When billing, GPUs, or providers wobble, the user feels it as a slow or broken answer.</p>
       <p>Cloudflare protects the front door. <strong>Akamai becomes the runtime layer above the hyperscalers</strong> — it decides where inference runs, fails over billing/auth in under 500ms, and gives Perplexity one SLA owner across the whole stack.</p>` },
@@ -76,6 +94,7 @@ const RESPONSES = {
   ],
 
   cto: [
+    WALKTHROUGH_MATCH,
     { match: /break|fail|where.+breaks?/i, html: `
       <p><strong>Where it actually breaks.</strong></p>
       <ul>
@@ -108,6 +127,7 @@ const RESPONSES = {
   ],
 
   cfo: [
+    WALKTHROUGH_MATCH,
     { match: /bleed|cost|spend|budget/i, html: `
       <p><strong>Where the money leaks.</strong></p>
       <ul>
@@ -131,6 +151,7 @@ const RESPONSES = {
   ],
 
   sales: [
+    WALKTHROUGH_MATCH,
     { match: /pitch|one sentence|elevator/i, html: `
       <p><strong>One-sentence pitch.</strong></p>
       <p>"Cloudflare routes the request. <strong>Akamai decides where the intelligence should run.</strong>"</p>` },
@@ -228,11 +249,30 @@ const FALLBACK = {
       <div class="atom-message__text">${html}</div>
     `;
     body.appendChild(msg);
+    wireMessageLinks(msg);
     // Smooth scroll to bottom
     requestAnimationFrame(() => {
       body.scrollTo({ top: body.scrollHeight, behavior: 'smooth' });
     });
     return msg;
+  }
+
+  function wireMessageLinks(root) {
+    root.querySelectorAll('a[data-atom-link="flow"]').forEach((a) => {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeAgent();
+        // Defer so the close animation can begin before scrolling.
+        window.setTimeout(() => {
+          if (window.dtomCrisisFlow && typeof window.dtomCrisisFlow.open === 'function') {
+            window.dtomCrisisFlow.open(0);
+          } else {
+            const target = document.getElementById('end-to-end-flow');
+            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 120);
+      });
+    });
   }
 
   function escapeHtml(str) {
