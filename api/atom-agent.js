@@ -144,12 +144,26 @@ module.exports = async function handler(req, res) {
   let body = {};
   try { body = await readBody(req); } catch (_) { body = {}; }
 
-  const prompt = String(body.prompt || '').trim().slice(0, 1200);
-  const modeIn = String(body.mode || 'simple').toLowerCase();
+  // Accept prompt under any of the common keys clients tend to use.
+  const promptRaw =
+    body.prompt ??
+    body.message ??
+    body.query ??
+    body.q ??
+    body.input ??
+    body.text ??
+    '';
+  const prompt = String(promptRaw || '').trim().slice(0, 1200);
+  const modeIn = String(body.mode || body.persona || 'simple').toLowerCase();
   const mode = MODE_PROMPTS[modeIn] ? modeIn : 'simple';
 
   if (!prompt) {
-    return res.status(400).json({ error: 'Missing prompt', html: fallbackHTML(mode, 'empty prompt') });
+    return res.status(400).json({
+      error: 'Missing prompt',
+      hint: 'POST JSON body must include one of: prompt | message | query | q | input | text. Optional: mode = simple|cto|cfo|sales.',
+      example: { prompt: 'Give me the 30 second Akamai leadership pitch.', mode: 'simple' },
+      html: fallbackHTML(mode, 'empty prompt'),
+    });
   }
 
   if (!process.env.PERPLEXITY_API_KEY) {
