@@ -134,6 +134,23 @@ function checkAll(w) {
   // 11. Crisis flow compaction
   expect(!!doc.querySelector('.flow-chips-row'), 'flow-chips-row present');
   expect(!!doc.querySelector('.flow-honesty-collapse'), 'honesty footer is <details>');
+
+  // 12. ATOM brand design system tokens + font
+  const headHtml = doc.head.innerHTML;
+  expect(/Plus\+Jakarta\+Sans/.test(headHtml), 'Plus Jakarta Sans font link loaded');
+  // CSS bundle is at dist/main.css; we read it once and assert tokens
+  const cssPath = path.resolve(__dirname, 'dist/main.css');
+  if (fs.existsSync(cssPath)) {
+    const css = fs.readFileSync(cssPath, 'utf8');
+    expect(/--atom-bg:\s*#020202/.test(css), 'ATOM --atom-bg #020202 token present');
+    expect(/--atom-fg:\s*#f6f6fd/.test(css), 'ATOM --atom-fg #f6f6fd token present');
+    expect(/--atom-accent:\s*#696aac/.test(css), 'ATOM --atom-accent #696aac token present');
+    expect(/--atom-primary:\s*#3e3f7e/.test(css), 'ATOM --atom-primary #3e3f7e token present');
+    expect(/--atom-secondary:\s*#a2a3e9/.test(css), 'ATOM --atom-secondary #a2a3e9 token present');
+    expect(/Plus Jakarta Sans/.test(css), 'Plus Jakarta Sans declared in font-family stack');
+    expect(/#8587e3/.test(css) && /#4c4dac/.test(css) && /#696aac/.test(css),
+      'ATOM pill-button gradient stops (#8587e3 / #4c4dac / #696aac) present');
+  }
 }
 
 runScenario('Bundle BLOCKED (only inline boot runs)', false, checkAll);

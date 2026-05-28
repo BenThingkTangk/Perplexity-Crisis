@@ -2794,3 +2794,385 @@ body.atom-open .atom-fab { opacity: 0; pointer-events: none; transform: translat
     radial-gradient(20rem 12rem at 0% 0%, color-mix(in srgb, var(--c) 12%, transparent), transparent 60%),
     color-mix(in srgb, var(--c) 5%, var(--surface-3) 92%);
 }
+
+/* ============================================================
+   ATOM BRAND DESIGN SYSTEM — canonical override layer
+   Dark-first cinematic foundation. Plus Jakarta Sans. Pill +
+   gradient buttons with glow. Dark glassmorphic cards. Applied
+   on top of the Akamai AI Grid surface to standardize the brand.
+   ============================================================ */
+:root, [data-theme="dark"] {
+  /* Canonical ATOM palette */
+  --atom-bg:           #020202;
+  --atom-fg:           #f6f6fd;
+  --atom-accent:       #696aac;
+  --atom-primary:      #3e3f7e;
+  --atom-secondary:    #a2a3e9;
+  --atom-tertiary:     #c7c8f2;
+  --atom-lightaccent:  #e3e3f8;
+
+  /* Gradient stops (pill buttons + glows) */
+  --atom-grad-1:       #8587e3;
+  --atom-grad-2:       #4c4dac;
+  --atom-grad-3:       #696aac;
+
+  /* Glow */
+  --atom-glow:         rgba(105,106,172,.45);
+  --atom-glow-soft:    rgba(105,106,172,.22);
+  --atom-glow-strong:  rgba(133,135,227,.55);
+
+  /* Glass surfaces */
+  --atom-glass-bg:     rgba(246,246,253,.04);
+  --atom-glass-bg-2:   rgba(246,246,253,.07);
+  --atom-glass-border: rgba(246,246,253,.10);
+  --atom-glass-border-bright: rgba(246,246,253,.18);
+  --atom-glass-shadow: 0 24px 70px rgba(0,0,0,.55), inset 0 1px 0 rgba(246,246,253,.06);
+
+  /* Override existing tokens so cascading rules pick up brand colors */
+  --bg:               #020202;
+  --bg-1:             #06060a;
+  --bg-2:             #0a0a12;
+  --surface:          #0c0c16;
+  --surface-2:        #11111d;
+  --surface-3:        #181826;
+  --surface-4:        #20202f;
+
+  --ink:              #f6f6fd;
+  --ink-2:            #c7c8f2;
+  --ink-muted:        #8e8fb8;
+  --ink-faint:        #545578;
+  --ink-inverse:      #020202;
+
+  --border:           rgba(246,246,253,.08);
+  --border-bright:    rgba(246,246,253,.16);
+  --border-plasma:    rgba(162,163,233,.40);
+  --divider:          rgba(246,246,253,.06);
+
+  /* Re-skin plasma accents to ATOM palette */
+  --plasma:           #a2a3e9;
+  --plasma-2:         #8587e3;
+  --plasma-deep:      #3e3f7e;
+  --plasma-glow:      rgba(162,163,233,.22);
+  --plasma-glow-strong: rgba(162,163,233,.42);
+  --plasma-mist:      rgba(162,163,233,.08);
+
+  /* Akamai semantic chrome — keep recognizable but brand-tinted */
+  --akamai:           var(--atom-secondary);
+  --akamai-glow:      var(--atom-glow);
+
+  /* Typography — Plus Jakarta Sans is the primary UI font */
+  --font-display:     'Plus Jakarta Sans','Cabinet Grotesk','Satoshi',ui-sans-serif,system-ui,sans-serif;
+  --font-body:        'Plus Jakarta Sans','Satoshi','Inter',ui-sans-serif,system-ui,sans-serif;
+
+  /* Shadows tuned to ATOM glow */
+  --shadow-plasma:    0 0 36px var(--atom-glow), 0 0 1px var(--atom-secondary) inset;
+
+  /* Status/chart colors (chips, signals) */
+  --atom-ok:          #7ee0c5;
+  --atom-warn:        #f5c97a;
+  --atom-danger:      #ff6a7e;
+  --atom-info:        var(--atom-secondary);
+}
+
+/* Base — guarantee Plus Jakarta Sans + ATOM foreground anywhere
+   the cascade lands. body already pulls --font-body. */
+html, body { font-family: var(--font-body); color: var(--atom-fg); background: var(--atom-bg); }
+body { background: var(--atom-bg); }
+
+/* Atmospheric chrome — re-color the page glow to ATOM */
+body::before {
+  background: radial-gradient(circle, var(--atom-glow), transparent 60%) !important;
+}
+body::after {
+  background: radial-gradient(circle, rgba(199,200,242,.10), transparent 70%) !important;
+}
+
+/* Selection */
+::selection { background: var(--atom-secondary); color: var(--atom-bg); }
+
+/* Headings + display copy */
+h1, h2, h3, h4, h5, h6,
+.brand-text, .atom-agent__wordmark, .atom-fab__title {
+  font-family: var(--font-display);
+}
+.brand-text em, .atom-agent__wordmark em {
+  color: var(--atom-secondary);
+  text-shadow: 0 0 14px var(--atom-glow-strong);
+}
+
+/* ---------- ATOM pill button (gradient + glow) ---------- */
+.btn--primary,
+.btn--atom,
+.atom-send,
+.cmd-cta,
+.cmd-input-submit {
+  background: linear-gradient(135deg, var(--atom-grad-1) 0%, var(--atom-grad-3) 50%, var(--atom-grad-2) 100%) !important;
+  color: var(--atom-fg) !important;
+  border: 1px solid rgba(246,246,253,.18) !important;
+  border-radius: 999px !important;
+  box-shadow:
+    0 10px 28px var(--atom-glow),
+    0 0 24px var(--atom-glow-soft),
+    inset 0 1px 0 rgba(255,255,255,.22) !important;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: .01em;
+  transition: transform .18s ease, box-shadow .25s ease, filter .2s ease;
+}
+.btn--primary:hover,
+.btn--atom:hover,
+.atom-send:hover,
+.cmd-cta:hover,
+.cmd-input-submit:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+  box-shadow:
+    0 16px 40px var(--atom-glow-strong),
+    0 0 36px var(--atom-glow),
+    inset 0 1px 0 rgba(255,255,255,.30) !important;
+}
+.btn--primary:focus-visible,
+.btn--atom:focus-visible {
+  outline: 2px solid var(--atom-secondary);
+  outline-offset: 3px;
+}
+
+.btn--ghost {
+  border-radius: 999px !important;
+  border-color: var(--atom-glass-border-bright) !important;
+  background: var(--atom-glass-bg) !important;
+  color: var(--atom-fg) !important;
+}
+.btn--ghost:hover {
+  background: var(--atom-glass-bg-2) !important;
+  border-color: var(--atom-secondary) !important;
+  color: var(--atom-tertiary) !important;
+}
+
+/* ---------- Glassmorphic dark cards ---------- */
+.glass, .panel, .card, .metric, .stack-card, .timeline-card, .source-card,
+.cmd-card, .cmd-score, .cmd-health-card, .cmd-decision-card, .cmd-input-chip,
+.flow-card, .flow-stage, .fc-stage, .atom-message {
+  background:
+    linear-gradient(180deg, var(--atom-glass-bg-2), var(--atom-glass-bg)) !important;
+  border: 1px solid var(--atom-glass-border) !important;
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  box-shadow: var(--atom-glass-shadow);
+  color: var(--atom-fg);
+}
+
+/* Chips / pills */
+.eyebrow, .section-label, .chip, .tag,
+.cmd-input-chip, .flow-chip, .atom-chip {
+  border-radius: 999px;
+  border: 1px solid var(--atom-glass-border-bright);
+  background: var(--atom-glass-bg-2);
+  color: var(--atom-tertiary);
+  font-family: var(--font-display);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+.eyebrow--plasma {
+  color: var(--atom-secondary);
+  border-color: var(--atom-secondary);
+  box-shadow: 0 0 24px var(--atom-glow-soft);
+}
+
+/* ---------- Header / nav ---------- */
+.header {
+  background: linear-gradient(180deg,
+    rgba(2,2,2,.92),
+    rgba(2,2,2,.40)) !important;
+  border-bottom: 1px solid var(--atom-glass-border);
+}
+.nav-links a, .nav-tool {
+  border-radius: 999px !important;
+  font-family: var(--font-display);
+  color: var(--atom-tertiary);
+}
+.nav-links a:hover, .nav-tool:hover {
+  background: var(--atom-glass-bg-2);
+  border-color: var(--atom-secondary);
+  color: var(--atom-fg);
+}
+.nav-tool[aria-pressed="true"] {
+  background: linear-gradient(135deg, var(--atom-grad-2), var(--atom-grad-3));
+  color: var(--atom-fg);
+  border-color: var(--atom-secondary);
+  box-shadow: 0 0 18px var(--atom-glow-soft);
+}
+.nav-tool--copilot {
+  background: linear-gradient(135deg, var(--atom-grad-1), var(--atom-grad-2)) !important;
+  color: var(--atom-fg) !important;
+  border: 1px solid var(--atom-secondary) !important;
+  box-shadow: 0 0 22px var(--atom-glow-soft);
+}
+.brand-sub { color: var(--atom-secondary); }
+.logo-mark { color: var(--atom-secondary); filter: drop-shadow(0 0 10px var(--atom-glow)); }
+
+/* ---------- Floating ATOM AI launcher (FAB) ---------- */
+.atom-fab {
+  background: linear-gradient(135deg, rgba(133,135,227,.20) 0%, rgba(62,63,126,.55) 100%) !important;
+  border: 1px solid var(--atom-secondary) !important;
+  color: var(--atom-fg) !important;
+  box-shadow:
+    0 16px 44px rgba(0,0,0,.55),
+    0 0 0 1px rgba(162,163,233,.18),
+    0 0 36px var(--atom-glow) !important;
+  font-family: var(--font-display);
+}
+.atom-fab:hover {
+  border-color: var(--atom-secondary) !important;
+  box-shadow:
+    0 22px 56px rgba(0,0,0,.6),
+    0 0 0 1px rgba(162,163,233,.32),
+    0 0 56px var(--atom-glow-strong) !important;
+}
+.atom-fab__mark { color: var(--atom-secondary); filter: drop-shadow(0 0 8px var(--atom-glow)); }
+.atom-fab__title { color: var(--atom-fg); }
+.atom-fab__sub { color: var(--atom-tertiary); }
+.atom-fab__pulse { background: var(--atom-secondary); box-shadow: 0 0 10px var(--atom-secondary); }
+.atom-fab:focus-visible { outline: 2px solid var(--atom-secondary); outline-offset: 3px; }
+
+/* ---------- Drawer / agent panel ---------- */
+.atom-backdrop {
+  background:
+    radial-gradient(48rem 32rem at 80% 100%, var(--atom-glow-soft), transparent 60%),
+    rgba(2,2,2,.78) !important;
+}
+.atom-agent {
+  border: 1px solid var(--atom-secondary) !important;
+  background:
+    radial-gradient(40rem 18rem at 100% 0%, var(--atom-glow-soft), transparent 60%),
+    linear-gradient(180deg, #0a0a14 0%, #050508 100%) !important;
+  box-shadow:
+    0 36px 90px rgba(0,0,0,.75),
+    0 0 0 1px rgba(162,163,233,.16),
+    0 0 90px var(--atom-glow) !important;
+  color: var(--atom-fg) !important;
+  font-family: var(--font-body);
+}
+.atom-agent__header { border-bottom: 1px solid var(--atom-glass-border); }
+.atom-agent__mark { color: var(--atom-secondary); filter: drop-shadow(0 0 10px var(--atom-glow)); }
+.atom-agent__wordmark { color: var(--atom-fg); font-family: var(--font-display); }
+.atom-agent__wordmark em { color: var(--atom-secondary); text-shadow: 0 0 14px var(--atom-glow-strong); }
+.atom-agent__title { color: var(--atom-tertiary); }
+.atom-agent__close { color: var(--atom-tertiary); border-color: var(--atom-glass-border-bright); }
+.atom-agent__close:hover {
+  background: var(--atom-glass-bg-2);
+  color: var(--atom-secondary);
+  border-color: var(--atom-secondary);
+}
+
+.atom-tab {
+  font-family: var(--font-display);
+  color: var(--atom-tertiary);
+}
+.atom-tab.is-active {
+  color: var(--atom-fg);
+  background: linear-gradient(135deg, var(--atom-grad-2), var(--atom-grad-3));
+  border-color: var(--atom-secondary);
+  box-shadow: 0 0 22px var(--atom-glow-soft);
+}
+
+.atom-message {
+  border-color: var(--atom-glass-border) !important;
+  background: var(--atom-glass-bg-2) !important;
+  color: var(--atom-fg);
+}
+.atom-message[data-role="user"] {
+  background: linear-gradient(135deg, rgba(133,135,227,.16), rgba(62,63,126,.22)) !important;
+  border-color: var(--atom-secondary) !important;
+}
+
+/* ATOM input/composer */
+.atom-input, .atom-textarea, textarea.atom-agent__input,
+input[type="text"].atom-input, .atom-agent__composer textarea,
+.atom-agent__composer input {
+  background: var(--atom-glass-bg) !important;
+  border: 1px solid var(--atom-glass-border-bright) !important;
+  color: var(--atom-fg) !important;
+  border-radius: 14px !important;
+  font-family: var(--font-body);
+}
+.atom-input:focus, .atom-textarea:focus,
+.atom-agent__composer textarea:focus, .atom-agent__composer input:focus {
+  outline: none;
+  border-color: var(--atom-secondary) !important;
+  box-shadow: 0 0 0 3px var(--atom-glow-soft) !important;
+}
+
+/* ---------- Crisis flow stages ---------- */
+.fc-stage, .flow-stage {
+  border-color: var(--atom-glass-border-bright);
+}
+.fc-stage.is-active, .flow-stage.is-active,
+[data-flow-canvas-idx].is-active {
+  border-color: var(--atom-secondary);
+  box-shadow: 0 0 24px var(--atom-glow);
+}
+.fc-edge { stroke: var(--atom-accent); }
+.fc-edge.is-active { stroke: var(--atom-secondary); filter: drop-shadow(0 0 8px var(--atom-glow)); }
+.fc-hotspot { fill: var(--atom-secondary); filter: drop-shadow(0 0 6px var(--atom-glow)); }
+
+/* ---------- Routing/cache dashboard (cmd-*) tints ---------- */
+.cmd-score, .cmd-health-card { color: var(--atom-fg); }
+.cmd-score__value, .cmd-health-card__value { color: var(--atom-fg); font-family: var(--font-display); }
+.cmd-score__label, .cmd-health-card__label { color: var(--atom-tertiary); font-family: var(--font-display); letter-spacing: .14em; }
+.cmd-input-chip {
+  color: var(--atom-tertiary);
+  font-family: var(--font-display);
+}
+.cmd-input-chip.is-active,
+.cmd-input-chip[aria-pressed="true"] {
+  background: linear-gradient(135deg, var(--atom-grad-2), var(--atom-grad-3)) !important;
+  color: var(--atom-fg) !important;
+  border-color: var(--atom-secondary) !important;
+  box-shadow: 0 0 20px var(--atom-glow-soft);
+}
+[data-cmd-tab] {
+  font-family: var(--font-display);
+  color: var(--atom-tertiary);
+}
+[data-cmd-tab].is-active,
+[data-cmd-tab][aria-selected="true"] {
+  color: var(--atom-fg);
+  border-bottom-color: var(--atom-secondary);
+}
+[data-cmd-panel].is-active { box-shadow: inset 0 0 0 1px var(--atom-glass-border-bright); }
+
+/* ---------- Focus rings — universal ATOM ---------- */
+:focus-visible {
+  outline: 2px solid var(--atom-secondary);
+  outline-offset: 2px;
+}
+
+/* ---------- Boot splash (keeps cinematic) ---------- */
+.dtom-boot {
+  background: radial-gradient(60rem 40rem at 50% 30%, var(--atom-glow-soft), transparent 60%),
+              var(--atom-bg) !important;
+  color: var(--atom-fg);
+  font-family: var(--font-display);
+}
+
+/* ---------- Hero accents ---------- */
+.hero, .section--hero, .hero-stage {
+  color: var(--atom-fg);
+}
+.hero .lead, .section-sub { color: var(--atom-tertiary); }
+
+/* ---------- Light theme: keep ATOM accents but light surfaces ---------- */
+[data-theme="light"] {
+  --atom-fg:           #0f1117;
+  --atom-bg:           #f4f3ee;
+  --plasma:            var(--atom-primary);
+  --plasma-2:          var(--atom-accent);
+}
+[data-theme="light"] body { background: var(--atom-bg); color: var(--atom-fg); }
+
+/* ---------- Reduced motion respect ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .btn--primary, .btn--atom, .atom-fab, .nav-tool { transition: none; }
+}
