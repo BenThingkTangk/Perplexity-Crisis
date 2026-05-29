@@ -135,21 +135,25 @@ function checkAll(w) {
   expect(!!doc.querySelector('.flow-chips-row'), 'flow-chips-row present');
   expect(!!doc.querySelector('.flow-honesty-collapse'), 'honesty footer is <details>');
 
-  // 12. ATOM brand design system tokens + font
+  // 12. ATOM Experience System v2 tokens + font
   const headHtml = doc.head.innerHTML;
   expect(/Plus\+Jakarta\+Sans/.test(headHtml), 'Plus Jakarta Sans font link loaded');
+  expect(/atom-experience\.css/.test(headHtml), 'ATOM Experience System v2 CSS linked');
+  expect(/atom-lockup|viewBox="0 0 820 220"/.test(doc.body.innerHTML), 'Canonical ATOM lockup SVG present in header');
+  expect(/x-loader/.test(doc.body.innerHTML), 'ATOM v2 cinematic loader (x-loader) present');
+  expect(/PRECISION/.test(doc.body.innerHTML), 'Loader mantra PRECISION present');
   // CSS bundle is at dist/main.css; we read it once and assert tokens
   const cssPath = path.resolve(__dirname, 'dist/main.css');
   if (fs.existsSync(cssPath)) {
     const css = fs.readFileSync(cssPath, 'utf8');
-    expect(/--atom-bg:\s*#020202/.test(css), 'ATOM --atom-bg #020202 token present');
-    expect(/--atom-fg:\s*#f6f6fd/.test(css), 'ATOM --atom-fg #f6f6fd token present');
-    expect(/--atom-accent:\s*#696aac/.test(css), 'ATOM --atom-accent #696aac token present');
-    expect(/--atom-primary:\s*#3e3f7e/.test(css), 'ATOM --atom-primary #3e3f7e token present');
-    expect(/--atom-secondary:\s*#a2a3e9/.test(css), 'ATOM --atom-secondary #a2a3e9 token present');
+    expect(/--atom-bg:\s*#0b0b0c/.test(css), 'ATOM v2 --atom-bg #0b0b0c token present');
+    expect(/--atom-surface-1:\s*#111113/.test(css), 'ATOM v2 --atom-surface-1 #111113 token present');
+    expect(/--atom-primary:\s*#00c8c8/.test(css), 'ATOM v2 --atom-primary #00c8c8 (teal) token present');
+    expect(/--atom-primary-bright:\s*#00e6d3/.test(css), 'ATOM v2 --atom-primary-bright #00e6d3 token present');
+    expect(/--atom-text:\s*#e8e8ea/.test(css), 'ATOM v2 --atom-text #e8e8ea token present');
     expect(/Plus Jakarta Sans/.test(css), 'Plus Jakarta Sans declared in font-family stack');
-    expect(/#8587e3/.test(css) && /#4c4dac/.test(css) && /#696aac/.test(css),
-      'ATOM pill-button gradient stops (#8587e3 / #4c4dac / #696aac) present');
+    expect(/x-ease-cinema/.test(css), 'ATOM v2 cinema easing curve present');
+    expect(/x-loader/.test(css), 'ATOM v2 cinematic loader CSS present');
   }
 }
 

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 220" width="820" height="220" role="img" aria-labelledby="atom-wm-title atom-wm-desc">
+  <title id="atom-wm-title">ΔTOM wordmark</title>
+  <desc id="atom-wm-desc">Canonical ΔTOM wordmark — the primary ATOM brand mark. A polished, standalone wordmark on a transparent background: white hollow Greek capital Delta, white block T, teal O ring, white M. All four glyphs share a single cap height with balanced optical spacing. No orbital icon in the primary lockup.</desc>
+  <!-- Δ — hollow triangle, sharp apex, flat baseline, miter joins -->
+  <path d="M 96 26 L 192 194 L 0 194 Z M 96 84 L 146 178 L 46 178 Z"
+        fill="#f2f1ee" fill-rule="evenodd"/>
+  <!-- T — geometric block T with same cap height -->
+  <path d="M 218 26 H 388 V 56 H 320 V 194 H 286 V 56 H 218 Z"
+        fill="#f2f1ee"/>
+  <!-- O — teal ring (ATOM teal), slight optical overshoot of cap height -->
+  <circle cx="498" cy="110" r="74" fill="none" stroke="#5fc9c8" stroke-width="24"/>
+  <!-- M — two verticals + central V, equal optical weight -->
+  <path d="M 614 194 V 26 H 646 L 710 168 L 774 26 H 806 V 194 H 774 V 96 L 722 194 H 698 L 646 96 V 194 Z"
+        fill="#f2f1ee"/>
+</svg>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 220" width="820" height="220" role="img" aria-labelledby="atom-lk-title atom-lk-desc">
+  <title id="atom-lk-title">ΔTOM lockup</title>
+  <desc id="atom-lk-desc">Canonical ATOM lockup. The primary ATOM brand mark is the standalone ΔTOM wordmark: white hollow Greek capital Delta, white block T, teal O ring, white M — all on one cap height with balanced optical spacing. The orbital icon (atom-orbital.svg) is a secondary mark and is intentionally not used in the primary lockup.</desc>
+  <!-- Δ -->
+  <path d="M 96 26 L 192 194 L 0 194 Z M 96 84 L 146 178 L 46 178 Z"
+        fill="#f2f1ee" fill-rule="evenodd"/>
+  <!-- T -->
+  <path d="M 218 26 H 388 V 56 H 320 V 194 H 286 V 56 H 218 Z"
+        fill="#f2f1ee"/>
+  <!-- O -->
+  <circle cx="498" cy="110" r="74" fill="none" stroke="#5fc9c8" stroke-width="24"/>
+  <!-- M -->
+  <path d="M 614 194 V 26 H 646 L 710 168 L 774 26 H 806 V 194 H 774 V 96 L 722 194 H 698 L 646 96 V 194 Z"
+        fill="#f2f1ee"/>
+</svg>

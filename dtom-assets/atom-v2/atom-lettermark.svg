@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220" width="220" height="220" role="img" aria-labelledby="atom-lm-title atom-lm-desc">
+  <title id="atom-lm-title">ATOM lettermark</title>
+  <desc id="atom-lm-desc">ATOM lettermark — a polished hollow Greek capital Delta, geometrically consistent with the ΔTOM wordmark. Use for collapsed nav, app icons, social avatars, or any context where the full wordmark would be too wide.</desc>
+  <path d="M 110 26 L 210 196 L 10 196 Z M 110 86 L 162 180 L 58 180 Z"
+        fill="#f2f1ee" fill-rule="evenodd"/>
+</svg>
