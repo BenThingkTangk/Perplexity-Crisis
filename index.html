@@ -806,7 +806,7 @@
           The front door handles the connection. <em style="color:var(--plasma); font-style:normal; text-shadow: 0 0 24px var(--plasma-glow);">Akamai AI Grid brokers where the intelligence runs.</em>
         </h2>
         <p class="section-sub reveal" data-delay="2">
-          Two paths side-by-side: the current public-edge routing layer (DNS, WAF, bot, exact-match cache) and the proposed AI Grid pilot path (real-time broker, intelligent routing, semantic caching on roadmap, workload-aware control). Validation metrics: <b>TTFT</b>, <b>cost-per-query</b>, <b>cache hit rate</b>, <b>egress reduction</b>, <b>incident ownership</b>. Every panel is grounded in primary public sources and Discord field signals. Labels: <b style="color:var(--atom-secondary,#a2a3e9)">Confirmed</b>, <b style="color:#5aa4f7">Likely</b>, <b style="color:#f5b942">Unknown</b>, <b style="color:#8587e3">Ask Perplexity</b>.
+          <b style="color:#f5984a">Cloudflare</b> is the observable public front-door, CDN, WAF, and bot-challenge layer for <code>perplexity.ai</code>, <code>www.perplexity.ai</code>, and <code>api.perplexity.ai</code> — confirmed by live DNS (NS records · <code>jessica.ns.cloudflare.com</code>, <code>emerson.ns.cloudflare.com</code>), Cloudflare anycast A-records (AS13335 · <code>104.18.x.x</code>), and HTTP response headers (<code>server: cloudflare</code>, <code>cf-ray</code>, <code>cf-cache-status: HIT</code>, <code>cf-mitigated: challenge</code>, <code>__cf_bm</code> cookie). What sits behind that edge — Workers usage, internal AI Gateway, semantic cache, exact origin topology — is <b>not publicly observable</b> and stays Ask Perplexity. Two paths side-by-side: the current public-edge routing layer and the proposed AI Grid pilot path (real-time broker, intelligent routing, semantic caching on roadmap, workload-aware control). Validation metrics: <b>TTFT</b>, <b>cost-per-query</b>, <b>cache hit rate</b>, <b>egress reduction</b>, <b>incident ownership</b>. Labels: <b style="color:var(--atom-secondary,#a2a3e9)">Confirmed</b>, <b style="color:#5aa4f7">Likely</b>, <b style="color:#f5b942">Unknown</b>, <b style="color:#8587e3">Ask Perplexity</b>.
         </p>
 
         <!-- ============ COMMAND DASHBOARD ============ -->
@@ -816,20 +816,20 @@
           <div class="cmd-scorecards">
             <article class="cmd-score" style="--accent:#f5984a">
               <div class="cmd-score__label"><span class="pip"></span>Front door</div>
-              <div class="cmd-score__value tabular">Public-edge routing</div>
-              <div class="cmd-score__trend">DNS · WAF · bot · static CDN are well-understood; specific implementation in front of api.perplexity.ai is <b>not publicly confirmed</b></div>
-              <span class="cmd-score__status cmd-score__status--warn">Unknown</span>
+              <div class="cmd-score__value tabular">Cloudflare · DNS · CDN · WAF · bot</div>
+              <div class="cmd-score__trend">NS records delegated to Cloudflare; A-records resolve to Cloudflare anycast (AS13335); <code>server: cloudflare</code>, <code>cf-ray</code>, <code>cf-cache-status: HIT</code> observed on <code>perplexity.ai</code> and <code>api.perplexity.ai</code>.</div>
+              <span class="cmd-score__status cmd-score__status--err">Confirmed · Cloudflare</span>
             </article>
             <article class="cmd-score" style="--accent:#f5b942">
               <div class="cmd-score__label"><span class="pip"></span>AI routing logic</div>
-              <div class="cmd-score__value tabular">Implementation unconfirmed</div>
-              <div class="cmd-score__trend">Whether the AI router is a managed Worker, a custom reverse proxy, or a hyperscaler load balancer — answer in the next Perplexity discovery</div>
+              <div class="cmd-score__value tabular">Behind the edge · not observable</div>
+              <div class="cmd-score__trend">Whether internal routing uses Cloudflare Workers, Cloudflare AI Gateway (Perplexity-internal), a custom reverse proxy, or a hyperscaler load balancer is <b>not publicly disclosed</b>. Ask in the next discovery.</div>
               <span class="cmd-score__status cmd-score__status--warn">Ask Perplexity</span>
             </article>
             <article class="cmd-score" style="--accent:#00e6d3">
               <div class="cmd-score__label"><span class="pip"></span>Semantic cache</div>
               <div class="cmd-score__value tabular">Exact-match today · semantic on roadmap</div>
-              <div class="cmd-score__trend">Public AI Gateway products offer exact-match cache only. Akamai AI Grid <b>targets semantic caching at the edge</b> as a roadmap capability.</div>
+              <div class="cmd-score__trend">Public AI Gateway products document exact-match cache; semantic cache is a customer-opt-in AI Gateway feature with no public evidence of Perplexity-internal use. Akamai AI Grid <b>targets semantic caching at the edge</b> as a roadmap capability.</div>
               <span class="cmd-score__status cmd-score__status--next">Akamai differentiator</span>
             </article>
             <article class="cmd-score" style="--accent:#ef4444">
@@ -884,13 +884,13 @@
                 </g>
                 <!-- Flow line CF -->
                 <path class="topo-flow topo-flow--cf" d="M180 230 C 260 220, 320 200, 380 200" fill="none" stroke="url(#topo-cf)" stroke-width="2.4"/>
-                <!-- Public-edge routing card -->
+                <!-- Cloudflare edge card (CONFIRMED via DNS + headers) -->
                 <g class="topo-card topo-card--cf">
                   <rect x="380" y="160" width="180" height="100" rx="14" fill="rgba(245,152,74,.06)" stroke="rgba(245,152,74,.55)"/>
-                  <text x="470" y="186" text-anchor="middle" fill="#f5984a" font-family="JetBrains Mono" font-size="10" letter-spacing="2">PUBLIC-EDGE ROUTING</text>
-                  <text x="470" y="208" text-anchor="middle" fill="#eef2f6" font-family="Plus Jakarta Sans" font-size="14" font-weight="700">DNS · WAF · Bot</text>
-                  <text x="470" y="226" text-anchor="middle" fill="#eef2f6" font-family="Plus Jakarta Sans" font-size="12">CDN · LB · API guard</text>
-                  <text x="470" y="246" text-anchor="middle" fill="#f5984a" font-family="Plus Jakarta Sans" font-size="10.5">Exact-match cache only · no semantic</text>
+                  <text x="470" y="186" text-anchor="middle" fill="#f5984a" font-family="JetBrains Mono" font-size="10" letter-spacing="2">CLOUDFLARE EDGE · CONFIRMED</text>
+                  <text x="470" y="208" text-anchor="middle" fill="#eef2f6" font-family="Plus Jakarta Sans" font-size="14" font-weight="700">DNS · TLS · WAF · Bot</text>
+                  <text x="470" y="226" text-anchor="middle" fill="#eef2f6" font-family="Plus Jakarta Sans" font-size="12">CDN · cf-cache-status: HIT</text>
+                  <text x="470" y="246" text-anchor="middle" fill="#f5984a" font-family="Plus Jakarta Sans" font-size="10.5">Exact-match CDN cache · no public semantic</text>
                 </g>
                 <!-- Question mark routing -->
                 <g class="topo-routing-q">
@@ -1112,18 +1112,81 @@
             </div>
           </div>
 
+          <!-- Live DNS / header evidence (CONFIRMED Cloudflare) -->
+          <div class="cmd-evidence">
+            <div class="cmd-evidence__label"><span class="pip"></span> LIVE EVIDENCE · DNS + HTTP HEADERS · MAY 29, 2026</div>
+            <div class="cmd-evidence__grid">
+              <article class="cmd-evidence-card">
+                <span class="cmd-evidence-card__tag">DNS · NS records</span>
+                <code class="cmd-evidence-card__code">dig NS perplexity.ai +short
+jessica.ns.cloudflare.com.
+emerson.ns.cloudflare.com.</code>
+                <span class="cmd-evidence-card__note">Cloudflare-managed zone · prerequisite for orange-cloud proxy</span>
+              </article>
+              <article class="cmd-evidence-card">
+                <span class="cmd-evidence-card__tag">A records · AS13335</span>
+                <code class="cmd-evidence-card__code">perplexity.ai      → 104.18.26.48
+www.perplexity.ai  → 104.18.26.48
+api.perplexity.ai  → 104.18.26.48
+AS13335 Cloudflare · anycast: true</code>
+                <span class="cmd-evidence-card__note">All three hostnames resolve to Cloudflare anycast space</span>
+              </article>
+              <article class="cmd-evidence-card">
+                <span class="cmd-evidence-card__tag">Headers · TLS + edge</span>
+                <code class="cmd-evidence-card__code">curl -sI https://perplexity.ai/
+HTTP/2 301
+server: cloudflare
+cf-ray: a035928f0c28868b-SEA</code>
+                <span class="cmd-evidence-card__note">Cloudflare terminates TLS; <code>cf-ray</code> on every response</span>
+              </article>
+              <article class="cmd-evidence-card">
+                <span class="cmd-evidence-card__tag">CDN caching · HIT</span>
+                <code class="cmd-evidence-card__code">curl -sI https://api.perplexity.ai/
+HTTP/2 404
+cf-cache-status: HIT
+cache-control: public, max-age=300
+age: 25</code>
+                <span class="cmd-evidence-card__note">Even 404s served from Cloudflare edge cache</span>
+              </article>
+              <article class="cmd-evidence-card">
+                <span class="cmd-evidence-card__tag">Bot Management · challenge</span>
+                <code class="cmd-evidence-card__code">curl -sI https://www.perplexity.ai/ \
+  --user-agent "curl/8.4.0"
+HTTP/2 403
+cf-mitigated: challenge
+set-cookie: __cf_bm=...</code>
+                <span class="cmd-evidence-card__note">Cloudflare Bot Management / WAF active; <code>__cf_bm</code> deployed</span>
+              </article>
+              <article class="cmd-evidence-card cmd-evidence-card--ask">
+                <span class="cmd-evidence-card__tag">Ask Perplexity · NOT observable</span>
+                <code class="cmd-evidence-card__code">Cloudflare Workers · UNCONFIRMED
+Internal AI Gateway · UNCONFIRMED
+Semantic cache · UNCONFIRMED
+Origin topology · obscured by proxy
+Akamai in delivery path · NO EVIDENCE</code>
+                <span class="cmd-evidence-card__note">Cloudflare proxy hides origin by design — these stay discovery questions</span>
+              </article>
+            </div>
+          </div>
+
           <!-- Source drawer (collapsible — no raw text dump in main viewport) -->
           <details class="cmd-sources-drawer">
             <summary>
-              <span class="cmd-sources__label"><span class="pip"></span> EVIDENCE · 6 PUBLIC SOURCES</span>
+              <span class="cmd-sources__label"><span class="pip"></span> EVIDENCE · 8 PUBLIC SOURCES</span>
               <span class="cmd-sources-drawer__hint">tap to expand</span>
             </summary>
             <div class="cmd-sources__chips">
-              <a class="cmd-source-chip" href="https://www.vedbex.com/subdomain-finder/perplexity.ai" target="_blank" rel="noopener noreferrer">
-                <span class="cmd-source-chip__tag">Subdomain map</span><span>vedbex.com</span>
+              <a class="cmd-source-chip" href="https://ipinfo.io/104.18.26.48" target="_blank" rel="noopener noreferrer">
+                <span class="cmd-source-chip__tag">IP ASN · AS13335</span><span>ipinfo.io</span>
               </a>
-              <a class="cmd-source-chip" href="https://developers.cloudflare.com/reference-architecture/architectures/load-balancing/" target="_blank" rel="noopener noreferrer">
-                <span class="cmd-source-chip__tag">Cloudflare LB</span><span>developers.cloudflare.com</span>
+              <a class="cmd-source-chip" href="https://developers.cloudflare.com/fundamentals/reference/http-request-headers/" target="_blank" rel="noopener noreferrer">
+                <span class="cmd-source-chip__tag">cf-mitigated header</span><span>developers.cloudflare.com</span>
+              </a>
+              <a class="cmd-source-chip" href="https://developers.cloudflare.com/cache/concepts/cache-responses/" target="_blank" rel="noopener noreferrer">
+                <span class="cmd-source-chip__tag">cf-cache-status</span><span>developers.cloudflare.com</span>
+              </a>
+              <a class="cmd-source-chip" href="https://developers.cloudflare.com/ai-gateway/usage/providers/perplexity/" target="_blank" rel="noopener noreferrer">
+                <span class="cmd-source-chip__tag">AI Gateway · Perplexity provider</span><span>developers.cloudflare.com</span>
               </a>
               <a class="cmd-source-chip" href="https://developers.cloudflare.com/ai-gateway/features/caching/" target="_blank" rel="noopener noreferrer">
                 <span class="cmd-source-chip__tag">AI Gateway · cache</span><span>developers.cloudflare.com</span>
@@ -1131,8 +1194,8 @@
               <a class="cmd-source-chip" href="https://developers.cloudflare.com/ai-gateway/features/dynamic-routing/json-configuration/" target="_blank" rel="noopener noreferrer">
                 <span class="cmd-source-chip__tag">AI Gateway · routing</span><span>developers.cloudflare.com</span>
               </a>
-              <a class="cmd-source-chip" href="https://developers.cloudflare.com/cache/advanced-configuration/cache-reserve/" target="_blank" rel="noopener noreferrer">
-                <span class="cmd-source-chip__tag">Cache Reserve</span><span>developers.cloudflare.com</span>
+              <a class="cmd-source-chip" href="https://www.vedbex.com/subdomain-finder/perplexity.ai" target="_blank" rel="noopener noreferrer">
+                <span class="cmd-source-chip__tag">Subdomain map</span><span>vedbex.com</span>
               </a>
               <a class="cmd-source-chip" href="https://www.akamai.com/blog/cloud/distributed-ai-inference-why-placement-new-bottleneck" target="_blank" rel="noopener noreferrer">
                 <span class="cmd-source-chip__tag">Akamai · placement</span><span>akamai.com</span>
@@ -1225,6 +1288,10 @@
                   <span class="risk-tile__title">Status auto-resolve false-positive (May 7 sequence)</span>
                   <span class="risk-tile__src">Status channel record</span>
                 </button>
+                <button class="risk-tile" data-claim="c11" style="--c:#a2a3e9">
+                  <span class="risk-tile__title">Cloudflare is the public front-door, CDN, WAF &amp; bot layer</span>
+                  <span class="risk-tile__src">DNS + headers · May 29, 2026</span>
+                </button>
               </div>
             </div>
             <!-- Row 2: Likely -->
@@ -1277,8 +1344,8 @@
               </div>
               <div class="risk-cell" data-impact="high">
                 <button class="risk-tile" data-claim="u3" style="--c:#f5b942">
-                  <span class="risk-tile__title">Front-door routing in front of api.perplexity.ai</span>
-                  <span class="risk-tile__src">No public statement</span>
+                  <span class="risk-tile__title">Internal routing behind the Cloudflare edge</span>
+                  <span class="risk-tile__src">Proxy hides origin by design</span>
                 </button>
               </div>
             </div>
@@ -1343,6 +1410,13 @@
         </p>
 
         <div class="tl reveal" data-delay="3" id="tl">
+          <div class="tl__legend" aria-label="Timeline confidence legend">
+            <span class="tl__legend-label">Confidence</span>
+            <span class="tl__legend-item tl__legend-item--confirmed">Confirmed</span>
+            <span class="tl__legend-item tl__legend-item--likely">Likely</span>
+            <span class="tl__legend-item tl__legend-item--unknown">Unknown</span>
+            <span class="tl__legend-item tl__legend-item--ask">Ask Perplexity</span>
+          </div>
           <div class="tl__rail" aria-hidden="true">
             <div class="tl__rail-line"></div>
             <div class="tl__rail-progress" id="tl-rail-progress"></div>
@@ -1350,78 +1424,91 @@
           <div class="tl__steps" role="tablist" aria-label="Infrastructure timeline">
             <button class="tl__step is-active" role="tab" aria-selected="true" data-tl-idx="0" style="--c:#f5b942">
               <span class="tl__dot"></span>
+              <span class="tl__tag tl__tag--confirmed">Confirmed</span>
               <span class="tl__date">Jan 21, 2026</span>
               <span class="tl__step-title">Microsoft Foundry</span>
               <span class="tl__step-sub">$750M · 3 years</span>
             </button>
             <button class="tl__step" role="tab" aria-selected="false" data-tl-idx="1" style="--c:#a2a3e9">
               <span class="tl__dot"></span>
+              <span class="tl__tag tl__tag--confirmed">Confirmed</span>
               <span class="tl__date">Mar 3, 2026</span>
               <span class="tl__step-title">Akamai Blackwell</span>
               <span class="tl__step-sub">RTX PRO 6000 deploy</span>
             </button>
             <button class="tl__step" role="tab" aria-selected="false" data-tl-idx="2" style="--c:#ff7355">
               <span class="tl__dot"></span>
+              <span class="tl__tag tl__tag--confirmed">Confirmed</span>
               <span class="tl__date">Mar 4, 2026</span>
               <span class="tl__step-title">CoreWeave</span>
               <span class="tl__step-sub">GB200 NVL72</span>
             </button>
             <button class="tl__step" role="tab" aria-selected="false" data-tl-idx="3" style="--c:#00e6d3">
               <span class="tl__dot"></span>
+              <span class="tl__tag tl__tag--confirmed">Confirmed</span>
               <span class="tl__date">Mar 16, 2026</span>
               <span class="tl__step-title">Akamai AI Grid</span>
               <span class="tl__step-sub">Launch · orchestration</span>
             </button>
             <button class="tl__step" role="tab" aria-selected="false" data-tl-idx="4" style="--c:#ef4444">
               <span class="tl__dot"></span>
+              <span class="tl__tag tl__tag--confirmed">Confirmed</span>
               <span class="tl__date">May 8, 2026</span>
               <span class="tl__step-title">Sonar API incidents</span>
               <span class="tl__step-sub">Public outage cluster</span>
             </button>
             <button class="tl__step" role="tab" aria-selected="false" data-tl-idx="5" style="--c:#8587e3">
               <span class="tl__dot"></span>
+              <span class="tl__tag tl__tag--confirmed">Confirmed</span>
               <span class="tl__date">Feb 16, 2026</span>
               <span class="tl__step-title">Sonar · clean resolve</span>
               <span class="tl__step-sub">~53 min · single component</span>
             </button>
             <button class="tl__step" role="tab" aria-selected="false" data-tl-idx="6" style="--c:#ef4444">
               <span class="tl__dot"></span>
+              <span class="tl__tag tl__tag--confirmed">Confirmed</span>
               <span class="tl__date">May 7–8, 2026</span>
               <span class="tl__step-title">Web + API · re-escalation</span>
               <span class="tl__step-sub">4 h · auto-resolve misfire</span>
             </button>
             <button class="tl__step" role="tab" aria-selected="false" data-tl-idx="7" style="--c:#f5b942">
               <span class="tl__dot"></span>
+              <span class="tl__tag tl__tag--likely">Likely</span>
               <span class="tl__date">May 14–22</span>
               <span class="tl__step-title">Billing cluster</span>
               <span class="tl__step-sub">Idempotency gap pattern</span>
             </button>
             <button class="tl__step" role="tab" aria-selected="false" data-tl-idx="8" style="--c:#5aa4f7">
               <span class="tl__dot"></span>
+              <span class="tl__tag tl__tag--confirmed">Confirmed</span>
               <span class="tl__date">May 15–29</span>
               <span class="tl__step-title">Enterprise support</span>
               <span class="tl__step-sub">2-week response gap</span>
             </button>
             <button class="tl__step" role="tab" aria-selected="false" data-tl-idx="9" style="--c:#f5b942">
               <span class="tl__dot"></span>
+              <span class="tl__tag tl__tag--confirmed">Confirmed</span>
               <span class="tl__date">May 20, 2026</span>
               <span class="tl__step-title">Comet billing UI</span>
               <span class="tl__step-sub">Critical plan-switch bug</span>
             </button>
             <button class="tl__step" role="tab" aria-selected="false" data-tl-idx="10" style="--c:#ef4444">
               <span class="tl__dot"></span>
+              <span class="tl__tag tl__tag--confirmed">Confirmed</span>
               <span class="tl__date">May 24, 2026</span>
               <span class="tl__step-title">Comet ↔ Cloudflare wall</span>
               <span class="tl__step-sub">3rd-party site compatibility</span>
             </button>
             <button class="tl__step" role="tab" aria-selected="false" data-tl-idx="11" style="--c:#a855f7">
               <span class="tl__dot"></span>
+              <span class="tl__tag tl__tag--confirmed">Confirmed</span>
               <span class="tl__date">May 26–27</span>
               <span class="tl__step-title">Comet · CPU + sync</span>
               <span class="tl__step-sub">Post-update regressions</span>
             </button>
             <button class="tl__step" role="tab" aria-selected="false" data-tl-idx="12" style="--c:#00e6d3">
               <span class="tl__dot"></span>
+              <span class="tl__tag tl__tag--likely">Likely</span>
               <span class="tl__date">May 28–29</span>
               <span class="tl__step-title">Rate-limit · image-gen</span>
               <span class="tl__step-sub">Authenticated false-positives</span>
