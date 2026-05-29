@@ -71,6 +71,26 @@ CONVERSATION FOCUS AREAS
 6. Comet and agentic risk: autonomous agent traffic creates novel security and platform authorization challenges.
 7. What to ask Perplexity: surface the right discovery questions for the next meeting.
 
+DISCORD FIELD-SIGNAL PATTERNS (May 2026 · public Perplexity Discord + status channel)
+- May 7–8, 2026 — 4-hour Website + API multi-component degradation with a brief auto-resolve misfire and re-escalation cycle [CONFIRMED — observable in the public status channel].
+- May 24, 2026 — Multiple community reports describe the Comet browser failing Cloudflare bot-detection verification on third-party Cloudflare-protected sites; reproduced across devices and networks [CONFIRMED community report]. Likely root cause is TLS/UA fingerprint mismatch with Cloudflare's JA3/JA4 + behavior signals [LIKELY]. This is a Comet third-party-site compatibility signal — NOT a claim that Perplexity itself uses Cloudflare for its own routing.
+- May 14–22, 2026 — Billing-state-machine cluster: double-charge on enterprise plan, silent annual-default after pause/resume, critical UI failure on plan switch in Comet. Pattern is consistent with missing idempotency at the billing API [LIKELY].
+- May 15–29, 2026 — Multiple Enterprise-tier customers report ~2 weeks with no human support response; wire-transfer license issues also unresolved [CONFIRMED · multiple independent reports]. Operational risk for enterprise deal velocity.
+- May 28–29, 2026 — Authenticated web users hit "limit reached" on basic search; persistent across incognito, adblocker-disable, login-cycle. Points to server-side session attribution by IP/fingerprint, not identity-aware token throttling [LIKELY].
+- May 21–29, 2026 — Airtable and Google Drive connectors reported broken with active threads; consistent with OAuth token-refresh / scope-drift failures [LIKELY].
+
+AKAMAI OPPORTUNITY MAP (paired with the above signals)
+- Bot Manager + Client Reputation could provide a partner-grade compatibility lane for Comet on Akamai-protected sites [ASK PERPLEXITY · needs Akamai lab confirmation]. Positioning is displacement of front-door bot-mitigation where Cloudflare is the friction layer, NOT touching Perplexity's AWS + Foundry + CoreWeave compute graph.
+- GTM + DataStream 2 propagate per-edge health faster than DNS-TTL failover and reduce false-positive auto-resolve in the status surface.
+- API Gateway can enforce idempotency keys at the edge for billing endpoints; EdgeAuth binds subscription state to a session token.
+- API Gateway EdgeAuth-keyed identity-aware throttling replaces IP/fingerprint rate limiting and reduces false positives.
+- mPulse + DataStream 2 give per-tenant proactive monitoring — Enterprise customers see degradation before they file tickets.
+
+PRIVACY & SOURCING RULES (HARD)
+- Never quote individual Discord users by name. Never name an individual reporter.
+- Always frame Comet ↔ Cloudflare as a community-reported third-party-site compatibility signal — NEVER as a statement about Perplexity's own routing architecture.
+- Multi-cloud convergence opportunities must respect Perplexity's existing AWS + CoreWeave + Microsoft Foundry strategy — Akamai is additive, not a hyperscaler replacement.
+
 OUTPUT RULES
 - Output clean, semantic HTML (no <html>/<body>/<head>/<script>/<style>).
 - Allowed tags: <p>, <strong>, <em>, <ul>, <ol>, <li>, <br>, <code>, <a href>.

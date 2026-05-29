@@ -756,6 +756,22 @@
           </aside>
         </div>
 
+        <!-- Field Signals strip — Perplexity community + status-channel signals (May 2026) -->
+        <div class="field-signals reveal" data-delay="3" id="field-signals">
+          <div class="field-signals__head">
+            <div class="field-signals__label"><span class="pip"></span> FIELD SIGNALS // PERPLEXITY COMMUNITY + STATUS RECORD · MAY 2026</div>
+            <div class="field-signals__legend">
+              <span><i style="--c:#ef4444"></i>Displacement</span>
+              <span><i style="--c:#f5b942"></i>Convergence</span>
+              <span><i style="--c:#5aa4f7"></i>Observability</span>
+            </div>
+          </div>
+          <div class="field-signals__grid" id="field-signals-grid"></div>
+          <p class="field-signals__foot">
+            Signals are <b>community-reported</b> via Perplexity's public Discord and the official status channel. Akamai relevance is labeled per the convergence playbook — never used to imply Perplexity's internal routing architecture.
+          </p>
+        </div>
+
         <!-- Architecture recommendation strip -->
         <div class="crisis-recommendation reveal" data-delay="3">
           <div class="cr-label"><span class="pip"></span> ARCHITECTURE RECOMMENDATION // VERBATIM</div>
@@ -1189,6 +1205,18 @@
                   <span class="risk-tile__title">Credit-based metering · 401/402 cascade</span>
                   <span class="risk-tile__src">Perplexity API documentation</span>
                 </button>
+                <button class="risk-tile" data-claim="c8" style="--c:#a2a3e9">
+                  <span class="risk-tile__title">Comet ↔ Cloudflare verification wall breaks user flows</span>
+                  <span class="risk-tile__src">Public Discord · May 24–29, 2026</span>
+                </button>
+                <button class="risk-tile" data-claim="c9" style="--c:#a2a3e9">
+                  <span class="risk-tile__title">Enterprise support not enterprise-grade</span>
+                  <span class="risk-tile__src">Public Discord · May 15–29, 2026</span>
+                </button>
+                <button class="risk-tile" data-claim="c10" style="--c:#a2a3e9">
+                  <span class="risk-tile__title">Status auto-resolve false-positive (May 7 sequence)</span>
+                  <span class="risk-tile__src">Status channel record</span>
+                </button>
               </div>
             </div>
             <!-- Row 2: Likely -->
@@ -1209,6 +1237,14 @@
                 <button class="risk-tile" data-claim="l2" style="--c:#5aa4f7">
                   <span class="risk-tile__title">Akamai semantic caching at edge · roadmap</span>
                   <span class="risk-tile__src">PR uses &ldquo;will leverage&rdquo; language</span>
+                </button>
+                <button class="risk-tile" data-claim="l3" style="--c:#5aa4f7">
+                  <span class="risk-tile__title">Billing microservice lacks idempotency at API gateway</span>
+                  <span class="risk-tile__src">Multiple billing reports · May 14–22</span>
+                </button>
+                <button class="risk-tile" data-claim="l4" style="--c:#5aa4f7">
+                  <span class="risk-tile__title">Rate-limiter mis-attributing sessions (IP/fingerprint)</span>
+                  <span class="risk-tile__src">Web users · May 28–29</span>
                 </button>
               </div>
             </div>
@@ -1260,6 +1296,10 @@
                 <button class="risk-tile" data-claim="a3" style="--c:#8587e3">
                   <span class="risk-tile__title">us-east-1 failover · AWS ↔ CoreWeave handoff time</span>
                   <span class="risk-tile__src">Discovery question</span>
+                </button>
+                <button class="risk-tile" data-claim="a4" style="--c:#8587e3">
+                  <span class="risk-tile__title">Akamai Bot Manager · custom-browser compatibility lane</span>
+                  <span class="risk-tile__src">Needs Akamai lab confirmation</span>
                 </button>
               </div>
             </div>
@@ -1328,6 +1368,54 @@
               <span class="tl__date">May 8, 2026</span>
               <span class="tl__step-title">Sonar API incidents</span>
               <span class="tl__step-sub">Public outage cluster</span>
+            </button>
+            <button class="tl__step" role="tab" aria-selected="false" data-tl-idx="5" style="--c:#8587e3">
+              <span class="tl__dot"></span>
+              <span class="tl__date">Feb 16, 2026</span>
+              <span class="tl__step-title">Sonar · clean resolve</span>
+              <span class="tl__step-sub">~53 min · single component</span>
+            </button>
+            <button class="tl__step" role="tab" aria-selected="false" data-tl-idx="6" style="--c:#ef4444">
+              <span class="tl__dot"></span>
+              <span class="tl__date">May 7–8, 2026</span>
+              <span class="tl__step-title">Web + API · re-escalation</span>
+              <span class="tl__step-sub">4 h · auto-resolve misfire</span>
+            </button>
+            <button class="tl__step" role="tab" aria-selected="false" data-tl-idx="7" style="--c:#f5b942">
+              <span class="tl__dot"></span>
+              <span class="tl__date">May 14–22</span>
+              <span class="tl__step-title">Billing cluster</span>
+              <span class="tl__step-sub">Idempotency gap pattern</span>
+            </button>
+            <button class="tl__step" role="tab" aria-selected="false" data-tl-idx="8" style="--c:#5aa4f7">
+              <span class="tl__dot"></span>
+              <span class="tl__date">May 15–29</span>
+              <span class="tl__step-title">Enterprise support</span>
+              <span class="tl__step-sub">2-week response gap</span>
+            </button>
+            <button class="tl__step" role="tab" aria-selected="false" data-tl-idx="9" style="--c:#f5b942">
+              <span class="tl__dot"></span>
+              <span class="tl__date">May 20, 2026</span>
+              <span class="tl__step-title">Comet billing UI</span>
+              <span class="tl__step-sub">Critical plan-switch bug</span>
+            </button>
+            <button class="tl__step" role="tab" aria-selected="false" data-tl-idx="10" style="--c:#ef4444">
+              <span class="tl__dot"></span>
+              <span class="tl__date">May 24, 2026</span>
+              <span class="tl__step-title">Comet ↔ Cloudflare wall</span>
+              <span class="tl__step-sub">3rd-party site compatibility</span>
+            </button>
+            <button class="tl__step" role="tab" aria-selected="false" data-tl-idx="11" style="--c:#a855f7">
+              <span class="tl__dot"></span>
+              <span class="tl__date">May 26–27</span>
+              <span class="tl__step-title">Comet · CPU + sync</span>
+              <span class="tl__step-sub">Post-update regressions</span>
+            </button>
+            <button class="tl__step" role="tab" aria-selected="false" data-tl-idx="12" style="--c:#00e6d3">
+              <span class="tl__dot"></span>
+              <span class="tl__date">May 28–29</span>
+              <span class="tl__step-title">Rate-limit · image-gen</span>
+              <span class="tl__step-sub">Authenticated false-positives</span>
             </button>
           </div>
           <article class="tl__detail" id="tl-detail" aria-live="polite">
@@ -1415,6 +1503,54 @@
               <span class="flow-chip flow-chip--plasma">One SLA owner</span>
             </div>
           </div>
+        </div>
+
+        <!-- ============ GUIDED SCENE · "THE CLOUDFLARE WALL" ============
+             A compact 5-step storyboard for the meeting walkthrough. Community-sourced
+             Comet third-party-site compatibility signal — not a claim about
+             Perplexity's own routing architecture. -->
+        <div class="scene reveal" data-delay="3" id="scene-cloudflare-wall">
+          <div class="scene__head">
+            <div class="scene__label"><span class="pip" style="background:#ef4444; box-shadow:0 0 12px #ef4444"></span>GUIDED SCENE // THE CLOUDFLARE WALL</div>
+            <div class="scene__meta">
+              <span class="scene__tag scene__tag--likely">LIKELY · TLS / UA fingerprint</span>
+              <span class="scene__tag scene__tag--ask">ASK · Akamai Bot Manager compatibility lab</span>
+            </div>
+          </div>
+          <h3 class="scene__title">A Comet user hits a Cloudflare-protected site &mdash; and never gets through.</h3>
+          <p class="scene__sub">
+            Community-reported pattern on Perplexity's public Discord (May 24–29, 2026). Comet fails Cloudflare bot-detection on third-party sites and gets stuck on the challenge page across devices and networks. This is a Comet third-party-site compatibility signal &mdash; not a statement about Perplexity's own routing.
+          </p>
+          <ol class="scene__steps" role="list">
+            <li class="scene__step" style="--c:#5aa4f7">
+              <span class="scene__step-num">01</span>
+              <span class="scene__step-title">Open Comet</span>
+              <span class="scene__step-body">User opens Comet desktop and navigates to a high-traffic third-party site behind Cloudflare bot mitigation.</span>
+            </li>
+            <li class="scene__step" style="--c:#f5b942">
+              <span class="scene__step-num">02</span>
+              <span class="scene__step-title">Cloudflare challenge page</span>
+              <span class="scene__step-body">Cloudflare presents a verification interstitial (Turnstile / BotFight). Comet's TLS / user-agent fingerprint trips a bot signal.</span>
+            </li>
+            <li class="scene__step" style="--c:#ef4444">
+              <span class="scene__step-num">03</span>
+              <span class="scene__step-title">Challenge loop · no recovery</span>
+              <span class="scene__step-body">Verification never completes. User is permanently walled. Reproduced across devices and networks per the public Discord thread.</span>
+            </li>
+            <li class="scene__step" style="--c:#a855f7">
+              <span class="scene__step-num">04</span>
+              <span class="scene__step-title">Same site loads in Chrome / Safari</span>
+              <span class="scene__step-body">Mainstream browsers pass the same challenge cleanly &mdash; isolating the signal to Comet's custom-browser fingerprint, not the user.</span>
+            </li>
+            <li class="scene__step" style="--c:#00e6d3">
+              <span class="scene__step-num">05</span>
+              <span class="scene__step-title">Akamai compatibility lane</span>
+              <span class="scene__step-body">Akamai Bot Manager + Client Reputation use different signals. A partner-grade allow-list could whitelist Comet on Akamai-protected sites &mdash; needs Akamai lab confirmation.</span>
+            </li>
+          </ol>
+          <p class="scene__foot">
+            Narrative for the meeting: <b>Cloudflare's bot-detection treats your own browser as a bot. Akamai's edge gives you a place to negotiate browser identity &mdash; without touching your AWS / Foundry / CoreWeave compute graph.</b>
+          </p>
         </div>
 
         <!-- Honesty footer — collapsible to keep viewport clean -->
@@ -1634,6 +1770,98 @@
             Akamai is not there to replace AWS, Foundry, or CoreWeave.<br/>It is there to make their existing strategy <em>behave like one system.</em>
           </blockquote>
           <cite>// Convergence brief — pitch framing</cite>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== MEETING QUESTIONS · grouped, progressive disclosure ============== -->
+    <section id="meeting-questions" class="section section--meeting">
+      <div class="container container--wide">
+        <div class="section-label reveal">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Meeting questions · grouped
+        </div>
+        <h2 class="section-heading reveal" data-delay="1">
+          What to ask Perplexity. <em style="color:var(--atom-secondary,#a2a3e9); font-style:normal;">Grouped, precise, neutral.</em>
+        </h2>
+        <p class="section-sub reveal" data-delay="2">
+          Discovery questions across seven lanes &mdash; routing, Comet / Cloudflare, cache, auth + billing, observability, enterprise SLA, and API gateway. Each accordion expands for the verbatim list. No assumptions about Perplexity's internal routing are baked into the questions.
+        </p>
+        <div class="meeting-q reveal" data-delay="3" id="meeting-q-grid">
+          <details class="meeting-q__group" style="--c:#5aa4f7">
+            <summary>
+              <span class="meeting-q__group-tag"><span class="pip" style="background:#5aa4f7"></span>Routing &amp; traffic management</span>
+              <span class="meeting-q__group-count">4 questions</span>
+            </summary>
+            <ol class="meeting-q__list">
+              <li>How many CDN / edge providers are currently in your stack, and what is the traffic split across them?</li>
+              <li>On the May 7 incident where Website and API both degraded, was the root cause traced to an edge layer, origin, or a control-plane configuration change?</li>
+              <li>What is your current failover SLA, and how is traffic shifted when an origin region degrades &mdash; DNS-TTL based, or a real-time traffic manager?</li>
+              <li>Are CDN configurations differentiated for the web product, Sonar API, and Comet browser traffic?</li>
+            </ol>
+          </details>
+          <details class="meeting-q__group" style="--c:#ef4444">
+            <summary>
+              <span class="meeting-q__group-tag"><span class="pip" style="background:#ef4444"></span>Comet · Cloudflare compatibility</span>
+              <span class="meeting-q__group-count">3 questions</span>
+            </summary>
+            <ol class="meeting-q__list">
+              <li>Are you aware that Comet is failing Cloudflare bot-detection challenges on third-party Cloudflare-protected sites per multiple community reports? What is the plan &mdash; fingerprint normalization, or CDN-side compatibility negotiation?</li>
+              <li>Has Comet been tested for compatibility with Akamai-protected sites? Akamai Bot Manager + Client Reputation use different signals; a partner-grade allow-list lane may be feasible.</li>
+              <li>Is Comet performing any SSL interception or non-standard certificate manipulation that might cause failures at sites using EV certificates or HSTS preloading?</li>
+            </ol>
+          </details>
+          <details class="meeting-q__group" style="--c:#00e6d3">
+            <summary>
+              <span class="meeting-q__group-tag"><span class="pip" style="background:#00e6d3"></span>Cache strategy</span>
+              <span class="meeting-q__group-count">2 questions</span>
+            </summary>
+            <ol class="meeting-q__list">
+              <li>What percentage of perplexity.ai traffic is cacheable at the edge (static assets, popular results, image-gen outputs) vs pure origin / inference?</li>
+              <li>Have you explored edge-caching for high-frequency identical queries (trending topics), and if so, what is the cache invalidation strategy?</li>
+            </ol>
+          </details>
+          <details class="meeting-q__group" style="--c:#f5b942">
+            <summary>
+              <span class="meeting-q__group-tag"><span class="pip" style="background:#f5b942"></span>Auth &amp; billing</span>
+              <span class="meeting-q__group-count">2 questions</span>
+            </summary>
+            <ol class="meeting-q__list">
+              <li>Community reports include double-charges and silent annual-default after pause/resume. Is the billing microservice behind an API gateway with idempotency enforcement, or is it exposed directly?</li>
+              <li>How do you handle session token invalidation at the edge when a user's subscription state changes (Pro &rarr; cancelled &rarr; resubscribe)?</li>
+            </ol>
+          </details>
+          <details class="meeting-q__group" style="--c:#a2a3e9">
+            <summary>
+              <span class="meeting-q__group-tag"><span class="pip" style="background:#a2a3e9"></span>Observability &amp; incident telemetry</span>
+              <span class="meeting-q__group-count">3 questions</span>
+            </summary>
+            <ol class="meeting-q__list">
+              <li>Your May 7 status sequence showed an auto-resolve / re-open loop. Is status automation tied to synthetic checks, real user monitoring, or manual updates?</li>
+              <li>Do you have per-region, per-endpoint RUM today? What is your P95 latency target for inference streaming?</li>
+              <li>Are #status and #bug-reports signals from your public Discord being ingested into your incident management pipeline, or is that manual?</li>
+            </ol>
+          </details>
+          <details class="meeting-q__group" style="--c:#8587e3">
+            <summary>
+              <span class="meeting-q__group-tag"><span class="pip" style="background:#8587e3"></span>Enterprise SLA</span>
+              <span class="meeting-q__group-count">2 questions</span>
+            </summary>
+            <ol class="meeting-q__list">
+              <li>Enterprise customers in the public Discord report 2+ week support response gaps. What is your contracted enterprise incident-response SLA, and how is it enforced?</li>
+              <li>Would you be open to a dedicated Enterprise-tier edge configuration giving your largest customers guaranteed path priority and dedicated health checks?</li>
+            </ol>
+          </details>
+          <details class="meeting-q__group" style="--c:#a855f7">
+            <summary>
+              <span class="meeting-q__group-tag"><span class="pip" style="background:#a855f7"></span>API gateway</span>
+              <span class="meeting-q__group-count">2 questions</span>
+            </summary>
+            <ol class="meeting-q__list">
+              <li>Is the Sonar API behind the same API gateway as the web product? Status incidents show they can degrade independently.</li>
+              <li>What is the current rate-limit strategy for Sonar &mdash; IP, token, or account-based? Are you seeing false-positive rate-limiting against legitimate enterprise API consumers?</li>
+            </ol>
+          </details>
         </div>
       </div>
     </section>

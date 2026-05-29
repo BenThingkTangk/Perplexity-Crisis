@@ -11,8 +11,8 @@ const MODES = {
     greeting: '<strong>ATOM · Akamai AI Grid Command Center.</strong> Ask me to make the Akamai wedge for Perplexity obvious, clean, and impossible to misunderstand.',
     chips: [
       'Walk me through the end-to-end failure flow',
-      'Explain this like I have 30 seconds',
-      'What is the crisis in plain English?',
+      'Summarize the May 7 incident sequence',
+      'Why is Comet breaking on Cloudflare-protected sites?',
       'Why does Akamai matter here?',
     ],
   },
@@ -20,29 +20,29 @@ const MODES = {
     label: 'CTO',
     greeting: 'CTO mode online. I will frame this as a runtime, placement, and orchestration problem — not a CDN sale.',
     chips: [
-      'Walk me through the end-to-end failure flow',
-      'Where does Perplexity actually break?',
-      'What does the convergence layer own?',
-      'Semantic cache vs public AI Gateway?',
+      'Custom-browser bot compatibility · Akamai vs CF detection',
+      'May 7 GTM partial-resolve + re-escalation pattern',
+      'API idempotency at the edge for billing endpoints',
+      'Identity-aware rate limiting · stop session mis-attribution',
     ],
   },
   cfo: {
     label: 'CFO',
     greeting: 'CFO mode online. Token economics, egress drag, and SLA ownership — all in one cost-of-incidents story.',
     chips: [
-      'Walk me through the end-to-end failure flow',
-      'Where is the budget bleeding?',
-      'What does this cost if we do nothing?',
+      'Cost of a 4-hour multi-component incident',
+      'What does the billing-cluster pattern cost?',
       'ROI for an Akamai convergence pilot',
+      'Enterprise SLA risk · 2-week support gap',
     ],
   },
   sales: {
     label: 'Sales',
     greeting: 'Sales mode online. The wedge: keep the public edge, win the AI runtime. Here are the moves that close.',
     chips: [
-      'Walk me through the end-to-end failure flow',
       'Pitch in one sentence',
-      'How to open with the CTO',
+      'Comet · Cloudflare wall · displacement vs complement',
+      'Can DataStream 2 ingest Discord support signal?',
       'Objection: "the public edge already does this"',
     ],
   },
@@ -68,9 +68,66 @@ const WALKTHROUGH_HTML = `
 
 const WALKTHROUGH_MATCH = { match: /walk.+through|end[- ]to[- ]end|failure flow|flow.*fail|crisis flow|stages?/i, html: WALKTHROUGH_HTML };
 
+/* Shared Discord-research response patterns reused across modes. Each is grounded
+ * in the May 2026 public-Discord + status-channel extraction. Claim labels per
+ * the playbook: CONFIRMED / LIKELY / UNKNOWN / ASK PERPLEXITY. No usernames. */
+const COMET_CF_MATCH = { match: /comet.*cloudflare|cloudflare.*comet|cloudflare wall|bot.*detection|custom[- ]browser|bot compatibility|fingerprint/i, html: `
+  <p><strong>Comet ↔ Cloudflare verification wall — community signal.</strong> Multiple independent reports on Perplexity's public Discord describe Comet failing Cloudflare bot-detection challenges on third-party Cloudflare-protected sites; reproduced across devices and networks with no recovery path [CONFIRMED — Discord, May 24–29, 2026]. Likely root cause: TLS/UA fingerprint mismatch with Cloudflare's JA3/JA4 + behavior signals [LIKELY].</p>
+  <p>This is a Comet third-party-site compatibility signal — not a claim about Perplexity's own routing architecture.</p>
+  <ul>
+    <li>Akamai Bot Manager + Client Reputation use different signals than Cloudflare [CONFIRMED capability].</li>
+    <li>A partner-grade compatibility lane could allow-list Comet on Akamai-protected sites [ASK PERPLEXITY · needs Akamai lab confirmation].</li>
+    <li>Positioning: displacement of front-door bot-mitigation on sites Perplexity / Comet care about, additive to multi-cloud compute.</li>
+  </ul>` };
+
+const MAY7_MATCH = { match: /may 7|may7|may[- ]?7|website ?\+ ?api|website and api|re[- ]escalation|partial[- ]?resolve|auto[- ]?resolve|gtm.*partial/i, html: `
+  <p><strong>May 7–8 status sequence — observable in the public record.</strong></p>
+  <ul>
+    <li>20:20 UTC · Website degraded; status briefly auto-resolved then re-opened to Investigating [CONFIRMED].</li>
+    <li>20:30 UTC · API also degraded — scope expanded within 10 minutes (control-plane signal) [LIKELY].</li>
+    <li>20:33 UTC · Identified · 22:01 UTC · Resolved · 22:12 UTC · re-opened to Identified · 00:22 UTC May 8 · final Resolved.</li>
+    <li>Total window ~4 h 2 min with one false-resolve event [CONFIRMED].</li>
+  </ul>
+  <p><strong>Akamai move.</strong> GTM + DataStream 2 propagate per-edge health faster than DNS-TTL failover and reduce the risk of partial-edge "Resolved" while other edges still serve degraded responses. Status-system auto-resolve logic should be tied to real-user monitoring, not a single synthetic probe [ASK PERPLEXITY].</p>` };
+
+const BILLING_IDEMPOTENCY_MATCH = { match: /idempot|billing.*(api|gateway|microservice|edge)|double[- ]charg|plan switch|plan transition|annual default|enterprise billing/i, html: `
+  <p><strong>Billing state-machine pattern — three independent community signals.</strong></p>
+  <ul>
+    <li>Double-charge on an enterprise plan with an incorrect personal-Pro line item (€217 cited) [CONFIRMED report · Discord, ~7 d ago].</li>
+    <li>Silent annual-default after pause/resume — no clear consent flow [CONFIRMED report · May 22].</li>
+    <li>Critical UI failure when switching plans inside Comet [CONFIRMED report · May 20].</li>
+  </ul>
+  <p>All three are consistent with missing idempotency at the billing API and weak edge-side subscription-state verification [LIKELY].</p>
+  <p><strong>Akamai move.</strong> API Gateway can enforce idempotency keys at the edge for the billing endpoint and use EdgeAuth to bind subscription state to a session token — single-execution of payment state transitions without backend changes [CONFIRMED capability].</p>` };
+
+const RATE_LIMIT_MATCH = { match: /rate[- ]limit|identity[- ]aware|session.*(attribution|mis[- ]?attribut)|limit reached|throttl/i, html: `
+  <p><strong>Rate-limit false positives — May 28–29 web reports.</strong> Authenticated users hit "limit reached" on basic web search; persistence across incognito, adblocker-disable, and login-cycle points to server-side session attribution by IP or fingerprint rather than identity-aware token throttling [LIKELY].</p>
+  <ul>
+    <li>Akamai API Gateway supports EdgeAuth-keyed identity-aware throttling — limits follow the user, not the IP [CONFIRMED capability].</li>
+    <li>Reduces false positives for legitimate users while keeping real abuse enforcement at the edge.</li>
+    <li>Discovery: what is today's rate-limit key — IP, fingerprint, or token? [ASK PERPLEXITY]</li>
+  </ul>` };
+
+const DATASTREAM_DISCORD_MATCH = { match: /datastream|discord.*ingest|ingest.*discord|webhook.*observab|community signal/i, html: `
+  <p><strong>Auxiliary observability — Discord signal into the incident loop.</strong></p>
+  <ul>
+    <li>Akamai DataStream 2 streams edge events with low latency to downstream ingestion [CONFIRMED capability].</li>
+    <li>Discord webhooks (Perplexity's #status, #bug-reports) could feed a side-channel into the same observability pipeline as edge telemetry [ASK PERPLEXITY · integration design needed].</li>
+    <li>Value: community-reported issues (Comet/CF wall, billing cluster, rate-limit false positives) surface in the same dashboard as edge incidents — proactive enterprise signal, not reactive support.</li>
+  </ul>` };
+
+const SUPPORT_MATCH = { match: /enterprise.*support|support.*enterprise|2[- ]?week|support gap|sla.*risk|blackout|mpulse/i, html: `
+  <p><strong>Enterprise support blackout — operational signal.</strong> Multiple Enterprise-tier customers report ~2 weeks with no human support response; wire-transfer license issues also unresolved through bot triage [CONFIRMED · Discord, May 15–29].</p>
+  <ul>
+    <li>This is an enterprise deal-velocity risk, not a technical defect.</li>
+    <li>Akamai mPulse RUM + DataStream 2 give per-tenant proactive observability — degradations surface before enterprise customers file tickets [CONFIRMED capability].</li>
+    <li>Positioning: "Perplexity Enterprise, powered by Akamai edge monitoring" — a tier differentiator, not a CDN upsell.</li>
+  </ul>` };
+
 const RESPONSES = {
   simple: [
     WALKTHROUGH_MATCH,
+    COMET_CF_MATCH, MAY7_MATCH, BILLING_IDEMPOTENCY_MATCH, RATE_LIMIT_MATCH, DATASTREAM_DISCORD_MATCH, SUPPORT_MATCH,
     { match: /30\s*seconds|tl;?dr|short|brief|explain/i, html: `
       <p><strong>30-second version.</strong> Perplexity wired itself to AWS + Microsoft Foundry + CoreWeave inside a year. The architecture is fast — the coordination model isn't. When billing, GPUs, or providers wobble, the user feels it as a slow or broken answer.</p>
       <p>The public edge handles the connection. <strong>Akamai AI Grid is the runtime layer above the hyperscalers</strong> — it decides where inference runs, fails over billing/auth in under 500&nbsp;ms, and gives Perplexity one SLA owner across the whole stack. [CONFIRMED for Akamai capabilities · LIKELY for inference concentration]</p>` },
@@ -96,6 +153,7 @@ const RESPONSES = {
 
   cto: [
     WALKTHROUGH_MATCH,
+    COMET_CF_MATCH, MAY7_MATCH, BILLING_IDEMPOTENCY_MATCH, RATE_LIMIT_MATCH, DATASTREAM_DISCORD_MATCH, SUPPORT_MATCH,
     { match: /break|fail|where.+breaks?/i, html: `
       <p><strong>Where it actually breaks.</strong></p>
       <ul>
@@ -129,6 +187,7 @@ const RESPONSES = {
 
   cfo: [
     WALKTHROUGH_MATCH,
+    MAY7_MATCH, BILLING_IDEMPOTENCY_MATCH, SUPPORT_MATCH, DATASTREAM_DISCORD_MATCH, COMET_CF_MATCH,
     { match: /bleed|cost|spend|budget/i, html: `
       <p><strong>Where the money leaks.</strong></p>
       <ul>
@@ -153,6 +212,7 @@ const RESPONSES = {
 
   sales: [
     WALKTHROUGH_MATCH,
+    COMET_CF_MATCH, MAY7_MATCH, BILLING_IDEMPOTENCY_MATCH, RATE_LIMIT_MATCH, DATASTREAM_DISCORD_MATCH, SUPPORT_MATCH,
     { match: /pitch|one sentence|elevator/i, html: `
       <p><strong>One-sentence pitch.</strong></p>
       <p>"The front door handles the connection. <strong>Akamai AI Grid decides where the intelligence runs — and owns the outcome.</strong>"</p>` },

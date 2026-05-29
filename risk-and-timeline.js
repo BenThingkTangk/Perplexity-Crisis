@@ -13,9 +13,14 @@
     c5: { title: 'AI Grid target · sub-50 ms TTFT', body: 'Akamai AI Grid targets sub-50 ms time-to-first-token for select real-time workloads. Distance from demand collapses when inference runs at the nearest of 4,400+ edge PoPs.', src: 'Akamai AI Grid press release · March 2026', row: 'confirmed', impact: 'high' },
     c6: { title: '25+ Perplexity API outages tracked since May 2025', body: 'StatusGator public incident history shows 25+ Perplexity API outages including a documented Sonar API down-severity event and two major incidents in May 2026. This is the reliability anchor of the Akamai pitch.', src: 'StatusGator · public incident history for Perplexity API', row: 'confirmed', impact: 'high' },
     c7: { title: 'Credit-based metering · 401/402 cascade', body: 'Perplexity API uses Bearer-token auth with credit-based per-token metering. Credit exhaustion or billing failure produces 401/402 — there is no graceful degradation, so downstream integrations cascade. This is the exact failure mode EdgeWorkers can wrap with a circuit breaker.', src: 'Perplexity API documentation · key management + rate limits', row: 'confirmed', impact: 'high' },
+    c8: { title: 'Comet ↔ Cloudflare verification wall breaks user flows', body: 'Multiple independent community reports on Perplexity\'s public Discord describe Comet failing Cloudflare bot-detection challenges on third-party Cloudflare-protected sites — reproduced across devices and networks with no recovery path. This is a Comet third-party-site compatibility signal, not a statement about Perplexity\'s own routing architecture.', src: 'Public Perplexity Discord · #bug-reports / #feedback-comet · May 24–29, 2026', row: 'confirmed', impact: 'high' },
+    c9: { title: 'Enterprise support not enterprise-grade', body: 'Multiple independent reports across the public Perplexity Discord describe Enterprise-tier customers waiting 2+ weeks for any human support response. Wire-transfer license issues also unresolved through bot triage. This is an operational risk signal for enterprise deal velocity.', src: 'Public Perplexity Discord · #feedback-general · May 15–29, 2026', row: 'confirmed', impact: 'high' },
+    c10: { title: 'Status auto-resolve false-positive · May 7 sequence', body: 'The official status channel record shows the May 7 incident going Investigating → Identified → Resolved → re-opened to Identified → Resolved again over a ~4-hour window. The brief false-resolve is observable in the public record and would mask true MTTR in any downstream metrics.', src: 'Perplexity public status channel · May 7–8, 2026', row: 'confirmed', impact: 'high' },
 
     l1: { title: 'Perplexity inference concentrated in us-east-1', body: 'The Search API benchmarks were initiated from us-east-1. That strongly suggests regional concentration of the retrieval path, but is not a public statement of exclusive deployment. Qualify in writing.', src: 'Perplexity Research · benchmarks initiated from us-east-1', row: 'likely', impact: 'medium' },
     l2: { title: 'Akamai semantic caching at edge · roadmap', body: 'Akamai\'s March 2026 AI Grid press release uses "will leverage" language for semantic caching — forward-looking, not a GA claim. State as roadmap when pitching; do not claim GA today.', src: 'Akamai AI Grid press release · "will leverage" framing', row: 'likely', impact: 'high' },
+    l3: { title: 'Billing microservice lacks idempotency at API gateway', body: 'Three independent billing anomaly patterns (double-charge on enterprise plan, silent annual default after pause/resume, critical UI failure on plan switch in Comet) are all consistent with missing idempotency keys at the billing API. Likely — not directly confirmed by Perplexity engineering. Akamai API Gateway can enforce idempotency at the edge without backend changes.', src: 'Public Perplexity Discord · billing cluster · May 14–22, 2026', row: 'likely', impact: 'high' },
+    l4: { title: 'Rate-limiter mis-attributing sessions (IP/fingerprint)', body: 'Authenticated web users hitting "limit reached" persistently — even after incognito, adblocker-disable and login-cycle — points to server-side session attribution by IP or fingerprint rather than identity-aware token throttling. Likely, not confirmed. Akamai EdgeAuth-keyed rate limiting is the targeted fix.', src: 'Public Perplexity Discord · #bug-reports · May 28–29, 2026', row: 'likely', impact: 'medium' },
 
     u1: { title: 'Specific payment processor in use', body: 'Perplexity has not publicly named a payment processor. Stripe is a common assumption but is not confirmed. Do not state as fact.', src: 'No public disclosure', row: 'unknown', impact: 'low' },
     u2: { title: 'AI router implementation · Worker vs. custom proxy', body: 'Whether the AI router is a managed Worker product, a custom reverse proxy, or a hyperscaler load balancer is not publicly disclosed. This is a discovery question for the next Perplexity meeting.', src: 'No public disclosure', row: 'unknown', impact: 'medium' },
@@ -24,6 +29,7 @@
     a1: { title: 'Foundry endpoint topology vs. Sonar', body: 'Does Foundry model access route through the same API endpoint as the Sonar family, or is it a separate plane with its own ingress and billing graph? Surface this in the next meeting.', src: 'Discovery question for Perplexity', row: 'ask', impact: 'medium' },
     a2: { title: 'Is the credit-entitlement check synchronous on every API call?', body: 'If yes, every API call has a hard dependency on the billing endpoint being healthy — and an EdgeWorkers circuit breaker is a direct, day-one reliability win. If no, the win is smaller but still real. Ask explicitly.', src: 'Discovery question for Perplexity', row: 'ask', impact: 'high' },
     a3: { title: 'us-east-1 failover · AWS ↔ CoreWeave handoff time', body: 'On an AWS us-east-1 event, how long until traffic shifts onto CoreWeave or another plane? This determines the headline incident-compression number for the Akamai pilot.', src: 'Discovery question for Perplexity', row: 'ask', impact: 'high' },
+    a4: { title: 'Akamai Bot Manager · custom-browser compatibility lane', body: 'Could Akamai Bot Manager + Client Reputation provide a partner-grade compatibility lane for Comet so it does not trip front-door bot detection on Akamai-protected sites? Needs lab confirmation, but the architecture is plausible.', src: 'Discovery + Akamai lab confirmation', row: 'ask', impact: 'high' },
   };
 
   const ROW_LABELS = { confirmed: 'Confirmed', likely: 'Likely', unknown: 'Unknown', ask: 'Ask Perplexity' };
@@ -106,6 +112,70 @@
       stats: [['1', 'down-severity'], ['2', 'major incidents'], ['12 min', 'time to acknowledge']],
       src: 'StatusGator · public incident history',
       color: '#ef4444',
+    },
+    {
+      eyebrow: 'Feb 16, 2026 · Sonar API · clean resolve',
+      title: '~53-minute Sonar API outage, no re-escalation',
+      body: 'The Sonar API surface had a ~53-minute incident (16:35–17:28) that resolved cleanly with no re-escalation. The contrast with the May 7 multi-component re-open pattern is the operational signal: Sonar appears to be on its own incident lane.',
+      stats: [['~53 min', 'window'], ['1 component', 'Sonar API only'], ['Clean', 'resolution']],
+      src: 'Perplexity public status channel · Feb 16, 2026',
+      color: '#8587e3',
+    },
+    {
+      eyebrow: 'May 7–8, 2026 · Website + API · re-escalation',
+      title: '4-hour multi-component incident with auto-resolve misfire',
+      body: 'Status channel record: Website degraded at 20:20 UTC; API joined at 20:30; Identified at 20:33; Resolved at 22:01; re-opened to Identified at 22:12; final Resolved at 00:22 UTC May 8. The brief false-resolve is observable in the public record.',
+      stats: [['4 h 2 min', 'total window'], ['2', 'components affected'], ['1', 'false-resolve event']],
+      src: 'Perplexity public status channel · May 7–8, 2026',
+      color: '#ef4444',
+    },
+    {
+      eyebrow: 'May 14–22, 2026 · Billing · community cluster',
+      title: 'Billing state-machine anomalies on plan transitions',
+      body: 'Independent community reports include a double-charge on enterprise plan, silent annual default after pause/resume, and a critical UI failure when switching plans in Comet. Pattern is consistent with missing idempotency at the billing API.',
+      stats: [['3', 'independent patterns'], ['€217+', 'cited error amount'], ['LIKELY', 'idempotency gap']],
+      src: 'Public Perplexity Discord · #feedback-comet · May 14–22, 2026',
+      color: '#f5b942',
+    },
+    {
+      eyebrow: 'May 15–29, 2026 · Enterprise support',
+      title: 'Enterprise support blackout · 2-week response gap',
+      body: 'Multiple Enterprise-tier customers report ~2 weeks of zero human support response. Wire-transfer license issues also unresolved through bot triage. Operational, not technical — but a direct enterprise deal-velocity risk.',
+      stats: [['2 wk+', 'response gap'], ['Multiple', 'independent reports'], ['Enterprise', 'tier impacted']],
+      src: 'Public Perplexity Discord · #feedback-general · May 15–29, 2026',
+      color: '#5aa4f7',
+    },
+    {
+      eyebrow: 'May 20, 2026 · Comet · billing UI',
+      title: 'Critical billing UI failure on plan switch in Comet',
+      body: 'Community-reported "critical" billing UI failure when switching plans inside the Comet interface. Reinforces the broader billing state-machine pattern observed across the same week.',
+      stats: [['Critical', 'severity per poster'], ['Plan switch', 'trigger'], ['Comet', 'surface']],
+      src: 'Public Perplexity Discord · #feedback-comet · May 20, 2026',
+      color: '#f5b942',
+    },
+    {
+      eyebrow: 'May 24, 2026 · Comet · third-party site compatibility',
+      title: 'Comet ↔ Cloudflare verification wall (community-reported)',
+      body: 'Community thread on Comet failing Cloudflare bot-detection challenges on third-party Cloudflare-protected sites. Reproduced across devices and networks with no recovery path. This is a Comet third-party-site compatibility signal — not a claim about Perplexity\'s own routing.',
+      stats: [['LIKELY', 'TLS/UA fingerprint'], ['Multi-site', 'reproduction'], ['Displacement', 'opportunity']],
+      src: 'Public Perplexity Discord · #bug-reports / #feedback-comet · May 24, 2026',
+      color: '#ef4444',
+    },
+    {
+      eyebrow: 'May 26–27, 2026 · Comet desktop · regressions',
+      title: 'Comet high CPU + sync function regressions',
+      body: 'Post-update community reports of very high CPU usage in Comet desktop, alongside a separate thread describing the sync function as broken in the latest version. Operational signal of feature-velocity outpacing release-quality controls.',
+      stats: [['CPU', 'post-update'], ['Sync', 'broken'], ['MEDIUM', 'severity']],
+      src: 'Public Perplexity Discord · #comet-general · May 26–27, 2026',
+      color: '#a855f7',
+    },
+    {
+      eyebrow: 'May 28–29, 2026 · Web · rate-limit + image-gen',
+      title: 'Rate-limit false positives and image-gen failures',
+      body: 'Authenticated web users hitting "limit reached" persistently across incognito, adblocker-disable and login-cycle. Separate reports of Pro image generator unavailable and region-blocked. Identity-aware rate limiting + geo-routing at the edge are the targeted fixes.',
+      stats: [['Web', 'surface'], ['Authenticated', 'users'], ['LIKELY', 'IP/fingerprint key']],
+      src: 'Public Perplexity Discord · #bug-reports · May 28–29, 2026',
+      color: '#00e6d3',
     },
   ];
 

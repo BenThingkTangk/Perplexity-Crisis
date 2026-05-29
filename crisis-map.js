@@ -142,4 +142,103 @@
   }
   document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init) : init();
   window.CrisisMapStore = store; window.CRISIS_DATA = CRISES;
+
+  /* ============ FIELD SIGNALS — Discord + status-channel patterns (May 2026) ============
+   * Six community-sourced operational signals from Perplexity's public Discord
+   * and official status channel. Each carries an Akamai opportunity label:
+   *   - "Displacement"  : front-door / bot / API gateway lane where Akamai could
+   *                       offer a better experience than the current public-edge stack.
+   *   - "Convergence"   : multi-cloud orchestration / API gateway / idempotency lane
+   *                       where the AI Grid runtime layer adds value WITHOUT touching
+   *                       Perplexity's AWS + Foundry + CoreWeave compute graph.
+   *   - "Observability" : DataStream / mPulse / RUM lane — proactive enterprise signal.
+   *
+   * All labels per the Discord-research playbook: CONFIRMED / LIKELY / UNKNOWN / ASK.
+   * No verbatim user quotes, no usernames, no claims about Perplexity's own routing.
+   */
+  const FIELD_SIGNALS = [
+    {
+      id: 'fs-comet-cf',
+      lane: 'Displacement',
+      laneColor: '#ef4444',
+      eyebrow: 'May 24, 2026 · Comet desktop · ongoing',
+      title: 'Comet ↔ Cloudflare verification wall',
+      body: 'Community-reported pattern: Comet browser fails Cloudflare bot-detection on third-party sites; users blocked at the challenge page across devices and networks. This is a Comet third-party-site compatibility signal — not a claim about Perplexity\'s own routing.',
+      claim: 'LIKELY — TLS/UA fingerprint mismatch with Cloudflare bot mitigation',
+      move: 'Akamai Bot Manager + Client Reputation use different signals — Comet could be whitelisted at the edge by a partner-grade compatibility lane.',
+    },
+    {
+      id: 'fs-may7',
+      lane: 'Convergence',
+      laneColor: '#f5b942',
+      eyebrow: 'May 7–8, 2026 · Website + API · 4 h window',
+      title: 'Multi-component degradation with re-escalation',
+      body: 'Status channel record: Website degraded at 20:20 UTC, API degraded ten minutes later, "Resolved" at 22:01, re-opened to "Identified" at 22:12, final resolved 00:22 UTC May 8. Re-escalation pattern suggests partial-edge consistency, not just origin recovery.',
+      claim: 'CONFIRMED — status sequence is public; auto-resolve misfire observable',
+      move: 'Akamai GTM + DataStream 2 propagate per-edge health faster than DNS-TTL failover and prevent false-positive auto-resolutions on the status surface.',
+    },
+    {
+      id: 'fs-billing',
+      lane: 'Convergence',
+      laneColor: '#f5b942',
+      eyebrow: 'May 14–22, 2026 · Billing · multiple reports',
+      title: 'Billing state-machine cluster',
+      body: 'Independent community reports of double-charge on enterprise plan, silent annual-default after pause/resume, and a critical UI failure when switching plans inside Comet. Pattern is consistent with missing idempotency at the billing API.',
+      claim: 'LIKELY — billing microservice lacks edge-enforced idempotency',
+      move: 'Akamai API Gateway idempotency keys + EdgeAuth subscription-state token prevent replay and protect the billing path without Perplexity backend changes.',
+    },
+    {
+      id: 'fs-support',
+      lane: 'Observability',
+      laneColor: '#5aa4f7',
+      eyebrow: 'May 15–29, 2026 · Enterprise + wire-transfer customers',
+      title: 'Enterprise support blackout',
+      body: 'Multiple Enterprise-tier customers report ~2 weeks with no human support response. Wire-transfer license issues also unresolved via bot triage. Pattern is operational, not technical — but it puts every enterprise deal at risk.',
+      claim: 'CONFIRMED — multiple independent reports across channels',
+      move: 'Akamai mPulse RUM + DataStream 2 give Perplexity per-tenant proactive monitoring — degradations surface before enterprise customers file tickets.',
+    },
+    {
+      id: 'fs-rate',
+      lane: 'Convergence',
+      laneColor: '#f5b942',
+      eyebrow: 'May 28–29, 2026 · Web · authenticated users',
+      title: 'Rate-limit false positives on web search',
+      body: 'Authenticated users hit "limit reached" on basic web search. Persistence across incognito, adblocker-disable and login cycle indicates server-side session mis-attribution (IP or fingerprint), not client cookies.',
+      claim: 'LIKELY — IP/fingerprint-keyed rate limiting mis-attributing sessions',
+      move: 'Akamai API Gateway token-based identity-aware rate limiting (EdgeAuth-keyed) reduces false positives without weakening enforcement.',
+    },
+    {
+      id: 'fs-connectors',
+      lane: 'Observability',
+      laneColor: '#5aa4f7',
+      eyebrow: 'May 21–29, 2026 · Web · multiple connectors',
+      title: 'Connector OAuth lifecycle failures',
+      body: 'Airtable connector reported broken with active multi-reply thread; Google Drive connector responds but cannot read or acknowledge files. Pattern is consistent with token-refresh / scope drift at the OAuth layer.',
+      claim: 'LIKELY — connector OAuth tokens expiring or losing scope silently',
+      move: 'Akamai API Security observes OAuth token flows at the edge and alerts on expiry / scope-loss patterns without backend instrumentation.',
+    },
+  ];
+
+  function renderFieldSignals() {
+    const root = document.getElementById('field-signals-grid');
+    if (!root) return;
+    root.innerHTML = FIELD_SIGNALS.map((s) => `
+      <article class="fs-card" data-fs-id="${s.id}" style="--c:${s.laneColor}">
+        <div class="fs-card__top">
+          <span class="fs-card__lane" style="--c:${s.laneColor}"><span class="pip" style="background:${s.laneColor}"></span>${s.lane}</span>
+          <span class="fs-card__eyebrow">${s.eyebrow}</span>
+        </div>
+        <h3 class="fs-card__title">${s.title}</h3>
+        <p class="fs-card__body">${s.body}</p>
+        <div class="fs-card__claim">${s.claim}</div>
+        <div class="fs-card__move"><span class="fs-card__move-label">Akamai move</span><span class="fs-card__move-text">${s.move}</span></div>
+      </article>
+    `).join('');
+  }
+
+  function initFieldSignals() { renderFieldSignals(); }
+  document.readyState === 'loading'
+    ? document.addEventListener('DOMContentLoaded', initFieldSignals)
+    : initFieldSignals();
+  window.FIELD_SIGNALS = FIELD_SIGNALS;
 })();
