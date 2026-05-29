@@ -9,7 +9,7 @@ const path = require('path');
 const { chromium } = require('playwright');
 
 const TARGET = process.argv[2] || 'http://localhost:8765/';
-const OUT    = process.argv[3] || '/home/user/workspace/Perplexity-Crisis-5b8eb7aa/qa-shots';
+const OUT    = process.argv[3] || '/home/user/workspace/Perplexity-Crisis-25f5cba7/qa-shots';
 fs.mkdirSync(OUT, { recursive: true });
 
 const VIEWPORTS = [
@@ -20,11 +20,16 @@ const VIEWPORTS = [
 // Scroll target offsets: for each section, scroll so that the *content
 // payload* is centered in the viewport — not just the heading.
 const SECTIONS = [
+  { id: 'main',                     file: 'hero',           scrollSelector: '.hero-grid', top: true },
+  { id: 'crisis-map',               file: 'field-map',      scrollSelector: '.crisis-map-grid' },
   { id: 'cloudflare-routing-cache', file: 'routing-cache',  scrollSelector: '.cmd-scorecards' },
   { id: 'claims-risk',              file: 'claims-risk',    scrollSelector: '.risk-matrix__body' },
   { id: 'infra-timeline',           file: 'infra-timeline', scrollSelector: '.tl__steps' },
-  { id: 'end-to-end-flow',          file: 'crisis-flow',    scrollSelector: '.flow-canvas' },
+  { id: 'end-to-end-flow',          file: 'walkthrough',    scrollSelector: '.flow-canvas' },
+  { id: 'flywheel',                 file: 'convergence',    scrollSelector: '.flywheel-grid' },
   { id: 'pilot',                    file: 'pilot',          scrollSelector: '.calc-grid' },
+  { id: 'pilot',                    file: 'pilot-cta',      scrollSelector: '.pilot-cta' },
+  { id: 'stakeholders',             file: 'stakeholders',   scrollSelector: '.stake-grid' },
 ];
 
 let failures = 0;
@@ -65,10 +70,11 @@ const fail  = (msg) => { console.error('  FAIL ' + msg); failures++; };
     // 2. Section screenshots
     for (const s of SECTIONS) {
       await page.evaluate((args) => {
-        const { id, selector } = args;
+        const { id, selector, top } = args;
+        if (top) { window.scrollTo({ top: 0, behavior: 'instant' }); return; }
         const target = (selector && document.querySelector('#' + id + ' ' + selector)) || document.getElementById(id);
         if (target) target.scrollIntoView({ behavior: 'instant', block: 'center' });
-      }, { id: s.id, selector: s.scrollSelector });
+      }, { id: s.id, selector: s.scrollSelector, top: s.top });
       await page.waitForTimeout(550);
       const outFile = path.join(OUT, vp.name + '_' + s.file + '.png');
       await page.screenshot({ path: outFile, fullPage: false });
