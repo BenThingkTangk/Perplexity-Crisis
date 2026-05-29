@@ -5714,3 +5714,291 @@ main#main { padding-bottom: clamp(96px, 11vh, 132px); }
 }
 
 .stake-foot { margin-top: clamp(1rem, 1.8vw, 1.4rem); }
+
+/* ============================================================
+ * SEND-READY POLISH R2 — Header / Hero / Global restraint
+ * Inspired by: atom-launch-site.vercel.app · perplexity-crisis.vercel.app
+ * Dark-only, ATOM v2, teal sparing, coral accent for one moment.
+ * ============================================================ */
+
+:root {
+  --coral: #f4896b;
+  --coral-soft: rgba(244,137,107,.18);
+  --teal: #3ecfbf;
+  --teal-bright: #00e6d3;
+  --nav-h: 64px;
+}
+
+/* ---------- HEADER · single-row, compact, refined ---------- */
+.header {
+  background: linear-gradient(180deg, rgba(8,8,10,.92), rgba(8,8,10,.66)) !important;
+  border-bottom: 1px solid rgba(255,255,255,.05) !important;
+}
+.header.scrolled { border-bottom-color: rgba(255,255,255,.08) !important; }
+.nav {
+  padding: 12px 0 !important;
+  gap: clamp(12px, 1.6vw, 22px) !important;
+  align-items: center;
+  min-height: var(--nav-h);
+}
+
+/* Brand lockup: orbital teal Δ TOM */
+.brand { gap: 12px !important; }
+.logo-mark.atom-lockup {
+  height: 30px !important;
+  color: #f0f1f3;
+}
+.brand-text.brand-text--lockup {
+  display: inline-flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+  padding-left: 4px;
+  border-left: 1px solid rgba(255,255,255,.10);
+}
+.brand-text--lockup .brand-sub {
+  font-family: var(--font-mono) !important;
+  font-size: 10.5px !important;
+  letter-spacing: .14em !important;
+  text-transform: uppercase;
+  color: #b4b7c0 !important;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+.brand-tag {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--teal-bright);
+  line-height: 1;
+}
+@media (max-width: 1100px) {
+  .brand-text.brand-text--lockup { display: none !important; }
+}
+
+/* Nav links — refined ghost chips */
+.nav-links {
+  flex-wrap: nowrap !important;
+  gap: 2px !important;
+  align-items: center;
+}
+.nav-links > a {
+  border-radius: 8px !important;
+  font-family: var(--font-display) !important;
+  font-weight: 500 !important;
+  font-size: 13px !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  color: #c8cad2 !important;
+  padding: 7px 11px !important;
+  min-height: 32px !important;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  transition: color .18s ease, background .18s ease;
+}
+.nav-links > a:hover {
+  color: #ffffff !important;
+  background: rgba(255,255,255,.04) !important;
+  border-color: transparent !important;
+}
+.nav-sep {
+  display: inline-block;
+  width: 1px; height: 18px;
+  background: rgba(255,255,255,.10);
+  margin: 0 6px;
+}
+
+/* Ask ATOM — compact teal ghost pill */
+.nav-tool--copilot {
+  background: transparent !important;
+  border: 1px solid rgba(0,200,200,.45) !important;
+  color: var(--teal-bright) !important;
+  font-family: var(--font-display) !important;
+  font-weight: 600 !important;
+  font-size: 12.5px !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  padding: 7px 12px !important;
+  border-radius: 999px !important;
+  min-height: 32px !important;
+  box-shadow: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+.nav-tool--copilot:hover {
+  background: rgba(0,200,200,.10) !important;
+  border-color: rgba(0,230,211,.7) !important;
+  color: #ffffff !important;
+}
+.nav-tool--copilot svg {
+  width: 13px !important; height: 13px !important;
+  color: var(--teal-bright) !important;
+  filter: none !important;
+}
+.nav-tool--copilot .nav-tool__pulse { display: none !important; }
+
+/* Nav-toggle (mobile) — keep compact */
+.nav-toggle { border-radius: 8px !important; }
+
+/* Allow Architecture nav-tab in the row only on very wide screens to avoid wrap */
+@media (max-width: 1400px) {
+  .nav-links > a[href="/akamai-architecture.html"] { display: none; }
+}
+
+/* ---------- HERO · cleaner, less dead space, restrained CTAs ---------- */
+.hero {
+  padding-top: clamp(1.4rem, 3vw, 2.4rem) !important;
+  padding-bottom: clamp(2rem, 5vw, 3.6rem) !important;
+}
+.hero-grid {
+  gap: clamp(2rem, 4vw, 3.2rem) !important;
+  align-items: center !important;
+}
+.hero-copy { gap: clamp(1rem, 1.6vw, 1.4rem) !important; }
+.hero-kicker { gap: 10px !important; }
+.hero-kicker .eyebrow {
+  font-size: 10.5px !important;
+  letter-spacing: .18em !important;
+  color: #b4b7c0 !important;
+}
+.hero-kicker .btn--architecture {
+  box-shadow: none !important;
+  background: transparent !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+  color: #e8e8ea !important;
+  font-size: 12px !important;
+  padding: 6px 12px !important;
+  border-radius: 999px !important;
+  min-height: 32px !important;
+}
+.hero-kicker .btn--architecture:hover {
+  border-color: rgba(0,200,200,.45) !important;
+  color: #ffffff !important;
+  background: rgba(0,200,200,.06) !important;
+}
+
+.hero h1 {
+  font-family: var(--font-display, 'Plus Jakarta Sans');
+  font-weight: 700 !important;
+  font-size: clamp(2rem, 1rem + 3.4vw, 3.8rem) !important;
+  line-height: 1.06 !important;
+  letter-spacing: -.025em !important;
+  color: #f3f4f7 !important;
+  max-width: 18ch;
+}
+.hero h1 .hero-emph,
+.hero h1 em.hero-emph {
+  font-style: normal;
+  color: var(--teal-bright);
+  text-shadow: none;
+  background: linear-gradient(180deg, #00e6d3 0%, #3ecfbf 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero .lead {
+  color: #b4b7c0 !important;
+  font-size: clamp(.98rem, .92rem + .2vw, 1.08rem) !important;
+  line-height: 1.68 !important;
+  max-width: 62ch !important;
+}
+.hero .lead strong {
+  color: #f3f4f7;
+  font-weight: 600;
+}
+
+.hero-actions { gap: 10px !important; align-items: center; }
+.btn--ghost {
+  background: transparent !important;
+  border: 1px solid rgba(255,255,255,.12) !important;
+  color: #e8e8ea !important;
+  font-size: 13px !important;
+  padding: 9px 16px !important;
+  border-radius: 999px !important;
+  min-height: 38px !important;
+  font-weight: 500 !important;
+  box-shadow: none !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+}
+.btn--ghost:hover {
+  background: rgba(255,255,255,.04) !important;
+  border-color: rgba(0,200,200,.4) !important;
+  color: #ffffff !important;
+}
+.btn--ghost svg, .btn--ghost .icon {
+  width: 14px !important; height: 14px !important;
+  opacity: .85;
+}
+/* The primary hero CTA — slight teal tint, still ghost */
+.btn--hero-primary {
+  border-color: rgba(0,200,200,.55) !important;
+  color: var(--teal-bright) !important;
+}
+.btn--hero-primary:hover {
+  background: rgba(0,200,200,.10) !important;
+  color: #ffffff !important;
+  border-color: rgba(0,230,211,.7) !important;
+}
+.btn--hero-primary svg { color: var(--teal-bright) !important; }
+
+.hero-meta {
+  font-size: 10.5px !important;
+  letter-spacing: .14em !important;
+  color: #8a8d99 !important;
+  gap: 8px !important;
+}
+.hero-meta b { color: #c8cad2 !important; }
+
+/* Stage size — keep but slightly reduce overall weight */
+.hero-stage { transform: scale(.98); transform-origin: center; }
+
+/* ---------- Section eyebrow consistency ---------- */
+.section-label, .eyebrow {
+  font-family: var(--font-mono) !important;
+  font-size: 10.5px !important;
+  letter-spacing: .18em !important;
+  text-transform: uppercase !important;
+  color: #b4b7c0 !important;
+}
+.section-label svg { opacity: .8; }
+
+/* ---------- Global restraint — kill heavy glows / shadows ---------- */
+.atom-fab { box-shadow: 0 18px 44px rgba(0,0,0,.45), 0 0 0 1px rgba(0,200,200,.30) !important; }
+.btn--architecture, .btn--primary { box-shadow: none !important; }
+
+/* Pilot CTA — softer, less neon */
+.section--pilot .pilot-cta {
+  border-color: rgba(0,200,200,.28) !important;
+  box-shadow: none !important;
+  background:
+    radial-gradient(ellipse at 0% 0%, rgba(0,200,200,.08), transparent 55%),
+    linear-gradient(180deg, rgba(10,14,18,.86), rgba(8,10,14,.82)) !important;
+}
+.section--pilot .pilot-cta__title { background: none !important; -webkit-text-fill-color: #f3f4f7 !important; color: #f3f4f7 !important; }
+
+/* Stakeholder cards — softer borders */
+.section--stakeholders .stake-card { box-shadow: none !important; }
+.section--stakeholders .stake-card:hover { box-shadow: none !important; }
+.section--stakeholders .stake-card__initial { box-shadow: none !important; }
+
+/* Claims tiles — quieter */
+.section--claims .risk-tile { box-shadow: none !important; }
+.section--claims .risk-tile.is-active { box-shadow: 0 0 0 1px var(--c, #00c8c8) !important; }
+
+/* ---------- Coral accent — earned, one moment ---------- */
+.hero-meta .coral, .stat--coral .stat__value, .coral-accent {
+  color: var(--coral) !important;
+}
+
+/* ---------- Mobile · tighten nav ---------- */
+@media (max-width: 1100px) {
+  .nav-links > a { font-size: 12.5px !important; padding: 6px 9px !important; }
+  .nav-sep { margin: 0 4px; }
+}
+@media (max-width: 880px) {
+  .nav-links {
+    flex-wrap: wrap !important;
+  }
+}

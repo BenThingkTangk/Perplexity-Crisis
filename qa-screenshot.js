@@ -88,6 +88,19 @@ const fail  = (msg) => { console.error('  FAIL ' + msg); failures++; };
     if (!themeState.hasSun && !themeState.hasMoon) ok('no sun/moon icons in DOM (toggle removed)');
     else fail('legacy sun/moon icons still present (sun=' + themeState.hasSun + ' moon=' + themeState.hasMoon + ')');
 
+    // 1d. Nav wrap check — nav-links must be a single row at desktop widths
+    const navRow = await page.evaluate(() => {
+      const nav = document.getElementById('primary-nav');
+      if (!nav) return { ok: false, reason: 'missing nav' };
+      const links = Array.from(nav.querySelectorAll('a, button.nav-tool'));
+      const tops = links.map((l) => Math.round(l.getBoundingClientRect().top));
+      const uniq = Array.from(new Set(tops));
+      const navR = nav.getBoundingClientRect();
+      return { ok: uniq.length <= 1, rows: uniq.length, links: links.length, navHeight: Math.round(navR.height) };
+    });
+    if (navRow.ok) ok('nav single row (' + navRow.links + ' items, ' + navRow.navHeight + 'px high)');
+    else fail('nav wraps to ' + navRow.rows + ' rows · ' + navRow.links + ' items');
+
     // 1c. Loader hidden after duration
     const loaderHidden = await page.evaluate(() => {
       const b = document.getElementById('dtom-boot');

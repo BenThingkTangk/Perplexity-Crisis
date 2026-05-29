@@ -368,28 +368,24 @@
         </svg>
         <span class="brand-text brand-text--lockup">
           <span class="brand-sub">Strategic Convergence Brief · Akamai × Perplexity</span>
+          <span class="brand-tag">v2.0 · ATOM</span>
         </span>
       </a>
 
       <nav class="nav-links" id="primary-nav" aria-label="Primary">
         <a href="#thesis">Thesis</a>
         <a href="#crisis-map">Field Map</a>
-        <a href="#cloudflare-routing-cache">Routing &amp; Cache</a>
+        <a href="#cloudflare-routing-cache">Routing</a>
         <a href="#claims-risk">Claims</a>
         <a href="#end-to-end-flow">Walkthrough</a>
         <a href="#flywheel">Convergence</a>
         <a href="#stakeholders">Stakeholders</a>
         <a href="#pilot">Pilot</a>
-        <a href="/akamai-architecture.html">Architecture</a>
         <a href="#evidence">Evidence</a>
+        <span class="nav-sep" aria-hidden="true"></span>
         <button class="nav-tool nav-tool--copilot" type="button" data-atom-open aria-haspopup="dialog" aria-controls="atom-agent">
-          <span class="nav-tool__pulse" aria-hidden="true"></span>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="2.5"/><ellipse cx="12" cy="12" rx="9" ry="3.5"/><ellipse cx="12" cy="12" rx="9" ry="3.5" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="9" ry="3.5" transform="rotate(-60 12 12)"/></svg>
           Ask ATOM
-        </button>
-        <button class="nav-tool" type="button" data-evidence-open aria-haspopup="dialog" aria-controls="evidence-drawer">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 1v22"/><path d="M5 8l7-7 7 7"/></svg>
-          Sources
         </button>
       </nav>
       <button class="nav-tool nav-toggle" type="button" data-nav-toggle aria-label="Toggle menu" aria-expanded="false" aria-controls="primary-nav">
@@ -413,7 +409,7 @@
             </a>
           </div>
           <h1 class="reveal" data-delay="1">
-            A <em style="color:var(--plasma); font-style:normal; text-shadow: 0 0 24px var(--plasma-glow);">strategic convergence</em> brief for Perplexity &mdash; with an Akamai implementation path.
+            A <em class="hero-emph">strategic convergence</em> brief for Perplexity &mdash; with an Akamai implementation path.
           </h1>
           <p class="lead reveal" data-delay="2">
             We built a sourced convergence brief showing how Perplexity can turn its AWS + Microsoft Foundry + CoreWeave architecture into <strong>one user-facing reliability layer</strong> through Akamai AI Grid.
@@ -421,13 +417,9 @@
             Akamai AI Grid sits <strong>alongside</strong> the providers you already chose &mdash; as the real-time broker for AI requests, with intelligent routing, workload-aware control, semantic caching on the roadmap, and one SLA owner across the stack.
           </p>
           <div class="hero-actions reveal" data-delay="3">
-            <button class="btn btn--hero-copilot" type="button" data-atom-open aria-haspopup="dialog" aria-controls="atom-agent">
-              <span class="btn--hero-copilot__pulse" aria-hidden="true"></span>
-              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><ellipse cx="12" cy="12" rx="10" ry="4"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(-60 12 12)"/></svg>
-              <span class="btn--hero-copilot__stack">
-                <span class="btn--hero-copilot__title">Ask ATOM · Akamai Copilot</span>
-                <span class="btn--hero-copilot__sub">Live · grounded in the AI Grid brief</span>
-              </span>
+            <button class="btn btn--ghost btn--hero-primary" type="button" data-atom-open aria-haspopup="dialog" aria-controls="atom-agent">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="2.5"/><ellipse cx="12" cy="12" rx="9" ry="3.5"/><ellipse cx="12" cy="12" rx="9" ry="3.5" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="9" ry="3.5" transform="rotate(-60 12 12)"/></svg>
+              Ask ATOM &mdash; Akamai Copilot
             </button>
             <a class="btn btn--ghost" href="/akamai-architecture.html">
               <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h7v7H3z"/><path d="M14 3h7v7h-7z"/><path d="M14 14h7v7h-7z"/><path d="M3 14h7v7H3z"/><path d="M10 6h4M6 10v4M18 10v4M10 18h4"/></svg>
@@ -435,7 +427,7 @@
             </a>
             <a class="btn btn--ghost" href="#cloudflare-routing-cache">
               <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-              Routing &amp; cache war room
+              Routing war room
             </a>
             <a class="btn btn--ghost" href="#end-to-end-flow">
               <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
