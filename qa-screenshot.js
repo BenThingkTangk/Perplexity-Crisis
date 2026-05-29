@@ -27,9 +27,9 @@ const SECTIONS = [
   { id: 'infra-timeline',           file: 'infra-timeline', scrollSelector: '.tl__steps' },
   { id: 'end-to-end-flow',          file: 'walkthrough',    scrollSelector: '.flow-canvas' },
   { id: 'flywheel',                 file: 'convergence',    scrollSelector: '.flywheel-grid' },
-  { id: 'pilot',                    file: 'pilot',          scrollSelector: '.calc-grid' },
+  { id: 'pilot',                    file: 'pilot',          scrollSelector: '.pilot-sim' },
   { id: 'pilot',                    file: 'pilot-cta',      scrollSelector: '.pilot-cta' },
-  { id: 'stakeholders',             file: 'stakeholders',   scrollSelector: '.stake-grid' },
+  { id: 'stakeholders',             file: 'stakeholders',   scrollSelector: '.stake-map' },
 ];
 
 let failures = 0;

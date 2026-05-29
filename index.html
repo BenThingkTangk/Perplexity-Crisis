@@ -1883,7 +1883,7 @@
     </section>
 
     <!-- ============== PILOT ============== -->
-    <section id="pilot" class="section">
+    <section id="pilot" class="section section--pilot">
       <div class="container container--wide">
         <div class="section-label reveal">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
@@ -1894,54 +1894,105 @@
           A directional simulator &mdash; not a pricing guarantee. Tune query mix, peak-load pressure, and edge offload to see how AI Grid would move five validation metrics: <b>TTFT</b>, <b>cost-per-query</b>, <b>cache hit rate</b>, <b>egress reduction</b>, and <b>incident ownership</b>. The ask is small, the proof is structural.
         </p>
 
-        <div class="calc-grid">
-          <div class="calc-card glass reveal" data-delay="1">
-            <div class="control">
-              <label for="qpm">Monthly query volume</label>
-              <div class="row"><b><span id="qpmVal" class="tabular">600</span></b><span>million queries</span></div>
-              <input id="qpm" type="range" min="50" max="2000" step="10" value="600" />
-            </div>
-            <div class="control">
-              <label for="offload">Akamai inference offload</label>
-              <div class="row"><b><span id="offloadVal" class="tabular">35</span>%</b><span>of user-facing demand</span></div>
-              <input id="offload" type="range" min="5" max="80" step="1" value="35" />
-            </div>
-            <div class="control">
-              <label for="peak">Peak-hour stress factor</label>
-              <div class="row"><b><span id="peakVal" class="tabular">6</span> / 10</b><span>centralized load pressure</span></div>
-              <input id="peak" type="range" min="1" max="10" step="1" value="6" />
-            </div>
-            <div class="control">
-              <label for="cache">Semantic cache hit rate</label>
-              <div class="row"><b><span id="cacheVal" class="tabular">18</span>%</b><span>repeat-token compression</span></div>
-              <input id="cache" type="range" min="0" max="60" step="1" value="18" />
-            </div>
+        <div class="pilot-sim reveal" data-delay="2">
+          <div class="pilot-sim__presets" role="tablist" aria-label="Pilot scenario presets">
+            <button class="pilot-preset is-active" type="button" data-preset="peak" role="tab" aria-selected="true">
+              <span class="pilot-preset__name">Peak US/EU slice</span>
+              <span class="pilot-preset__sub">Recommended pilot scope</span>
+            </button>
+            <button class="pilot-preset" type="button" data-preset="steady" role="tab" aria-selected="false">
+              <span class="pilot-preset__name">Steady-state</span>
+              <span class="pilot-preset__sub">Today's blended traffic</span>
+            </button>
+            <button class="pilot-preset" type="button" data-preset="aggressive" role="tab" aria-selected="false">
+              <span class="pilot-preset__name">Aggressive offload</span>
+              <span class="pilot-preset__sub">Caching + broker, tuned</span>
+            </button>
+            <span class="pilot-sim__directional">Directional · not a pricing guarantee</span>
           </div>
-          <div class="calc-result glass reveal" data-delay="2">
-            <div class="calc-cells">
-              <article class="cell" id="cell-latency" style="--bar:0%">
-                <div class="cell-value tabular" id="latencyMetric">—</div>
-                <div class="cell-label">Latency improvement</div>
-                <div class="cell-note">Time-to-first-token, directional</div>
-              </article>
-              <article class="cell" id="cell-cost" style="--bar:0%">
-                <div class="cell-value tabular" id="costMetric">—</div>
-                <div class="cell-label">Cost pressure relief</div>
-                <div class="cell-note">Relative monthly spend</div>
-              </article>
-              <article class="cell" id="cell-support" style="--bar:0%">
-                <div class="cell-value tabular" id="supportMetric">—</div>
-                <div class="cell-label">Incident compression</div>
-                <div class="cell-note">Cross-vendor support burden</div>
-              </article>
-              <article class="cell" id="cell-edge" style="--bar:0%">
-                <div class="cell-value tabular" id="edgeMetric">—</div>
-                <div class="cell-label">Edge-served share</div>
-                <div class="cell-note">Offload + cache, blended</div>
-              </article>
+
+          <div class="pilot-sim__grid">
+            <div class="pilot-sim__controls">
+              <div class="pilot-sim__controls-head">
+                <span class="pilot-sim__eyebrow">Workload inputs</span>
+                <span class="pilot-sim__hint">Slide to model the pilot envelope</span>
+              </div>
+              <div class="control">
+                <label for="qpm">Monthly query volume</label>
+                <div class="row"><b><span id="qpmVal" class="tabular">600</span></b><span>million queries</span></div>
+                <input id="qpm" type="range" min="50" max="2000" step="10" value="600" />
+                <div class="control-axis"><span>50M</span><span>2B</span></div>
+              </div>
+              <div class="control">
+                <label for="offload">Akamai inference offload</label>
+                <div class="row"><b><span id="offloadVal" class="tabular">35</span>%</b><span>of user-facing demand</span></div>
+                <input id="offload" type="range" min="5" max="80" step="1" value="35" />
+                <div class="control-axis"><span>5%</span><span>80%</span></div>
+              </div>
+              <div class="control">
+                <label for="peak">Peak-hour stress factor</label>
+                <div class="row"><b><span id="peakVal" class="tabular">6</span> / 10</b><span>centralized load pressure</span></div>
+                <input id="peak" type="range" min="1" max="10" step="1" value="6" />
+                <div class="control-axis"><span>calm</span><span>red-line</span></div>
+              </div>
+              <div class="control">
+                <label for="cache">Semantic cache hit rate</label>
+                <div class="row"><b><span id="cacheVal" class="tabular">18</span>%</b><span>repeat-token compression</span></div>
+                <input id="cache" type="range" min="0" max="60" step="1" value="18" />
+                <div class="control-axis"><span>0%</span><span>60%</span></div>
+              </div>
             </div>
-            <div class="calc-tip">
-              Pilot framing: deploy AI Grid against a narrow, painful slice of real-time search demand &mdash; peak-hour US/EU &mdash; then measure user-path TTFT, cost/query, cache hit rate, egress, and incident ownership against the current path before broader rollout.
+
+            <div class="pilot-sim__outputs">
+              <div class="pilot-sim__outputs-head">
+                <span class="pilot-sim__eyebrow pilot-sim__eyebrow--accent">Five validation metrics</span>
+                <span class="pilot-sim__hint">Versus the current path · 30-day pilot horizon</span>
+              </div>
+              <div class="calc-cells">
+                <article class="cell" id="cell-latency" style="--bar:0%">
+                  <div class="cell-head">
+                    <span class="cell-tag">TTFT</span>
+                    <span class="cell-flag">directional</span>
+                  </div>
+                  <div class="cell-value tabular" id="latencyMetric">—</div>
+                  <div class="cell-label">Latency improvement</div>
+                  <div class="cell-note">Time-to-first-token, P50 / P95</div>
+                  <div class="cell-bar" aria-hidden="true"><span></span></div>
+                </article>
+                <article class="cell" id="cell-cost" style="--bar:0%">
+                  <div class="cell-head">
+                    <span class="cell-tag">Cost / query</span>
+                    <span class="cell-flag">directional</span>
+                  </div>
+                  <div class="cell-value tabular" id="costMetric">—</div>
+                  <div class="cell-label">Cost pressure relief</div>
+                  <div class="cell-note">Blended monthly spend &amp; egress</div>
+                  <div class="cell-bar" aria-hidden="true"><span></span></div>
+                </article>
+                <article class="cell" id="cell-support" style="--bar:0%">
+                  <div class="cell-head">
+                    <span class="cell-tag">Incident ownership</span>
+                    <span class="cell-flag">directional</span>
+                  </div>
+                  <div class="cell-value tabular" id="supportMetric">—</div>
+                  <div class="cell-label">Incident compression</div>
+                  <div class="cell-note">Cross-vendor support burden</div>
+                  <div class="cell-bar" aria-hidden="true"><span></span></div>
+                </article>
+                <article class="cell" id="cell-edge" style="--bar:0%">
+                  <div class="cell-head">
+                    <span class="cell-tag">Cache + egress</span>
+                    <span class="cell-flag">directional</span>
+                  </div>
+                  <div class="cell-value tabular" id="edgeMetric">—</div>
+                  <div class="cell-label">Edge-served share</div>
+                  <div class="cell-note">Offload + semantic cache, blended</div>
+                  <div class="cell-bar" aria-hidden="true"><span></span></div>
+                </article>
+              </div>
+              <div class="calc-tip">
+                Pilot framing: deploy AI Grid against a narrow, painful slice of real-time search demand &mdash; peak-hour US/EU &mdash; then measure user-path TTFT, cost/query, cache hit rate, egress, and incident ownership against the current path before broader rollout.
+              </div>
             </div>
           </div>
         </div>
@@ -1992,139 +2043,201 @@
           For each role: their likely angle on a convergence pilot, what Akamai should show them, and the specific ask. Respectful, accurate, and tailored &mdash; no personal data beyond role context.
         </p>
 
-        <div class="stake-grid reveal" data-delay="3">
-          <article class="stake-card stake-card--founder">
-            <div class="stake-card__head">
-              <div class="stake-card__role">Cofounder · CEO</div>
-              <div class="stake-card__name">Aravind Srinivas</div>
+        <div class="stake-map reveal" data-delay="3">
+          <div class="stake-lane stake-lane--founders">
+            <div class="stake-lane__head">
+              <span class="stake-lane__pip"></span>
+              <span class="stake-lane__name">Founders &amp; Strategy</span>
+              <span class="stake-lane__hint">Convergence framing &amp; founder-level reliability wedge</span>
             </div>
-            <div class="stake-card__angle">
-              <div class="stake-card__label">Likely angle</div>
-              <p>Founder-level reliability wedge. Protect answer latency, API trust, and the agentic UX as Perplexity scales into enterprise.</p>
-            </div>
-            <div class="stake-card__show">
-              <div class="stake-card__label">What Akamai shows</div>
-              <p>The convergence brief, hero-flow, and Field Map. The architecture accelerated faster than the coordination layer &mdash; here is the layer that catches it without slowing the roadmap.</p>
-            </div>
-            <div class="stake-card__ask">
-              <div class="stake-card__label">Meeting ask</div>
-              <p>15-minute triage to scope one constrained workload pilot. Five validation metrics. No rip-and-replace.</p>
-            </div>
-          </article>
+            <div class="stake-lane__cards">
+              <article class="stake-card stake-card--founder">
+                <div class="stake-card__head">
+                  <div class="stake-card__initial" aria-hidden="true">A</div>
+                  <div class="stake-card__id">
+                    <div class="stake-card__name">Aravind Srinivas</div>
+                    <div class="stake-card__role">Cofounder · CEO</div>
+                  </div>
+                </div>
+                <div class="stake-card__body">
+                  <div class="stake-card__row">
+                    <span class="stake-card__label">Why they care</span>
+                    <p>Founder-level reliability wedge. Protect answer latency, API trust, and the agentic UX as Perplexity scales into enterprise.</p>
+                  </div>
+                  <div class="stake-card__row">
+                    <span class="stake-card__label">Akamai angle</span>
+                    <p>The convergence brief, hero-flow, and Field Map. The architecture accelerated faster than the coordination layer &mdash; here is the layer that catches it without slowing the roadmap.</p>
+                  </div>
+                  <div class="stake-card__row stake-card__row--ask">
+                    <span class="stake-card__label">Meeting ask</span>
+                    <p>15-minute triage to scope one constrained workload pilot. Five validation metrics. No rip-and-replace.</p>
+                  </div>
+                </div>
+              </article>
 
-          <article class="stake-card">
-            <div class="stake-card__head">
-              <div class="stake-card__role">Office of CEO</div>
-              <div class="stake-card__name">Carolyn Dorricott</div>
-            </div>
-            <div class="stake-card__angle">
-              <div class="stake-card__label">Likely angle</div>
-              <p>Routing &amp; gatekeeping. Whose calendar does this land on &mdash; Aravind, the infra owner, or a business owner &mdash; for the right 15-minute conversation.</p>
-            </div>
-            <div class="stake-card__show">
-              <div class="stake-card__label">What Akamai shows</div>
-              <p>Two-page executive summary: thesis, five validation metrics, the pilot ask. Stakeholder map so routing is trivial.</p>
-            </div>
-            <div class="stake-card__ask">
-              <div class="stake-card__label">Meeting ask</div>
-              <p>Route the brief into the right calendar for a 15-minute triage call this month.</p>
-            </div>
-          </article>
+              <article class="stake-card stake-card--strategy">
+                <div class="stake-card__head">
+                  <div class="stake-card__initial" aria-hidden="true">J</div>
+                  <div class="stake-card__id">
+                    <div class="stake-card__name">Johnny Ho</div>
+                    <div class="stake-card__role">Cofounder · Chief Strategy Officer</div>
+                  </div>
+                </div>
+                <div class="stake-card__body">
+                  <div class="stake-card__row">
+                    <span class="stake-card__label">Why they care</span>
+                    <p>Strategic convergence layer. Turn multi-cloud complexity (AWS + Foundry + CoreWeave) into a defensible advantage rather than a coordination tax.</p>
+                  </div>
+                  <div class="stake-card__row">
+                    <span class="stake-card__label">Akamai angle</span>
+                    <p>The no-rip-and-replace argument: AI Grid as the real-time broker for AI requests across providers, with optionality preserved on the model and capacity side.</p>
+                  </div>
+                  <div class="stake-card__row stake-card__row--ask">
+                    <span class="stake-card__label">Meeting ask</span>
+                    <p>Align on convergence framing before the technical pilot &mdash; so the pilot proof maps to a strategic narrative, not just a perf win.</p>
+                  </div>
+                </div>
+              </article>
 
-          <article class="stake-card stake-card--strategy">
-            <div class="stake-card__head">
-              <div class="stake-card__role">Cofounder · Chief Strategy Officer</div>
-              <div class="stake-card__name">Johnny Ho</div>
+              <article class="stake-card stake-card--routing">
+                <div class="stake-card__head">
+                  <div class="stake-card__initial" aria-hidden="true">C</div>
+                  <div class="stake-card__id">
+                    <div class="stake-card__name">Carolyn Dorricott</div>
+                    <div class="stake-card__role">Office of CEO</div>
+                  </div>
+                </div>
+                <div class="stake-card__body">
+                  <div class="stake-card__row">
+                    <span class="stake-card__label">Why they care</span>
+                    <p>Routing &amp; gatekeeping. Whose calendar does this land on &mdash; Aravind, the infra owner, or a business owner &mdash; for the right 15-minute conversation.</p>
+                  </div>
+                  <div class="stake-card__row">
+                    <span class="stake-card__label">Akamai angle</span>
+                    <p>Two-page executive summary: thesis, five validation metrics, the pilot ask. Stakeholder map so routing is trivial.</p>
+                  </div>
+                  <div class="stake-card__row stake-card__row--ask">
+                    <span class="stake-card__label">Meeting ask</span>
+                    <p>Route the brief into the right calendar for a 15-minute triage call this month.</p>
+                  </div>
+                </div>
+              </article>
             </div>
-            <div class="stake-card__angle">
-              <div class="stake-card__label">Likely angle</div>
-              <p>Strategic convergence layer. Turn multi-cloud complexity (AWS + Foundry + CoreWeave) into a defensible advantage rather than a coordination tax.</p>
-            </div>
-            <div class="stake-card__show">
-              <div class="stake-card__label">What Akamai shows</div>
-              <p>The no-rip-and-replace argument: AI Grid as the real-time broker for AI requests across providers, with optionality preserved on the model and capacity side.</p>
-            </div>
-            <div class="stake-card__ask">
-              <div class="stake-card__label">Meeting ask</div>
-              <p>Align on convergence framing before the technical pilot &mdash; so the pilot proof maps to a strategic narrative, not just a perf win.</p>
-            </div>
-          </article>
+          </div>
 
-          <article class="stake-card">
-            <div class="stake-card__head">
-              <div class="stake-card__role">Chief Business Officer</div>
-              <div class="stake-card__name">Dmitry Shevelenko</div>
+          <div class="stake-lane stake-lane--business">
+            <div class="stake-lane__head">
+              <span class="stake-lane__pip"></span>
+              <span class="stake-lane__name">Business &amp; Enterprise</span>
+              <span class="stake-lane__hint">SLA consolidation &amp; enterprise reliability story</span>
             </div>
-            <div class="stake-card__angle">
-              <div class="stake-card__label">Likely angle</div>
-              <p>Operational risk and vendor / SLA consolidation. Fewer blame-spirals, one owner for user-facing reliability, cleaner enterprise contracting story.</p>
-            </div>
-            <div class="stake-card__show">
-              <div class="stake-card__label">What Akamai shows</div>
-              <p>Convergence walkthrough &amp; Claims Matrix. One SLA owner across the user-facing path; quantified incident-ownership reduction in the pilot.</p>
-            </div>
-            <div class="stake-card__ask">
-              <div class="stake-card__label">Meeting ask</div>
-              <p>Frame the pilot as a vendor / SLA consolidation experiment, with clear exit criteria.</p>
-            </div>
-          </article>
+            <div class="stake-lane__cards">
+              <article class="stake-card">
+                <div class="stake-card__head">
+                  <div class="stake-card__initial" aria-hidden="true">D</div>
+                  <div class="stake-card__id">
+                    <div class="stake-card__name">Dmitry Shevelenko</div>
+                    <div class="stake-card__role">Chief Business Officer</div>
+                  </div>
+                </div>
+                <div class="stake-card__body">
+                  <div class="stake-card__row">
+                    <span class="stake-card__label">Why they care</span>
+                    <p>Operational risk and vendor / SLA consolidation. Fewer blame-spirals, one owner for user-facing reliability, cleaner enterprise contracting story.</p>
+                  </div>
+                  <div class="stake-card__row">
+                    <span class="stake-card__label">Akamai angle</span>
+                    <p>Convergence walkthrough &amp; Claims Matrix. One SLA owner across the user-facing path; quantified incident-ownership reduction in the pilot.</p>
+                  </div>
+                  <div class="stake-card__row stake-card__row--ask">
+                    <span class="stake-card__label">Meeting ask</span>
+                    <p>Frame the pilot as a vendor / SLA consolidation experiment, with clear exit criteria.</p>
+                  </div>
+                </div>
+              </article>
 
-          <article class="stake-card stake-card--enterprise">
-            <div class="stake-card__head">
-              <div class="stake-card__role">Head of Product, Enterprise</div>
-              <div class="stake-card__name">Frank te Pas</div>
+              <article class="stake-card stake-card--enterprise">
+                <div class="stake-card__head">
+                  <div class="stake-card__initial" aria-hidden="true">F</div>
+                  <div class="stake-card__id">
+                    <div class="stake-card__name">Frank te Pas</div>
+                    <div class="stake-card__role">Head of Product, Enterprise</div>
+                  </div>
+                </div>
+                <div class="stake-card__body">
+                  <div class="stake-card__row">
+                    <span class="stake-card__label">Why they care</span>
+                    <p>Enterprise trust, API reliability, customer-facing SLA story. Convert reliability into a sales asset, not a recurring escalation.</p>
+                  </div>
+                  <div class="stake-card__row">
+                    <span class="stake-card__label">Akamai angle</span>
+                    <p>Field Map signals on enterprise support gap and rate-limit false positives. AI Grid as the place to encode an Enterprise-tier reliability lane.</p>
+                  </div>
+                  <div class="stake-card__row stake-card__row--ask">
+                    <span class="stake-card__label">Meeting ask</span>
+                    <p>Co-design an Enterprise-tier pilot slice with measurable TTFT and incident-ownership wins inside 30 days.</p>
+                  </div>
+                </div>
+              </article>
             </div>
-            <div class="stake-card__angle">
-              <div class="stake-card__label">Likely angle</div>
-              <p>Enterprise trust, API reliability, customer-facing SLA story. Convert reliability into a sales asset, not a recurring escalation.</p>
-            </div>
-            <div class="stake-card__show">
-              <div class="stake-card__label">What Akamai shows</div>
-              <p>Field Map signals on enterprise support gap and rate-limit false positives. AI Grid as the place to encode an Enterprise-tier reliability lane.</p>
-            </div>
-            <div class="stake-card__ask">
-              <div class="stake-card__label">Meeting ask</div>
-              <p>Co-design an Enterprise-tier pilot slice with measurable TTFT and incident-ownership wins inside 30 days.</p>
-            </div>
-          </article>
+          </div>
 
-          <article class="stake-card stake-card--technical">
-            <div class="stake-card__head">
-              <div class="stake-card__role">AI Agent Infra Lead</div>
-              <div class="stake-card__name">Justin Takamine</div>
+          <div class="stake-lane stake-lane--technical">
+            <div class="stake-lane__head">
+              <span class="stake-lane__pip"></span>
+              <span class="stake-lane__name">Technical &amp; Growth</span>
+              <span class="stake-lane__hint">Pilot success criteria &amp; retention read-out</span>
             </div>
-            <div class="stake-card__angle">
-              <div class="stake-card__label">Likely angle</div>
-              <p>Technical validation. Will the routing, cache, billing/auth failover, and TTFT story survive a real workload? Where does AI Grid actually sit?</p>
-            </div>
-            <div class="stake-card__show">
-              <div class="stake-card__label">What Akamai shows</div>
-              <p>Routing &amp; Cache war-room, end-to-end walkthrough, and the constrained-pilot model. AI Grid as broker; semantic caching on the roadmap; intelligent routing today.</p>
-            </div>
-            <div class="stake-card__ask">
-              <div class="stake-card__label">Meeting ask</div>
-              <p>Technical scoping session to lock pilot success criteria: TTFT P50/P95, cost/query, cache hit rate, egress, incident ownership.</p>
-            </div>
-          </article>
+            <div class="stake-lane__cards">
+              <article class="stake-card stake-card--technical">
+                <div class="stake-card__head">
+                  <div class="stake-card__initial" aria-hidden="true">J</div>
+                  <div class="stake-card__id">
+                    <div class="stake-card__name">Justin Takamine</div>
+                    <div class="stake-card__role">AI Agent Infra Lead</div>
+                  </div>
+                </div>
+                <div class="stake-card__body">
+                  <div class="stake-card__row">
+                    <span class="stake-card__label">Why they care</span>
+                    <p>Technical validation. Will the routing, cache, billing/auth failover, and TTFT story survive a real workload? Where does AI Grid actually sit?</p>
+                  </div>
+                  <div class="stake-card__row">
+                    <span class="stake-card__label">Akamai angle</span>
+                    <p>Routing &amp; Cache war-room, end-to-end walkthrough, and the constrained-pilot model. AI Grid as broker; semantic caching on the roadmap; intelligent routing today.</p>
+                  </div>
+                  <div class="stake-card__row stake-card__row--ask">
+                    <span class="stake-card__label">Meeting ask</span>
+                    <p>Technical scoping session to lock pilot success criteria: TTFT P50/P95, cost/query, cache hit rate, egress, incident ownership.</p>
+                  </div>
+                </div>
+              </article>
 
-          <article class="stake-card">
-            <div class="stake-card__head">
-              <div class="stake-card__role">VP Product Growth</div>
-              <div class="stake-card__name">Raman Malik</div>
+              <article class="stake-card stake-card--growth">
+                <div class="stake-card__head">
+                  <div class="stake-card__initial" aria-hidden="true">R</div>
+                  <div class="stake-card__id">
+                    <div class="stake-card__name">Raman Malik</div>
+                    <div class="stake-card__role">VP Product Growth</div>
+                  </div>
+                </div>
+                <div class="stake-card__body">
+                  <div class="stake-card__row">
+                    <span class="stake-card__label">Why they care</span>
+                    <p>Reliability as growth retention. Fewer failed API experiences and stronger enterprise conversion are direct growth levers, not infra niceties.</p>
+                  </div>
+                  <div class="stake-card__row">
+                    <span class="stake-card__label">Akamai angle</span>
+                    <p>How TTFT and incident-ownership wins translate into measurable retention &amp; conversion lift in the Field Map and pilot model.</p>
+                  </div>
+                  <div class="stake-card__row stake-card__row--ask">
+                    <span class="stake-card__label">Meeting ask</span>
+                    <p>Agree a small post-pilot read-out where growth metrics are wired into the same dashboard as reliability metrics.</p>
+                  </div>
+                </div>
+              </article>
             </div>
-            <div class="stake-card__angle">
-              <div class="stake-card__label">Likely angle</div>
-              <p>Reliability as growth retention. Fewer failed API experiences and stronger enterprise conversion are direct growth levers, not infra niceties.</p>
-            </div>
-            <div class="stake-card__show">
-              <div class="stake-card__label">What Akamai shows</div>
-              <p>How TTFT and incident-ownership wins translate into measurable retention &amp; conversion lift in the Field Map and pilot model.</p>
-            </div>
-            <div class="stake-card__ask">
-              <div class="stake-card__label">Meeting ask</div>
-              <p>Agree a small post-pilot read-out where growth metrics are wired into the same dashboard as reliability metrics.</p>
-            </div>
-          </article>
+          </div>
         </div>
 
         <p class="stake-foot reveal" data-delay="3">

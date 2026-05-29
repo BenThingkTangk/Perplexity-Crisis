@@ -336,6 +336,31 @@
     [qpm, offload, peak, cache].forEach(setProgressBg);
   };
   [qpm, offload, peak, cache].forEach((i) => i.addEventListener('input', updateModel));
+
+  /* Preset chips — Peak US/EU slice, Steady-state, Aggressive offload */
+  const PRESETS = {
+    peak:       { qpm: 600,  offload: 35, peak: 7, cache: 22 },
+    steady:     { qpm: 900,  offload: 18, peak: 5, cache: 12 },
+    aggressive: { qpm: 1200, offload: 60, peak: 4, cache: 45 },
+  };
+  const presetBtns = document.querySelectorAll('.pilot-preset[data-preset]');
+  presetBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const cfg = PRESETS[btn.dataset.preset];
+      if (!cfg) return;
+      qpm.value = cfg.qpm;
+      offload.value = cfg.offload;
+      peak.value = cfg.peak;
+      cache.value = cfg.cache;
+      presetBtns.forEach((b) => {
+        const on = b === btn;
+        b.classList.toggle('is-active', on);
+        b.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      updateModel();
+    });
+  });
+
   updateModel();
 
   /* ------------ Evidence list (in-page) + drawer ------------ */

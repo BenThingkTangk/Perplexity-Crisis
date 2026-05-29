@@ -5269,3 +5269,448 @@ main#main { padding-bottom: clamp(96px, 11vh, 132px); }
   /* On stacked layout the detail panel goes below — keep the same compaction */
   .section--claims .risk-detail { padding: clamp(0.95rem, 2.2vw, 1.2rem) !important; }
 }
+
+/* ============================================================
+ * SEND-READY POLISH PASS — Pilot simulator · Stakeholder map ·
+ * Claims tightening (final). Dark-canon, ATOM v2.
+ * ============================================================ */
+
+/* ---------- Claims Risk Matrix — final tightening ---------- */
+.section--claims .risk-matrix__head { grid-template-columns: 190px 1fr !important; }
+.section--claims .risk-row { grid-template-columns: 190px repeat(3, minmax(0, 1fr)) !important; }
+.section--claims .risk-matrix__yaxis,
+.section--claims .risk-matrix__col-label {
+  font-size: 9.5px !important;
+  letter-spacing: .24em !important;
+  color: var(--atom-tertiary, #a8a9d6) !important;
+}
+.section--claims .risk-matrix__col-label {
+  border-bottom: 1px solid rgba(0,200,200,.18) !important;
+  padding: 6px 0 !important;
+}
+.section--claims .risk-row__label {
+  background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.005)) !important;
+  border: 1px solid var(--v4-line) !important;
+  border-left: 2px solid var(--c, #a2a3e9) !important;
+}
+.section--claims .risk-cell {
+  background: rgba(255,255,255,.012) !important;
+  border: 1px solid var(--v4-line) !important;
+  min-height: 72px !important;
+  padding: 7px !important;
+  gap: 6px !important;
+}
+.section--claims .risk-tile {
+  background: rgba(8,10,14,.7) !important;
+  border: 1px solid color-mix(in srgb, var(--c, #a2a3e9) 22%, var(--v4-line)) !important;
+  padding: 7px 9px !important;
+}
+.section--claims .risk-tile:hover {
+  border-color: color-mix(in srgb, var(--c, #a2a3e9) 60%, transparent) !important;
+  background: rgba(12,14,18,.85) !important;
+  transform: translateY(-1px);
+}
+.section--claims .risk-tile.is-active {
+  border-color: var(--c, #00e6d3) !important;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--c, #00e6d3) 14%, rgba(8,10,14,.85)), rgba(8,10,14,.85)) !important;
+}
+.section--claims .risk-matrix__xaxis {
+  text-align: right !important;
+  color: var(--atom-tertiary, #a8a9d6) !important;
+  font-size: 9.5px !important;
+  letter-spacing: .24em !important;
+  text-transform: uppercase;
+  font-family: var(--font-mono);
+}
+@media (max-width: 1100px) {
+  .section--claims .risk-matrix__head { grid-template-columns: 1fr !important; }
+  .section--claims .risk-row { grid-template-columns: 1fr !important; }
+}
+
+/* ---------- Pilot — premium interactive simulator ---------- */
+.section--pilot { padding-top: clamp(2.4rem, 4vw, 3.4rem); padding-bottom: clamp(2.4rem, 4vw, 3.4rem); }
+
+.pilot-sim {
+  margin-top: clamp(1rem, 1.8vw, 1.4rem);
+  border: 1px solid var(--v4-line, rgba(255,255,255,.07));
+  border-radius: 22px;
+  background:
+    radial-gradient(ellipse at 0% 0%, rgba(0,230,211,.06), transparent 55%),
+    radial-gradient(ellipse at 100% 100%, rgba(133,135,227,.05), transparent 55%),
+    linear-gradient(180deg, rgba(14,14,22,.78), rgba(8,8,14,.92));
+  padding: clamp(1rem, 2vw, 1.5rem);
+  position: relative;
+  overflow: hidden;
+}
+.pilot-sim::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(120deg, transparent 30%, rgba(0,230,211,.03) 50%, transparent 70%);
+  pointer-events: none;
+}
+
+.pilot-sim__presets {
+  position: relative;
+  display: flex; flex-wrap: wrap; align-items: center;
+  gap: 8px;
+  padding-bottom: clamp(.8rem, 1.4vw, 1.1rem);
+  margin-bottom: clamp(.9rem, 1.5vw, 1.2rem);
+  border-bottom: 1px dashed rgba(255,255,255,.08);
+}
+.pilot-preset {
+  appearance: none; cursor: pointer;
+  background: rgba(255,255,255,.025);
+  border: 1px solid var(--v4-line, rgba(255,255,255,.08));
+  border-radius: 12px;
+  padding: 10px 14px;
+  display: flex; flex-direction: column; gap: 2px;
+  text-align: left;
+  transition: border-color .2s ease, background .2s ease, transform .2s ease;
+  color: var(--atom-fg, #f6f6fd);
+  font: inherit;
+}
+.pilot-preset:hover { border-color: rgba(0,230,211,.35); background: rgba(0,230,211,.06); }
+.pilot-preset.is-active {
+  border-color: rgba(0,230,211,.55);
+  background: linear-gradient(180deg, rgba(0,230,211,.10), rgba(0,200,200,.04));
+  box-shadow: 0 0 0 1px rgba(0,230,211,.22), 0 8px 22px rgba(0,200,200,.08);
+}
+.pilot-preset__name {
+  font-family: var(--font-display, 'Plus Jakarta Sans');
+  font-weight: 700; font-size: 13px; letter-spacing: -.01em;
+}
+.pilot-preset__sub {
+  font-family: var(--font-mono);
+  font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--v4-text-muted, #8a8d99);
+}
+.pilot-sim__directional {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--v4-text-faint, #71747f);
+  padding: 4px 10px;
+  border: 1px dashed rgba(255,255,255,.12);
+  border-radius: 999px;
+}
+
+.pilot-sim__grid {
+  position: relative;
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+  gap: clamp(1rem, 2vw, 1.6rem);
+}
+@media (max-width: 1000px) {
+  .pilot-sim__grid { grid-template-columns: 1fr; }
+}
+
+.pilot-sim__controls, .pilot-sim__outputs {
+  background: rgba(8,10,14,.55);
+  border: 1px solid var(--v4-line, rgba(255,255,255,.07));
+  border-radius: 16px;
+  padding: clamp(1rem, 1.6vw, 1.3rem);
+}
+.pilot-sim__controls-head, .pilot-sim__outputs-head {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+  padding-bottom: 12px;
+  margin-bottom: 14px;
+  border-bottom: 1px dashed rgba(255,255,255,.06);
+}
+.pilot-sim__eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10.5px; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--v4-text-muted, #8a8d99);
+}
+.pilot-sim__eyebrow--accent { color: var(--plasma, #00e6d3); }
+.pilot-sim__hint {
+  font-family: var(--font-mono);
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--v4-text-faint, #71747f);
+}
+
+.pilot-sim__controls .control { margin-bottom: clamp(.8rem, 1.2vw, 1rem); }
+.pilot-sim__controls .control:last-child { margin-bottom: 0; }
+.pilot-sim__controls .control label {
+  font-family: var(--font-mono); font-size: 10.5px;
+  letter-spacing: .16em; text-transform: uppercase;
+  color: var(--v4-text-muted, #8a8d99);
+}
+.pilot-sim__controls .control .row {
+  display: flex; align-items: baseline; gap: 8px; margin: 4px 0 8px;
+}
+.pilot-sim__controls .control .row b {
+  font-family: var(--font-display, 'Plus Jakarta Sans');
+  font-weight: 800; font-size: 1.15rem; color: var(--atom-fg, #f6f6fd);
+}
+.pilot-sim__controls .control .row span {
+  font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .1em;
+  color: var(--v4-text-faint, #71747f); text-transform: uppercase;
+}
+.pilot-sim__controls .control input[type="range"] {
+  width: 100%;
+  accent-color: #00e6d3;
+}
+.control-axis {
+  display: flex; justify-content: space-between;
+  margin-top: 4px;
+  font-family: var(--font-mono); font-size: 9.5px;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--v4-text-faint, #71747f);
+}
+
+.pilot-sim__outputs .calc-cells {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
+}
+@media (max-width: 640px) {
+  .pilot-sim__outputs .calc-cells { grid-template-columns: 1fr; }
+}
+.pilot-sim__outputs .cell {
+  position: relative;
+  background: linear-gradient(180deg, rgba(255,255,255,.025), rgba(255,255,255,.005)) !important;
+  border: 1px solid color-mix(in srgb, #00e6d3 18%, var(--v4-line)) !important;
+  border-radius: 14px !important;
+  padding: 14px 14px 12px !important;
+  overflow: hidden;
+}
+.pilot-sim__outputs .cell::before {
+  content: ""; position: absolute; top:0; right:0; width: 60px; height: 60px;
+  background: radial-gradient(circle at 100% 0%, rgba(0,230,211,.18), transparent 70%);
+  pointer-events: none;
+}
+.pilot-sim__outputs .cell-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 8px;
+}
+.pilot-sim__outputs .cell-tag {
+  font-family: var(--font-mono); font-size: 9.5px;
+  letter-spacing: .18em; text-transform: uppercase;
+  color: var(--plasma, #00e6d3);
+  background: rgba(0,230,211,.10);
+  border: 1px solid rgba(0,230,211,.25);
+  border-radius: 999px;
+  padding: 3px 8px;
+}
+.pilot-sim__outputs .cell-flag {
+  font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--v4-text-faint, #71747f);
+}
+.pilot-sim__outputs .cell-value {
+  font-family: var(--font-display, 'Plus Jakarta Sans');
+  font-weight: 800; font-size: clamp(1.7rem, 1.2rem + 1.2vw, 2.1rem);
+  letter-spacing: -.02em;
+  color: #ffffff !important;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.pilot-sim__outputs .cell-label {
+  font-family: var(--font-display, 'Plus Jakarta Sans');
+  font-weight: 600; font-size: 12.5px;
+  color: var(--atom-fg, #f6f6fd) !important;
+  letter-spacing: 0;
+  text-transform: none;
+  margin-top: 2px;
+}
+.pilot-sim__outputs .cell-note {
+  font-size: 11px;
+  color: var(--v4-text-muted, #8a8d99) !important;
+  margin-top: 2px;
+  line-height: 1.35;
+}
+.pilot-sim__outputs .cell-bar {
+  margin-top: 10px;
+  height: 4px;
+  background: rgba(255,255,255,.05);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.pilot-sim__outputs .cell-bar > span {
+  display: block;
+  height: 100%;
+  width: var(--bar, 0%);
+  background: linear-gradient(90deg, #00c8c8, #00e6d3);
+  border-radius: 999px;
+  transition: width .35s cubic-bezier(.65,.05,.36,1);
+}
+.pilot-sim__outputs .calc-tip {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px dashed rgba(255,255,255,.10);
+  border-radius: 12px;
+  font-size: 12px;
+  color: var(--v4-text-muted, #8a8d99);
+  line-height: 1.5;
+  background: rgba(255,255,255,.015);
+}
+
+/* Override older #pilot calc CSS so the new simulator wraps it cleanly */
+#pilot .calc-grid { display: none; }
+
+/* Pilot CTA — make it visually dominant under the simulator */
+.section--pilot .pilot-cta {
+  margin-top: clamp(1.2rem, 2vw, 1.8rem);
+  border: 1px solid rgba(0,230,211,.42);
+  background:
+    radial-gradient(ellipse at 0% 0%, rgba(0,230,211,.16), transparent 55%),
+    radial-gradient(ellipse at 100% 100%, rgba(162,163,233,.10), transparent 55%),
+    linear-gradient(180deg, rgba(10,14,18,.92), rgba(8,10,14,.88));
+  box-shadow: 0 24px 60px rgba(0,200,200,.10), inset 0 0 0 1px rgba(0,230,211,.06);
+}
+.section--pilot .pilot-cta__title {
+  font-size: clamp(1.25rem, .95rem + .9vw, 1.7rem);
+  line-height: 1.22;
+  font-weight: 800;
+  background: linear-gradient(180deg, #ffffff 0%, #c8f3ee 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ---------- Stakeholder map — lane-based executive layout ---------- */
+.section--stakeholders { padding-top: clamp(2.4rem, 4vw, 3.4rem); padding-bottom: clamp(2.4rem, 4vw, 3.4rem); }
+.stake-map {
+  margin-top: clamp(1rem, 1.8vw, 1.4rem);
+  display: grid; gap: clamp(1rem, 1.8vw, 1.4rem);
+}
+.stake-lane {
+  border: 1px solid var(--v4-line, rgba(255,255,255,.07));
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(14,14,22,.55), rgba(8,8,14,.78));
+  padding: clamp(.95rem, 1.6vw, 1.25rem);
+  position: relative;
+  overflow: hidden;
+}
+.stake-lane::before {
+  content: ""; position: absolute; inset: 0 auto 0 0; width: 3px;
+  background: linear-gradient(180deg, rgba(0,230,211,.55), rgba(0,200,200,.10));
+}
+.stake-lane--founders::before { background: linear-gradient(180deg, #00e6d3, #a2a3e9); }
+.stake-lane--business::before { background: linear-gradient(180deg, #5aa4f7, #00e6d3); }
+.stake-lane--technical::before { background: linear-gradient(180deg, #f5b942, #00e6d3); }
+
+.stake-lane__head {
+  display: flex; align-items: center; gap: 10px;
+  padding-bottom: 10px; margin-bottom: 12px;
+  border-bottom: 1px dashed rgba(255,255,255,.08);
+  padding-left: 10px;
+}
+.stake-lane__pip {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--plasma, #00e6d3);
+  box-shadow: 0 0 12px rgba(0,230,211,.55);
+}
+.stake-lane--founders .stake-lane__pip { background: #00e6d3; box-shadow: 0 0 12px rgba(0,230,211,.55); }
+.stake-lane--business .stake-lane__pip { background: #5aa4f7; box-shadow: 0 0 12px rgba(90,164,247,.45); }
+.stake-lane--technical .stake-lane__pip { background: #f5b942; box-shadow: 0 0 12px rgba(245,185,66,.45); }
+.stake-lane__name {
+  font-family: var(--font-display, 'Plus Jakarta Sans');
+  font-weight: 800; font-size: 14px; letter-spacing: -.005em;
+  color: var(--atom-fg, #f6f6fd);
+}
+.stake-lane__hint {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 10px; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--v4-text-faint, #71747f);
+}
+
+.stake-lane__cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: clamp(.7rem, 1.2vw, 1rem);
+}
+@media (max-width: 720px) {
+  .stake-lane__cards { grid-template-columns: 1fr; }
+  .stake-lane__hint { display: none; }
+}
+
+/* Replace older stake-card styling — same selector, refined for lane layout */
+.section--stakeholders .stake-card {
+  background: linear-gradient(180deg, rgba(255,255,255,.022), rgba(255,255,255,.008)) !important;
+  border: 1px solid var(--v4-line, rgba(255,255,255,.08)) !important;
+  border-radius: 14px !important;
+  padding: clamp(.9rem, 1.4vw, 1.15rem) !important;
+  gap: 12px !important;
+  position: relative;
+  transition: border-color .25s ease, transform .25s ease, background .25s ease;
+}
+.section--stakeholders .stake-card::before { display: none !important; }
+.section--stakeholders .stake-card:hover {
+  border-color: rgba(0,230,211,.4) !important;
+  background: linear-gradient(180deg, rgba(0,230,211,.045), rgba(255,255,255,.01)) !important;
+  transform: translateY(-1px);
+}
+.section--stakeholders .stake-card__head {
+  display: flex; align-items: center; gap: 12px;
+  padding: 0 !important;
+  padding-bottom: 10px !important;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.section--stakeholders .stake-card__initial {
+  flex: 0 0 36px; width: 36px; height: 36px;
+  display: grid; place-items: center;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(0,230,211,.16), rgba(133,135,227,.10));
+  border: 1px solid rgba(0,230,211,.32);
+  font-family: var(--font-display, 'Plus Jakarta Sans');
+  font-weight: 800; font-size: 16px;
+  color: var(--atom-fg, #f6f6fd);
+  letter-spacing: -.02em;
+}
+.stake-card--founder .stake-card__initial,
+.stake-card--strategy .stake-card__initial {
+  background: linear-gradient(135deg, rgba(0,230,211,.22), rgba(162,163,233,.15));
+  border-color: rgba(0,230,211,.45);
+}
+.stake-card--enterprise .stake-card__initial {
+  background: linear-gradient(135deg, rgba(90,164,247,.18), rgba(0,230,211,.12));
+  border-color: rgba(90,164,247,.42);
+}
+.stake-card--technical .stake-card__initial {
+  background: linear-gradient(135deg, rgba(245,185,66,.18), rgba(0,230,211,.10));
+  border-color: rgba(245,185,66,.42);
+}
+.stake-card--growth .stake-card__initial,
+.stake-card--routing .stake-card__initial {
+  background: linear-gradient(135deg, rgba(133,135,227,.18), rgba(0,230,211,.10));
+  border-color: rgba(133,135,227,.42);
+}
+.section--stakeholders .stake-card__id { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.section--stakeholders .stake-card__name {
+  font-family: var(--font-display, 'Plus Jakarta Sans');
+  font-weight: 700; font-size: 1.02rem; line-height: 1.2;
+  color: var(--atom-fg, #f6f6fd);
+  margin: 0 !important;
+  letter-spacing: -.01em;
+}
+.section--stakeholders .stake-card__role {
+  font-family: var(--font-mono);
+  font-size: 9.5px; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--v4-text-muted, #8a8d99);
+  margin-top: 2px;
+}
+.section--stakeholders .stake-card__body { display: flex; flex-direction: column; gap: 10px; padding: 0 !important; }
+.section--stakeholders .stake-card__row { padding: 0 !important; display: flex; flex-direction: column; gap: 3px; }
+.section--stakeholders .stake-card__row--ask {
+  margin-top: 4px;
+  padding: 8px 10px !important;
+  background: rgba(0,230,211,.06);
+  border: 1px solid rgba(0,230,211,.22);
+  border-radius: 10px;
+}
+.section--stakeholders .stake-card__label {
+  font-family: var(--font-mono);
+  font-size: 9px !important; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--v4-text-muted, #8a8d99) !important;
+  margin-bottom: 0 !important;
+}
+.section--stakeholders .stake-card__row--ask .stake-card__label { color: var(--plasma, #00e6d3) !important; }
+.section--stakeholders .stake-card__row p {
+  font-size: 12.5px !important; line-height: 1.5 !important;
+  color: var(--ink-soft, #c9ced8) !important;
+  margin: 0 !important;
+}
+.section--stakeholders .stake-card__row--ask p {
+  color: var(--atom-fg, #f6f6fd) !important;
+  font-weight: 500;
+}
+
+.stake-foot { margin-top: clamp(1rem, 1.8vw, 1.4rem); }
