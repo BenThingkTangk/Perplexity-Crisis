@@ -75,32 +75,32 @@
       url: 'https://www.cnbc.com/2026/03/10/amazon-wins-court-order-to-block-perplexitys-ai-shopping-agent.html'
     },
     {
-      tag: 'Live evidence · Outlook',
+      tag: 'Live evidence · Mailbox',
       date: 'May 18, 2026',
-      title: 'Two consecutive $50 payment failures from failed-payments@perplexity.ai',
-      summary: 'At 20:22:47 and 20:23:12 UTC, two $50.00 charges failed against the Perplexity billing endpoint, breaking API access and cascading into ATOM/AntimatterAI integration outages. Direct evidence for the Billing Cascade failure mode.',
-      url: 'mailto:failed-payments@perplexity.ai'
+      title: 'Two consecutive $50 payment failures from the Perplexity failed-payments billing inbox',
+      summary: 'At 20:22:47 and 20:23:12 UTC, two $50.00 charges failed against the Perplexity billing endpoint, breaking API access and cascading into downstream integration outages. Direct evidence for the Billing Cascade failure mode.',
+      url: '#crisis-map'
     },
     {
-      tag: 'Live evidence · Outlook',
+      tag: 'Live evidence · Mailbox',
       date: 'May 25, 2026',
       title: 'Perplexity billing correction — credits refunded, bonus credits granted',
-      summary: 'team@mail.perplexity.ai issued a billing correction email reinstating credit usage, refunding purchases during the impacted period, and granting bonus credits — confirming the May 18 failure was a billing system issue, not infrastructure scarcity.',
-      url: 'mailto:team@mail.perplexity.ai'
+      summary: 'The Perplexity team billing email issued a billing correction reinstating credit usage, refunding purchases during the impacted period, and granting bonus credits — confirming the May 18 failure was a billing-system issue, not infrastructure scarcity.',
+      url: '#crisis-map'
     },
     {
-      tag: 'Live evidence · Outlook',
+      tag: 'Live evidence · Mailbox',
       date: 'May 22, 2026',
       title: 'Perplexity Sub-processor Update — Polytomic Inc. added (effective June 8, 2026)',
-      summary: 'team@mail.perplexity.ai sub-processor notice announcing Polytomic Inc. as a new data sub-processor to move and update data between Perplexity\'s data warehouse and CRM systems. Direct signal of supply-chain expansion under the same orchestration regime.',
-      url: 'mailto:team@mail.perplexity.ai'
+      summary: 'Perplexity team notice announcing Polytomic Inc. as a new data sub-processor to move and update data between Perplexity\'s data warehouse and CRM systems. Direct signal of supply-chain expansion under the same orchestration regime.',
+      url: '#crisis-map'
     },
     {
       tag: 'Live evidence · Akamai',
       date: 'May 20–27, 2026',
-      title: 'Akamai ↔ Perplexity opportunity threads — Welander, McKay, Pare, Holcombe',
-      summary: 'Sustained correspondence with Jouni Welander (jwelander@akamai.com) plus cc threads with Neil McKay, Matt Pare, and Robert Holcombe through the May 18–25 incident window. Akamai sync notes reference Perplexity\'s multi-cloud model and orchestration fragmentation as the primary opportunity vector.',
-      url: 'mailto:jwelander@akamai.com'
+      title: 'Akamai ↔ Perplexity field engagement threads',
+      summary: 'Sustained Akamai field-engagement correspondence with Perplexity through the May 18–25 incident window. Akamai field-team sync notes reference Perplexity\'s multi-cloud model and orchestration fragmentation as the primary opportunity vector.',
+      url: '#crisis-map'
     },
     {
       tag: 'Intake channel · Discord',
