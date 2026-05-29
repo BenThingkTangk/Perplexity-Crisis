@@ -59,6 +59,15 @@
       matrix.querySelectorAll('.risk-tile').forEach((t) => {
         t.classList.toggle('is-active', t.dataset.claim === claimId);
       });
+
+      // Visual pulse on the companion panel so the change registers when the
+      // user clicks a lower tile and the sticky panel updates in place.
+      if (det) {
+        det.classList.remove('is-updating');
+        // force reflow so the animation can re-trigger
+        void det.offsetWidth;
+        det.classList.add('is-updating');
+      }
     }
 
     matrix.querySelectorAll('.risk-tile').forEach((tile) => {

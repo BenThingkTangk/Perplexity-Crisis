@@ -153,7 +153,10 @@ body {
   line-height: 1.6;
   background: var(--bg);
   color: var(--ink);
-  overflow-x: hidden;
+  /* Use `clip` instead of `hidden` so this does not promote <body> into its
+   * own scroll container — that breaks `position: sticky` for all descendants
+   * (notably the Claims Risk Matrix companion detail panel). */
+  overflow-x: clip;
   position: relative;
 }
 
@@ -3694,7 +3697,7 @@ input[type="text"].atom-input, .atom-agent__composer textarea,
  * ============================================================ */
 
 /* ---------- Global guardrails ---------- */
-html, body { overflow-x: hidden; }
+html, body { overflow-x: clip; }
 .container, .container--wide { padding-left: clamp(1rem, 3vw, 2.25rem); padding-right: clamp(1rem, 3vw, 2.25rem); }
 
 /* Safe-bottom: FAB is ~88px tall on desktop. Push content so it never sits underneath. */
@@ -4057,8 +4060,8 @@ main#main { padding-bottom: clamp(96px, 11vh, 132px); }
 
 .risk-detail {
   grid-column: 2 / 3;
-  grid-row: 1 / span 3;
-  position: sticky; top: clamp(80px, 10vh, 120px);
+  grid-row: 1 / span 4;
+  position: sticky; top: calc(var(--nav-h, 64px) + 16px);
   padding: clamp(1.2rem, 2vw, 1.6rem);
   border-radius: 18px;
   background: linear-gradient(180deg, rgba(22,22,38,.78), rgba(8,8,18,.92));
@@ -4289,9 +4292,23 @@ main#main { padding-bottom: clamp(96px, 11vh, 132px); }
 .atom-message__text { font-size: 14px !important; }
 .atom-message { padding: 14px 16px !important; }
 
-/* Sticky risk-detail must respect header — collapse to non-sticky if cell would overlap */
-@media (max-height: 960px) {
-  .risk-detail { position: relative !important; top: auto !important; }
+/* Sticky risk-detail must respect header. At shorter viewport heights, keep it
+ * sticky but cap height and scroll internally so it always fits below the
+ * sticky 64px header while remaining visible as the user scrolls the matrix.
+ *
+ * Critical: the `.reveal` class on the matrix applies `will-change: transform`
+ * which creates a containing block and BREAKS position:sticky for descendants.
+ * We explicitly clear it on the matrix so the sticky panel works. */
+.risk-matrix.reveal,
+.risk-matrix.reveal.in-view { will-change: auto !important; transform: none !important; }
+
+@media (min-width: 1101px) {
+  .risk-detail {
+    position: sticky !important;
+    top: calc(var(--nav-h, 64px) + 16px) !important;
+    max-height: calc(100vh - var(--nav-h, 64px) - 32px) !important;
+    overflow-y: auto !important;
+  }
 }
 
 /* Routing/cache: compact the upper hero block on smaller heights so dashboard is visible */
@@ -5247,7 +5264,7 @@ main#main { padding-bottom: clamp(96px, 11vh, 132px); }
 .section--claims .risk-detail {
   padding: clamp(1rem, 1.4vw, 1.25rem) !important;
   border-radius: 16px !important;
-  top: clamp(72px, 8vh, 96px);
+  top: calc(var(--nav-h, 64px) + 16px) !important;
 }
 .section--claims .risk-detail__title {
   margin: 8px 0 6px !important;
@@ -5266,8 +5283,52 @@ main#main { padding-bottom: clamp(96px, 11vh, 132px); }
 .section--claims { padding-top: clamp(2.4rem, 4vw, 3.4rem); padding-bottom: clamp(2.4rem, 4vw, 3.4rem); }
 
 @media (max-width: 1100px) {
-  /* On stacked layout the detail panel goes below — keep the same compaction */
-  .section--claims .risk-detail { padding: clamp(0.95rem, 2.2vw, 1.2rem) !important; }
+  /* On stacked layout the detail panel goes below — keep the same compaction.
+   * Make it a sticky bottom companion so selecting a tile lower in the matrix
+   * still surfaces the updated detail in the viewport. */
+  .section--claims .risk-detail {
+    padding: clamp(0.95rem, 2.2vw, 1.2rem) !important;
+    position: sticky !important;
+    bottom: 12px !important;
+    top: auto !important;
+    z-index: 5;
+    max-height: 52vh;
+    overflow-y: auto;
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+  }
+}
+
+/* "Selected claim" pin — small affordance so users see the panel responds */
+.risk-detail__pin {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--atom-tertiary, #a8a9d6);
+  background: rgba(255,255,255,.04);
+  border: 1px solid var(--v4-line, rgba(255,255,255,.08));
+}
+.risk-detail__pin::before {
+  content: "";
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--c, #a2a3e9);
+  box-shadow: 0 0 8px var(--c, #a2a3e9);
+}
+@keyframes riskDetailPulse {
+  0%   { box-shadow: 0 20px 60px rgba(0,0,0,.5), 0 0 0 0 color-mix(in srgb, var(--c, #a2a3e9) 38%, transparent); }
+  60%  { box-shadow: 0 20px 60px rgba(0,0,0,.5), 0 0 0 10px color-mix(in srgb, var(--c, #a2a3e9) 0%, transparent); }
+  100% { box-shadow: 0 20px 60px rgba(0,0,0,.5), 0 0 32px color-mix(in srgb, var(--c, #a2a3e9) 16%, transparent); }
+}
+.risk-detail.is-updating { animation: riskDetailPulse .55s ease-out 1; }
+@media (prefers-reduced-motion: reduce) {
+  .risk-detail.is-updating { animation: none; }
 }
 
 /* ============================================================
