@@ -35,6 +35,28 @@
   (function () {
     var doc = document;
 
+    /* ----- ATOM v2 Dark-canon lock (no light mode).
+         The app never activates light mode. We pin data-theme='dark' on the
+         documentElement at boot and intercept any attempt to change it
+         (including legacy callers of theme.set / setAttribute). Light-theme
+         CSS is retained for future compatibility but is unreachable from the
+         UI: there is no toggle, no preference persistence, no media query
+         that opts into it. */
+    var root = doc.documentElement;
+    root.setAttribute('data-theme', 'dark');
+    try {
+      var _setAttr = root.setAttribute.bind(root);
+      root.setAttribute = function (name, value) {
+        if (name === 'data-theme' && value !== 'dark') value = 'dark';
+        return _setAttr(name, value);
+      };
+    } catch (_) { /* no-op */ }
+    try {
+      Object.defineProperty(root, 'dataset', { value: new Proxy(root.dataset, {
+        set: function (t, k, v) { if (k === 'theme') v = 'dark'; t[k] = v; return true; },
+      })});
+    } catch (_) { /* dataset proxy may fail in some engines — setAttribute guard still wins */ }
+
     /* ----- ATOM v2 Cold-open loader dismissal (CRITICAL).
          The .x-loader is position:fixed with high z-index. We dismiss after the
          mantra sequence (default 2.8s) and again as a hard safety net so it
@@ -368,10 +390,6 @@
         <button class="nav-tool" type="button" data-evidence-open aria-haspopup="dialog" aria-controls="evidence-drawer">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 1v22"/><path d="M5 8l7-7 7 7"/></svg>
           Sources
-        </button>
-        <button class="nav-tool" type="button" data-theme-toggle aria-label="Toggle theme">
-          <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-          <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
         </button>
       </nav>
       <button class="nav-tool nav-toggle" type="button" data-nav-toggle aria-label="Toggle menu" aria-expanded="false" aria-controls="primary-nav">

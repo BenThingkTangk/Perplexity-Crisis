@@ -31,14 +31,14 @@
   /* ----------------------------------------------------- */
   /* Theme                                                 */
   /* ----------------------------------------------------- */
+  /* Dark-canon only. The app never activates light mode; theme.set is a
+   * no-op that always pins to 'dark'. Light-theme CSS is retained for
+   * compatibility but is unreachable from the UI. */
   var theme = {
-    get: function () {
-      return document.documentElement.getAttribute('data-theme') || 'dark';
-    },
-    set: function (next) {
-      if (next === 'toggle') next = theme.get() === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', next);
-      try { dispatchEvent(new CustomEvent('atom:theme', { detail: { theme: next } })); } catch (_) {}
+    get: function () { return 'dark'; },
+    set: function (_next) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      try { dispatchEvent(new CustomEvent('atom:theme', { detail: { theme: 'dark' } })); } catch (_) {}
     },
   };
 

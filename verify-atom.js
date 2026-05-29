@@ -135,6 +135,14 @@ function checkAll(w) {
   expect(!!doc.querySelector('.flow-chips-row'), 'flow-chips-row present');
   expect(!!doc.querySelector('.flow-honesty-collapse'), 'honesty footer is <details>');
 
+  // 11b. Dark-canon lock — no light mode reachable from the UI
+  expect(doc.documentElement.getAttribute('data-theme') === 'dark', 'documentElement data-theme="dark" after boot');
+  expect(!doc.querySelector('[data-theme-toggle]'), 'no [data-theme-toggle] control in DOM');
+  expect(!/icon-sun/.test(doc.body.innerHTML), 'no sun icon in DOM (theme toggle removed)');
+  // Attempt to set light mode — dark-canon guard must coerce back to dark
+  try { doc.documentElement.setAttribute('data-theme', 'light'); } catch (_) {}
+  expect(doc.documentElement.getAttribute('data-theme') === 'dark', 'setAttribute("data-theme","light") coerced back to dark');
+
   // 12. ATOM Experience System v2 tokens + font
   const headHtml = doc.head.innerHTML;
   expect(/Plus\+Jakarta\+Sans/.test(headHtml), 'Plus Jakarta Sans font link loaded');

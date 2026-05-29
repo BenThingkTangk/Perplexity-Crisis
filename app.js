@@ -116,22 +116,8 @@
   const $$ = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
   const hostname = (u) => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch { return u; } };
 
-  /* ------------ Theme toggle ------------ */
-  const themeBtn = $('[data-theme-toggle]');
-  const moonIcon = themeBtn?.querySelector('.icon-moon');
-  const sunIcon  = themeBtn?.querySelector('.icon-sun');
-  const setTheme = (t) => {
-    root.setAttribute('data-theme', t);
-    if (moonIcon && sunIcon) {
-      moonIcon.style.display = t === 'dark' ? '' : 'none';
-      sunIcon.style.display  = t === 'dark' ? 'none' : '';
-    }
-    themeBtn?.setAttribute('aria-label', `Switch to ${t === 'dark' ? 'light' : 'dark'} mode`);
-  };
-  setTheme('dark');
-  themeBtn?.addEventListener('click', () => {
-    setTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
-  });
+  /* ------------ Theme: dark-canon only, no toggle, no light mode ------------ */
+  root.setAttribute('data-theme', 'dark');
 
   /* ------------ Mobile nav ------------ */
   const navToggle = $('[data-nav-toggle]');

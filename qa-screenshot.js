@@ -67,6 +67,38 @@ const fail  = (msg) => { console.error('  FAIL ' + msg); failures++; };
     if (wScroll.scrollWidth <= wScroll.clientWidth + 2) ok('no horizontal overflow');
     else fail('horizontal overflow by ' + (wScroll.scrollWidth - wScroll.clientWidth) + 'px');
 
+    // 1b. Dark-canon lock: documentElement is dark, no toggle visible, light coerced back
+    const themeState = await page.evaluate(() => {
+      const root = document.documentElement;
+      const initial = root.getAttribute('data-theme');
+      // Attempt to flip to light — guard must coerce back to dark
+      try { root.setAttribute('data-theme', 'light'); } catch (_) {}
+      const afterAttempt = root.getAttribute('data-theme');
+      const toggle = document.querySelector('[data-theme-toggle]');
+      const sun = document.querySelector('.icon-sun');
+      const moon = document.querySelector('.icon-moon');
+      return { initial, afterAttempt, hasToggle: !!toggle, hasSun: !!sun, hasMoon: !!moon };
+    });
+    if (themeState.initial === 'dark') ok('documentElement data-theme="dark" after load');
+    else fail('expected data-theme=dark on load, got "' + themeState.initial + '"');
+    if (themeState.afterAttempt === 'dark') ok('attempt to set data-theme=light coerced back to dark');
+    else fail('dark-canon guard failed: data-theme became "' + themeState.afterAttempt + '"');
+    if (!themeState.hasToggle) ok('no [data-theme-toggle] in DOM');
+    else fail('theme toggle still present in DOM');
+    if (!themeState.hasSun && !themeState.hasMoon) ok('no sun/moon icons in DOM (toggle removed)');
+    else fail('legacy sun/moon icons still present (sun=' + themeState.hasSun + ' moon=' + themeState.hasMoon + ')');
+
+    // 1c. Loader hidden after duration
+    const loaderHidden = await page.evaluate(() => {
+      const b = document.getElementById('dtom-boot');
+      if (!b) return true; // loader removed entirely is fine
+      const cs = getComputedStyle(b);
+      const state = b.getAttribute('data-state');
+      return state === 'done' || cs.visibility === 'hidden' || cs.display === 'none' || parseFloat(cs.opacity) === 0;
+    });
+    if (loaderHidden) ok('loader hidden after duration');
+    else fail('loader not hidden after duration');
+
     // 2. Section screenshots
     for (const s of SECTIONS) {
       await page.evaluate((args) => {
