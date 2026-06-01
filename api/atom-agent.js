@@ -116,7 +116,7 @@ const FALLBACK_RESPONSES = {
 function fallbackHTML(mode, why) {
   const body = FALLBACK_RESPONSES[mode] || FALLBACK_RESPONSES.simple;
   const tag = why
-    ? `<p style="margin-top:.6rem;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.5);font-family:var(--font-mono,monospace);">ATOM · brief mode · ${why}</p>`
+    ? `<p style="margin-top:.6rem;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.5);font-family:var(--font-mono,monospace);">ΔTOM · brief mode · ${why}</p>`
     : '';
   return body + tag;
 }

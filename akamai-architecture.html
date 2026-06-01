@@ -14,18 +14,18 @@
       --surface: rgba(16,18,21,.78);
       --surface2: rgba(21,25,29,.72);
       --border: rgba(255,255,255,.10);
-      --border2: rgba(0,230,211,.35);
+      --border2: rgba(91, 217, 218,.35);
       --text: #edf8f8;
       --muted: #9ca8ad;
       --faint: #5e6970;
-      --plasma: #00e6d3;
+      --plasma: #5bd9da;
       --plasma2: #00a7ff;
       --gold: #ffd166;
       --violet: #b987ff;
       --coral: #ff7569;
       --green: #72f2a1;
       --shadow: 0 30px 120px rgba(0,0,0,.64);
-      --glow: 0 0 64px rgba(0,230,211,.20);
+      --glow: 0 0 64px rgba(91, 217, 218,.20);
       --font-display: "Cabinet Grotesk", "Satoshi", system-ui, sans-serif;
       --font-body: "Satoshi", system-ui, sans-serif;
       --font-mono: "JetBrains Mono", "SFMono-Regular", ui-monospace, monospace;
@@ -38,9 +38,9 @@
       margin: 0;
       font-family: var(--font-body);
       background:
-        radial-gradient(circle at 18% 12%, rgba(0,230,211,.14), transparent 26%),
+        radial-gradient(circle at 18% 12%, rgba(91, 217, 218,.14), transparent 26%),
         radial-gradient(circle at 78% 18%, rgba(0,167,255,.10), transparent 24%),
-        radial-gradient(circle at 50% 90%, rgba(0,230,211,.08), transparent 32%),
+        radial-gradient(circle at 50% 90%, rgba(91, 217, 218,.08), transparent 32%),
         linear-gradient(135deg, #07100f 0%, #08090a 42%, #020303 100%);
       overflow-x: hidden;
     }
@@ -78,7 +78,7 @@
       position: absolute;
       inset: 0;
       pointer-events: none;
-      background: linear-gradient(90deg, rgba(0,230,211,.09), transparent 24%, transparent 76%, rgba(0,167,255,.08));
+      background: linear-gradient(90deg, rgba(91, 217, 218,.09), transparent 24%, transparent 76%, rgba(0,167,255,.08));
       mix-blend-mode: screen;
     }
 
@@ -108,7 +108,7 @@
       width: var(--logo-size);
       height: var(--logo-size);
       color: var(--plasma);
-      filter: drop-shadow(0 0 18px rgba(0,230,211,.28));
+      filter: drop-shadow(0 0 18px rgba(91, 217, 218,.28));
     }
 
     .atom-atmosphere { stroke: currentColor; stroke-width: 1.25; opacity: .18; }
@@ -151,7 +151,7 @@
       font-weight: 700;
       letter-spacing: .30em;
     }
-    .atom-wordmark b { color: var(--plasma); text-shadow: 0 0 20px rgba(0,230,211,.34); }
+    .atom-wordmark b { color: var(--plasma); text-shadow: 0 0 20px rgba(91, 217, 218,.34); }
 
     .eyebrow {
       display: inline-flex;
@@ -165,7 +165,7 @@
       border: 1px solid var(--border2);
       border-radius: 999px;
       padding: 10px 14px;
-      background: rgba(0,230,211,.06);
+      background: rgba(91, 217, 218,.06);
       box-shadow: var(--glow);
       white-space: nowrap;
     }
@@ -174,7 +174,7 @@
       height: 8px;
       border-radius: 999px;
       background: var(--plasma);
-      box-shadow: 0 0 18px rgba(0,230,211,.85);
+      box-shadow: 0 0 18px rgba(91, 217, 218,.85);
     }
 
     .hero {
@@ -205,7 +205,7 @@
 
     .accent {
       color: var(--plasma);
-      text-shadow: 0 0 40px rgba(0,230,211,.26);
+      text-shadow: 0 0 40px rgba(91, 217, 218,.26);
     }
 
     .lede {
@@ -266,8 +266,8 @@
     .metric {
       padding: 15px 14px;
       border-radius: 18px;
-      border: 1px solid rgba(0,230,211,.22);
-      background: rgba(0,230,211,.055);
+      border: 1px solid rgba(91, 217, 218,.22);
+      background: rgba(91, 217, 218,.055);
     }
 
     .metric strong {
@@ -291,7 +291,7 @@
       border: 1px solid rgba(255,255,255,.10);
       border-radius: 30px;
       background:
-        radial-gradient(circle at 50% 48%, rgba(0,230,211,.17), transparent 32%),
+        radial-gradient(circle at 50% 48%, rgba(91, 217, 218,.17), transparent 32%),
         linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.018)),
         rgba(5,7,8,.72);
       min-height: 710px;
@@ -307,7 +307,7 @@
       content: "";
       position: absolute;
       inset: 20px;
-      border: 1px solid rgba(0,230,211,.14);
+      border: 1px solid rgba(91, 217, 218,.14);
       border-radius: 24px;
       pointer-events: none;
     }
@@ -347,7 +347,7 @@
     .flow {
       stroke-dasharray: 8 10;
       animation: flow 3.8s linear infinite;
-      filter: drop-shadow(0 0 10px rgba(0,230,211,.25));
+      filter: drop-shadow(0 0 10px rgba(91, 217, 218,.25));
     }
     .pulse-node {
       animation: node-pulse 2.2s ease-in-out infinite;
@@ -420,7 +420,7 @@
     .source-box a {
       color: var(--plasma);
       text-decoration: none;
-      border-bottom: 1px solid rgba(0,230,211,.28);
+      border-bottom: 1px solid rgba(91, 217, 218,.28);
     }
 
     @keyframes atom-spin-left { to { transform: rotate(-360deg); } }
@@ -467,10 +467,10 @@
         box-shadow: inset 0 1px 0 rgba(255,255,255,.07);
       }
       .mobile-flow-card.primary {
-        border-color: rgba(0,230,211,.35);
+        border-color: rgba(91, 217, 218,.35);
         background:
-          radial-gradient(circle at 78% 18%, rgba(0,230,211,.14), transparent 52%),
-          rgba(0,230,211,.055);
+          radial-gradient(circle at 78% 18%, rgba(91, 217, 218,.14), transparent 52%),
+          rgba(91, 217, 218,.055);
       }
       .mobile-flow-card.trust { border-color: rgba(255,117,105,.34); }
       .mobile-flow-card.proof { border-color: rgba(185,135,255,.34); }
@@ -502,7 +502,7 @@
         height: 24px;
         background: linear-gradient(var(--plasma), transparent);
         position: relative;
-        box-shadow: 0 0 16px rgba(0,230,211,.35);
+        box-shadow: 0 0 16px rgba(91, 217, 218,.35);
       }
       .mobile-flow-arrow::after {
         content: "";
@@ -554,7 +554,7 @@
           <circle class="atom-electron atom-electron-b" cx="61" cy="32" r="2.4" />
           <circle class="atom-electron atom-electron-c" cx="15.5" cy="48.5" r="2.2" />
         </svg>
-        <span class="atom-wordmark"><span class="word-main">AT<b>O</b>M</span><small>ARCHITECTURE DOSSIER</small></span>
+        <span class="atom-wordmark"><span class="word-main">ΔT<b>O</b>M</span><small>ARCHITECTURE DOSSIER</small></span>
       </a>
       <div class="eyebrow"><span class="pip"></span> Akamai convergence stack // Perplexity deployment map</div>
     </header>
@@ -604,7 +604,7 @@
         <svg class="architecture" viewBox="0 0 960 710" role="img" aria-label="Akamai convergence architecture from user traffic to edge control plane, AI factories, security, and observability">
           <defs>
             <linearGradient id="plasmaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#00e6d3"/>
+              <stop offset="0%" stop-color="#5bd9da"/>
               <stop offset="100%" stop-color="#00a7ff"/>
             </linearGradient>
             <linearGradient id="factoryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -619,26 +619,26 @@
               </feMerge>
             </filter>
             <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
-              <path d="M0,0 L0,6 L9,3 z" fill="#00e6d3" />
+              <path d="M0,0 L0,6 L9,3 z" fill="#5bd9da" />
             </marker>
             <marker id="arrowDim" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
               <path d="M0,0 L0,6 L9,3 z" fill="#5e6970" />
             </marker>
           </defs>
 
-          <rect x="34" y="36" width="190" height="70" rx="18" fill="rgba(0,230,211,.08)" stroke="rgba(0,230,211,.35)" />
+          <rect x="34" y="36" width="190" height="70" rx="18" fill="rgba(91, 217, 218,.08)" stroke="rgba(91, 217, 218,.35)" />
           <text x="57" y="65" class="svg-label">Demand</text>
           <text x="57" y="91" class="svg-title" font-size="18">Users + agents</text>
 
-          <path class="flow" d="M224 72 C280 72 262 170 326 170" stroke="#00e6d3" stroke-width="3" fill="none" marker-end="url(#arrow)" />
+          <path class="flow" d="M224 72 C280 72 262 170 326 170" stroke="#5bd9da" stroke-width="3" fill="none" marker-end="url(#arrow)" />
 
-          <rect x="314" y="54" width="332" height="232" rx="30" fill="rgba(0,230,211,.055)" stroke="rgba(0,230,211,.42)" filter="url(#glow)" />
+          <rect x="314" y="54" width="332" height="232" rx="30" fill="rgba(91, 217, 218,.055)" stroke="rgba(91, 217, 218,.42)" filter="url(#glow)" />
           <text x="354" y="96" class="svg-label">Akamai convergence fabric</text>
           <text x="354" y="130" class="svg-title" font-size="22">AI Grid Control Plane</text>
           <text x="354" y="159" class="svg-body">Workload-aware broker for every AI request</text>
 
           <g>
-            <rect x="348" y="190" width="118" height="44" rx="13" fill="#00e6d3"/>
+            <rect x="348" y="190" width="118" height="44" rx="13" fill="#5bd9da"/>
             <text x="372" y="217" class="svg-mono">TTFT</text>
             <rect x="482" y="190" width="118" height="44" rx="13" fill="#00a7ff"/>
             <text x="505" y="217" class="svg-mono">TOKEN COST</text>
@@ -648,22 +648,22 @@
             <text x="499" y="273" class="svg-mono">MODEL FIT</text>
           </g>
 
-          <circle cx="480" cy="420" r="130" fill="none" stroke="rgba(0,230,211,.34)" stroke-width="2" stroke-dasharray="6 9" />
-          <circle cx="480" cy="420" r="91" fill="rgba(0,230,211,.06)" stroke="rgba(0,230,211,.28)" />
-          <circle cx="480" cy="420" r="49" fill="rgba(0,230,211,.12)" stroke="rgba(0,230,211,.48)" filter="url(#glow)" />
+          <circle cx="480" cy="420" r="130" fill="none" stroke="rgba(91, 217, 218,.34)" stroke-width="2" stroke-dasharray="6 9" />
+          <circle cx="480" cy="420" r="91" fill="rgba(91, 217, 218,.06)" stroke="rgba(91, 217, 218,.28)" />
+          <circle cx="480" cy="420" r="49" fill="rgba(91, 217, 218,.12)" stroke="rgba(91, 217, 218,.48)" filter="url(#glow)" />
           <text x="480" y="411" text-anchor="middle" class="svg-label">Akamai</text>
           <text x="480" y="439" text-anchor="middle" class="svg-title" font-size="22">Edge POPs</text>
 
           <g class="pulse-node">
-            <circle cx="480" cy="292" r="9" fill="#00e6d3" />
-            <circle cx="609" cy="420" r="9" fill="#00e6d3" />
-            <circle cx="480" cy="548" r="9" fill="#00e6d3" />
-            <circle cx="351" cy="420" r="9" fill="#00e6d3" />
+            <circle cx="480" cy="292" r="9" fill="#5bd9da" />
+            <circle cx="609" cy="420" r="9" fill="#5bd9da" />
+            <circle cx="480" cy="548" r="9" fill="#5bd9da" />
+            <circle cx="351" cy="420" r="9" fill="#5bd9da" />
             <circle cx="568" cy="326" r="7" fill="#00a7ff" />
             <circle cx="392" cy="514" r="7" fill="#00a7ff" />
           </g>
 
-          <path class="flow" d="M480 286 C480 326 480 343 480 370" stroke="#00e6d3" stroke-width="3" fill="none" marker-end="url(#arrow)" />
+          <path class="flow" d="M480 286 C480 326 480 343 480 370" stroke="#5bd9da" stroke-width="3" fill="none" marker-end="url(#arrow)" />
 
           <rect x="48" y="185" width="218" height="102" rx="20" fill="url(#factoryGrad)" stroke="rgba(255,209,102,.42)" />
           <text x="75" y="221" class="svg-label" fill="#ffd166">AI factory</text>
@@ -684,16 +684,16 @@
           <path class="flow" d="M314 212 C276 240 302 380 266 380" stroke="#00a7ff" stroke-width="2.5" fill="none" marker-end="url(#arrowDim)" />
           <path class="flow" d="M314 252 C278 320 310 526 266 526" stroke="#ff7569" stroke-width="2.5" fill="none" marker-end="url(#arrowDim)" />
 
-          <rect x="690" y="76" width="230" height="86" rx="20" fill="rgba(0,230,211,.055)" stroke="rgba(0,230,211,.26)" />
+          <rect x="690" y="76" width="230" height="86" rx="20" fill="rgba(91, 217, 218,.055)" stroke="rgba(91, 217, 218,.26)" />
           <text x="735" y="111" class="svg-label">Traffic</text>
           <text x="735" y="140" class="svg-title" font-size="18">GTM · Edge DNS</text>
-          <path class="flow" d="M646 144 C668 120 668 119 690 119" stroke="#00e6d3" stroke-width="2.5" fill="none" marker-end="url(#arrow)" />
+          <path class="flow" d="M646 144 C668 120 668 119 690 119" stroke="#5bd9da" stroke-width="2.5" fill="none" marker-end="url(#arrow)" />
 
-          <rect x="690" y="202" width="230" height="100" rx="20" fill="rgba(0,230,211,.055)" stroke="rgba(0,230,211,.26)" />
+          <rect x="690" y="202" width="230" height="100" rx="20" fill="rgba(91, 217, 218,.055)" stroke="rgba(91, 217, 218,.26)" />
           <text x="735" y="237" class="svg-label">Edge logic</text>
           <text x="735" y="266" class="svg-title" font-size="18">EdgeWorkers</text>
           <text x="735" y="288" class="svg-body">Cloudlets · EdgeKV</text>
-          <path class="flow" d="M646 222 C668 250 668 252 690 252" stroke="#00e6d3" stroke-width="2.5" fill="none" marker-end="url(#arrow)" />
+          <path class="flow" d="M646 222 C668 250 668 252 690 252" stroke="#5bd9da" stroke-width="2.5" fill="none" marker-end="url(#arrow)" />
 
           <rect x="690" y="344" width="230" height="118" rx="20" fill="rgba(255,117,105,.07)" stroke="rgba(255,117,105,.38)" />
           <text x="735" y="379" class="svg-label" fill="#ff7569">Trust perimeter</text>
@@ -707,7 +707,7 @@
           <text x="735" y="590" class="svg-body">mPulse · SIEM · data lake</text>
           <path class="flow" d="M580 520 C640 552 656 552 690 552" stroke="#b987ff" stroke-width="2.5" fill="none" marker-end="url(#arrowDim)" />
 
-          <rect x="323" y="615" width="314" height="54" rx="18" fill="rgba(0,230,211,.08)" stroke="rgba(0,230,211,.32)" />
+          <rect x="323" y="615" width="314" height="54" rx="18" fill="rgba(91, 217, 218,.08)" stroke="rgba(91, 217, 218,.32)" />
           <text x="480" y="638" text-anchor="middle" class="svg-label">Pilot motion</text>
           <text x="480" y="661" text-anchor="middle" class="svg-body">90 days · peak-hour US/EU · measure TTFT, p95, cache hit, offload, incidents</text>
         </svg>

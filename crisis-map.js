@@ -41,7 +41,7 @@
       metrics: [{ val: '3→1', label: 'Control planes' }, { val: '4,400+', label: 'Edge POPs' }, { val: '2.5×', label: 'Latency reduction' }],
     },
     {
-      id: 2, color: '#00e6d3',
+      id: 2, color: '#5bd9da',
       eyebrow: '03 / LATENCY & TTFT SPIKES',
       title: 'Geographic concentration · the first-mile penalty before inference',
       weight: '22% of failure surface',

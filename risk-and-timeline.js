@@ -113,7 +113,7 @@
       body: 'Akamai AI Grid launches as an intelligent orchestrator and real-time broker for AI requests — optimizing cost-per-token, time-to-first-token, and throughput across the widest distributed AI platform in the industry.',
       stats: [['4,400+', 'edge PoPs'], ['<50 ms', 'TTFT target'], ['2.5×', 'latency reduction']],
       src: 'Akamai AI Grid press release · March 16, 2026',
-      color: '#00e6d3',
+      color: '#5bd9da',
     },
     {
       eyebrow: 'May 8, 2026 · Sonar API · public outage cluster',
@@ -185,7 +185,7 @@
       body: 'Authenticated web users hitting "limit reached" persistently across incognito, adblocker-disable and login-cycle. Separate reports of Pro image generator unavailable and region-blocked. Identity-aware rate limiting + geo-routing at the edge are the targeted fixes.',
       stats: [['Web', 'surface'], ['Authenticated', 'users'], ['LIKELY', 'IP/fingerprint key']],
       src: 'Public Perplexity Discord · #bug-reports · May 28–29, 2026',
-      color: '#00e6d3',
+      color: '#5bd9da',
     },
   ];
 

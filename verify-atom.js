@@ -156,8 +156,8 @@ function checkAll(w) {
     const css = fs.readFileSync(cssPath, 'utf8');
     expect(/--atom-bg:\s*#0b0b0c/.test(css), 'ATOM v2 --atom-bg #0b0b0c token present');
     expect(/--atom-surface-1:\s*#111113/.test(css), 'ATOM v2 --atom-surface-1 #111113 token present');
-    expect(/--atom-primary:\s*#00c8c8/.test(css), 'ATOM v2 --atom-primary #00c8c8 (teal) token present');
-    expect(/--atom-primary-bright:\s*#00e6d3/.test(css), 'ATOM v2 --atom-primary-bright #00e6d3 token present');
+    expect(/--atom-primary:\s*#39bfc0/i.test(css), 'ΔTOM V4 --atom-primary #39BFC0 (cyan) token present');
+    expect(/--atom-primary-bright:\s*#5bd9da/i.test(css), 'ΔTOM V4 --atom-primary-bright #5BD9DA token present');
     expect(/--atom-text:\s*#e8e8ea/.test(css), 'ATOM v2 --atom-text #e8e8ea token present');
     expect(/Plus Jakarta Sans/.test(css), 'Plus Jakarta Sans declared in font-family stack');
     expect(/x-ease-cinema/.test(css), 'ATOM v2 cinema easing curve present');

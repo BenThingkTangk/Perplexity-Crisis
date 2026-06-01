@@ -8,7 +8,7 @@
 const MODES = {
   simple: {
     label: 'Simple',
-    greeting: '<strong>ATOM · Strategic Convergence Brief.</strong> Ask me how AI Grid sits alongside AWS, Foundry, and CoreWeave as Perplexity\'s coordination layer &mdash; without rip-and-replace.',
+    greeting: '<strong>ΔTOM · Strategic Convergence Brief.</strong> Ask me how AI Grid sits alongside AWS, Foundry, and CoreWeave as Perplexity\'s coordination layer &mdash; without rip-and-replace.',
     chips: [
       'Draft the 15-minute Perplexity triage agenda',
       'Map Discord field signals to Akamai pilot metrics',
@@ -306,7 +306,7 @@ function bootAtomAgent() {
     msg.className = 'atom-message';
     msg.dataset.role = role;
     msg.innerHTML = `
-      <div class="atom-message__who">${role === 'user' ? 'You' : 'ATOM · Akamai Copilot'}</div>
+      <div class="atom-message__who">${role === 'user' ? 'You' : 'ΔTOM · Akamai Copilot'}</div>
       <div class="atom-message__text">${html}</div>
     `;
     body.appendChild(msg);
@@ -384,8 +384,8 @@ function bootAtomAgent() {
       const live = (data && typeof data.html === 'string' && data.html.trim()) ? data.html : deterministic;
       const isLive = data && (data.source === 'atom' || data.source === 'perplexity' || data.grounded);
       const badge = isLive
-        ? '<div class="atom-badge atom-badge--live"><span class="pip"></span>ATOM · live</div>'
-        : '<div class="atom-badge atom-badge--offline"><span class="pip"></span>ATOM · brief mode</div>';
+        ? '<div class="atom-badge atom-badge--live"><span class="pip"></span>ΔTOM · live</div>'
+        : '<div class="atom-badge atom-badge--offline"><span class="pip"></span>ΔTOM · brief mode</div>';
       const citationsHtml = Array.isArray(data && data.citations) && data.citations.length
         ? '<div class="atom-citations"><div class="atom-citations__label">Sources</div><ol>' +
             data.citations.slice(0, 6).map((c) => {
